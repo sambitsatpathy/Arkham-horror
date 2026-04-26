@@ -136,9 +136,14 @@ function init() {
   `);
 
   // Migrations
-  const cols = db.prepare("PRAGMA table_info(players)").all().map(c => c.name);
-  if (!cols.includes('assets')) {
+  const playerCols = db.prepare("PRAGMA table_info(players)").all().map(c => c.name);
+  if (!playerCols.includes('assets')) {
     db.exec("ALTER TABLE players ADD COLUMN assets TEXT DEFAULT '[]'");
+  }
+
+  const sessionCols = db.prepare("PRAGMA table_info(game_session)").all().map(c => c.name);
+  if (!sessionCols.includes('campaign_dir')) {
+    db.exec("ALTER TABLE game_session ADD COLUMN campaign_dir TEXT DEFAULT 'night_of_zealot'");
   }
 }
 

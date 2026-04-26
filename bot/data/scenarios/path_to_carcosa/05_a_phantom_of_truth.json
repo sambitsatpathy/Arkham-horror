@@ -1,0 +1,134 @@
+{
+  "code": "05_a_phantom_of_truth",
+  "name": "A Phantom of Truth",
+  "pack": "path_to_carcosa",
+  "acts": [
+    { "index": 0, "name": "Chasing the Stranger",   "card_code": "03204", "doom_threshold": null },
+    { "index": 1, "name": "The Parisian Streets",   "card_code": "03205", "doom_threshold": null },
+    { "index": 2, "name": "Phantom of Truth",       "card_code": "03206", "doom_threshold": null },
+    { "index": 3, "name": "The Grand Performance",  "card_code": "03207", "doom_threshold": null }
+  ],
+  "agendas": [
+    { "index": 0, "name": "Something's Out There",  "card_code": "03201", "doom_threshold": 5 },
+    { "index": 1, "name": "The Truth of the Matter","card_code": "03202", "doom_threshold": 9 },
+    { "index": 2, "name": "Curtain Call",           "card_code": "03203", "doom_threshold": 999 }
+  ],
+  "locations": [
+    {
+      "code": "montparnasse",
+      "name": "Montparnasse",
+      "card_code": "03208",
+      "act_index": 0,
+      "shroud": 3,
+      "clues_per_investigator": 1,
+      "start_revealed": true,
+      "starting_location": true
+    },
+    {
+      "code": "montmartre_1",
+      "name": "Montmartre",
+      "card_code": "03209",
+      "act_index": 0,
+      "shroud": 2,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    },
+    {
+      "code": "montmartre_2",
+      "name": "Montmartre",
+      "card_code": "03210",
+      "act_index": 0,
+      "shroud": 2,
+      "clues_per_investigator": 1,
+      "start_revealed": false
+    },
+    {
+      "code": "grand_guignol",
+      "name": "Grand Guignol",
+      "card_code": "03211",
+      "act_index": 0,
+      "shroud": 4,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    },
+    {
+      "code": "opera_garnier_1",
+      "name": "Opéra Garnier",
+      "card_code": "03212",
+      "act_index": 0,
+      "shroud": 3,
+      "clues_per_investigator": 1,
+      "start_revealed": false
+    },
+    {
+      "code": "opera_garnier_2",
+      "name": "Opéra Garnier",
+      "card_code": "03213",
+      "act_index": 0,
+      "shroud": 4,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    },
+    {
+      "code": "gare_dorsay",
+      "name": "Gare d'Orsay",
+      "card_code": "03214",
+      "act_index": 0,
+      "shroud": 2,
+      "clues_per_investigator": 1,
+      "start_revealed": false
+    },
+    {
+      "code": "pere_lachaise",
+      "name": "Père Lachaise Cemetery",
+      "card_code": "03215",
+      "act_index": 0,
+      "shroud": 4,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    }
+  ],
+  "encounter_sets": [
+    "cult_of_the_yellow_sign",
+    "hasturs_gift",
+    "decaying_reality",
+    "inhabitants_of_carcosa",
+    "striking_fear",
+    "ancient_evils"
+  ],
+  "intro_text": [
+    "Paris. The city of light — but tonight it is full of shadows.",
+    "You have followed the Mysterious Stranger across the Atlantic, tracking them through the art districts and theatres of the French capital. They know something about the King in Yellow, and they are afraid.",
+    "But you are not the only ones hunting them. Something else moves through these streets, wearing a face it has borrowed."
+  ],
+  "setup_instructions": [
+    "Investigators begin at Montparnasse.",
+    "The Mysterious Stranger (03216) begins in play at a random unrevealed location.",
+    "Place Byakhee (03217) in play at the nearest location to the Mysterious Stranger.",
+    "Locations in Paris are connected by a linear street map — place them in sequence."
+  ],
+  "resolutions": {
+    "R1": {
+      "label": "Resolution 1 — The Stranger is found",
+      "text": [
+        "You corner the Mysterious Stranger in the catacombs beneath Père Lachaise. Their story is impossible — and yet every word rings true.",
+        "The path to Carcosa runs through Paris, and now you know where it leads next.",
+        "Record in the campaign log: *The investigators found the Mysterious Stranger. Each investigator earns 2 bonus XP.*"
+      ]
+    },
+    "R2": {
+      "label": "Resolution 2 — The Stranger escaped",
+      "text": [
+        "You lost them in the crowd at Gare d'Orsay. Or perhaps they were never there — perhaps what you followed was merely a reflection.",
+        "Record in the campaign log: *The Mysterious Stranger escaped. Investigators earn no bonus XP.*"
+      ]
+    },
+    "defeat": {
+      "label": "Defeat — The Byakhee claims its prey",
+      "text": [
+        "The thing catches you in the open. You wake in a hospital in Montparnasse, your memory of the last twelve hours gone.",
+        "Record in the campaign log: *The investigators were defeated in Paris. Each investigator gains 1 physical trauma.*"
+      ]
+    }
+  }
+}

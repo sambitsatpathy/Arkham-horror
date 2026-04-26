@@ -1,0 +1,63 @@
+{
+  "code": "01_extracurricular_activity",
+  "name": "Extracurricular Activity",
+  "pack": "dwl",
+  "acts": [
+    { "index": 0, "name": "After Hours",      "card_code": "02045", "doom_threshold": null },
+    { "index": 1, "name": "Rice's Whereabouts","card_code": "02046", "doom_threshold": null },
+    { "index": 2, "name": "Campus Safety",    "card_code": "02047", "doom_threshold": null }
+  ],
+  "agendas": [
+    { "index": 0, "name": "Quiet Halls",       "card_code": "02042", "doom_threshold": 5 },
+    { "index": 1, "name": "Dead of Night",     "card_code": "02043", "doom_threshold": 9 },
+    { "index": 2, "name": "The Beast Unleashed","card_code": "02044", "doom_threshold": 999 }
+  ],
+  "locations": [
+    { "code": "miskatonic_quad",       "name": "Miskatonic Quad",       "card_code": "02048", "act_index": 0, "shroud": 3, "clues_per_investigator": 1, "start_revealed": true,  "starting_location": true },
+    { "code": "humanities_building",   "name": "Humanities Building",   "card_code": "02049", "act_index": 0, "shroud": 3, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "orne_library",          "name": "Orne Library",          "card_code": "02050", "act_index": 0, "shroud": 3, "clues_per_investigator": 2, "start_revealed": false },
+    { "code": "student_union",         "name": "Student Union",         "card_code": "02051", "act_index": 0, "shroud": 1, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "dormitories",           "name": "Dormitories",           "card_code": "02052", "act_index": 0, "shroud": 1, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "admin_building",        "name": "Administration Building","card_code": "02053", "act_index": 0, "shroud": 4, "clues_per_investigator": 2, "start_revealed": false },
+    { "code": "faculty_offices_east",  "name": "Faculty Offices",       "card_code": "02054", "act_index": 0, "shroud": 2, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "faculty_offices_112",   "name": "Faculty Offices",       "card_code": "02055", "act_index": 0, "shroud": 2, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "science_building",      "name": "Science Building",      "card_code": "02056", "act_index": 0, "shroud": 2, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "alchemy_labs",          "name": "Alchemy Labs",          "card_code": "02057", "act_index": 0, "shroud": 5, "clues_per_investigator": 2, "start_revealed": false }
+  ],
+  "encounter_sets": [
+    "extracurricular_activity", "sorcery", "beast_thralls", "bishops_thralls", "whippoorwills", "ancient_evils", "striking_fear"
+  ],
+  "intro_text": [
+    "Dr. Henry Armitage — head librarian of Miskatonic University — has contacted you in a panic. Two of his colleagues, Professor Warren Rice and Dr. Francis Morgan, have gone missing on campus after a late-night study session.",
+    "Something is wrong at Miskatonic University tonight. The campus is too quiet. The lights in the science building flicker. And somewhere, deep in the stacks of Orne Library, something is moving."
+  ],
+  "setup_instructions": [
+    "Set aside The Experiment (02060) — it enters play when the Alchemy Labs are investigated.",
+    "Set aside Yog-Sothoth's Emissary, if included in the scenario.",
+    "Investigators begin at Miskatonic Quad.",
+    "Place clues on locations as indicated."
+  ],
+  "resolutions": {
+    "R1": {
+      "label": "Resolution 1 — Rice is found alive",
+      "text": [
+        "You find Professor Rice cowering in a supply closet, half-mad with fear but alive. He tells you of a ritual performed in the Alchemy Labs — something was summoned and broke free.",
+        "Record in the campaign log: *Professor Rice was saved.* Each investigator earns 1 bonus XP."
+      ]
+    },
+    "R2": {
+      "label": "Resolution 2 — Rice is missing",
+      "text": [
+        "Despite your best efforts, you cannot find Professor Rice. By the time you escape the campus, it is clear he has been taken — or worse.",
+        "Record in the campaign log: *Professor Rice was not found.* The investigators suffer a penalty in future scenarios."
+      ]
+    },
+    "defeat": {
+      "label": "Defeat — Overwhelmed",
+      "text": [
+        "The horrors of Miskatonic University prove too much. You flee into the night, empty-handed.",
+        "Record in the campaign log: *The investigators were defeated at Miskatonic University.*"
+      ]
+    }
+  }
+}

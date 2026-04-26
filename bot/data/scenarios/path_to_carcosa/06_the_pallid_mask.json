@@ -1,0 +1,134 @@
+{
+  "code": "06_the_pallid_mask",
+  "name": "The Pallid Mask",
+  "pack": "path_to_carcosa",
+  "acts": [
+    { "index": 0, "name": "Into the Catacombs",     "card_code": "03243", "doom_threshold": null },
+    { "index": 1, "name": "Deeper into Darkness",   "card_code": "03244", "doom_threshold": null },
+    { "index": 2, "name": "The Pallid Mask",         "card_code": "03245", "doom_threshold": null },
+    { "index": 3, "name": "The Way Out",             "card_code": "03246", "doom_threshold": null }
+  ],
+  "agendas": [
+    { "index": 0, "name": "The Catacombs Beckon",   "card_code": "03241", "doom_threshold": 5 },
+    { "index": 1, "name": "Lost and Alone",          "card_code": "03242", "doom_threshold": 999 }
+  ],
+  "locations": [
+    {
+      "code": "gate_to_hell",
+      "name": "Gate to Hell",
+      "card_code": "03247",
+      "act_index": 0,
+      "shroud": 2,
+      "clues_per_investigator": 0,
+      "start_revealed": true,
+      "starting_location": true
+    },
+    {
+      "code": "stone_archways",
+      "name": "Stone Archways",
+      "card_code": "03248",
+      "act_index": 0,
+      "shroud": 3,
+      "clues_per_investigator": 1,
+      "start_revealed": false
+    },
+    {
+      "code": "crypt",
+      "name": "Crypt",
+      "card_code": "03249",
+      "act_index": 0,
+      "shroud": 3,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    },
+    {
+      "code": "bone_filled_caverns",
+      "name": "Bone-Filled Caverns",
+      "card_code": "03250",
+      "act_index": 0,
+      "shroud": 4,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    },
+    {
+      "code": "well_of_souls",
+      "name": "Well of Souls",
+      "card_code": "03251",
+      "act_index": 0,
+      "shroud": 5,
+      "clues_per_investigator": 3,
+      "start_revealed": false
+    },
+    {
+      "code": "candlelit_tunnels",
+      "name": "Candlelit Tunnels",
+      "card_code": "03252",
+      "act_index": 0,
+      "shroud": 2,
+      "clues_per_investigator": 1,
+      "start_revealed": false
+    },
+    {
+      "code": "labyrinth_of_bones",
+      "name": "Labyrinth of Bones",
+      "card_code": "03253",
+      "act_index": 0,
+      "shroud": 4,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    },
+    {
+      "code": "narrow_shaft",
+      "name": "Narrow Shaft",
+      "card_code": "03254",
+      "act_index": 0,
+      "shroud": 3,
+      "clues_per_investigator": 1,
+      "start_revealed": false
+    }
+  ],
+  "encounter_sets": [
+    "cult_of_the_yellow_sign",
+    "hasturs_gift",
+    "decaying_reality",
+    "inhabitants_of_carcosa",
+    "striking_fear",
+    "ancient_evils",
+    "chilling_cold"
+  ],
+  "intro_text": [
+    "Beneath the streets of Paris lies the largest ossuary in the world. Six million dead rest in these tunnels.",
+    "The Mysterious Stranger told you to follow the pallid mask — that the answer you seek is underground. What you find instead are tunnels that do not appear on any map, branching and folding into geometries that should not exist.",
+    "The dead are watching. And something ahead is wearing a mask."
+  ],
+  "setup_instructions": [
+    "Investigators begin at the Gate to Hell.",
+    "Shuffle all catacomb locations and create a face-down grid — they are revealed as investigators explore.",
+    "The Ghoul Priest from The Gathering enters play if the investigators were defeated in scenario 1.",
+    "Place 1 Catacomb Ghoul (03255) per investigator in the tunnels."
+  ],
+  "resolutions": {
+    "R1": {
+      "label": "Resolution 1 — The pallid mask is found",
+      "text": [
+        "At the deepest point of the catacombs, you find it: an ivory mask that should not exist. It fits no human face, and yet you understand — this is the key.",
+        "Record in the campaign log: *The investigators found the pallid mask. Each investigator earns 2 bonus XP.*"
+      ]
+    },
+    "R2": {
+      "label": "Resolution 2 — You surfaced empty-handed",
+      "text": [
+        "You found the way out. That is enough for tonight.",
+        "The mask is still down there, somewhere in the dark.",
+        "Record in the campaign log: *The investigators escaped without the mask.*"
+      ]
+    },
+    "defeat": {
+      "label": "Defeat — Lost in the catacombs",
+      "text": [
+        "The tunnels rearrange themselves. You wander for hours. When you finally emerge, you are in a part of Paris you do not recognise — and several days have passed.",
+        "Record in the campaign log: *The investigators were lost in the catacombs. Each investigator gains 1 physical and 1 mental trauma.*"
+      ]
+    }
+  }
+}

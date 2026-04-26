@@ -119,13 +119,37 @@
     "ancient_evils",
     "locked_doors"
   ],
+  "intro_text": [
+    "It is the night of October 13th, 1926. After your harrowing experience, you have learned that a group of cultists — worshippers of a being known only as Umôrdhoth — intend to perform a ritual at the edge of Arkham.",
+    "You must find and stop them before midnight. Time is short, and the cultists are already moving through the city."
+  ],
   "setup_instructions": [
     "Set aside the 5 Cultist enemies. Shuffle them and place one face-down under each of 5 random non-starting locations.",
     "Investigators begin in Your House.",
     "The goal is to discover the cultists' identities before the ritual is complete."
   ],
-  "resolution": {
-    "victory": ["Investigators gathered enough clues to identify the cultists before doom advanced."],
-    "defeat": ["Doom reached the final threshold and the ritual was completed."]
+  "resolutions": {
+    "R1": {
+      "label": "Resolution 1 — You stopped the ritual in time",
+      "text": [
+        "With only minutes to spare, you confront the cultists and disrupt their foul preparations. The ritual fails.",
+        "But Umôrdhoth's hunger cannot be denied forever. You have bought Arkham time — not safety.",
+        "Record in the campaign log: *The investigators stopped the ritual. Each investigator earns 1 bonus XP per cultist identified.*"
+      ]
+    },
+    "R2": {
+      "label": "Resolution 2 — Partial success",
+      "text": [
+        "You identified some of the cultists but not all. The ritual proceeds in part — enough to weaken the barrier between worlds.",
+        "Record in the campaign log: *The investigators partially stopped the ritual. Award 1 XP per cultist identified.*"
+      ]
+    },
+    "defeat": {
+      "label": "Defeat — The ritual is complete",
+      "text": [
+        "Doom falls upon Arkham. The cultists complete their midnight rite, and Umôrdhoth stirs in its ancient prison.",
+        "Record in the campaign log: *The ritual was completed. The investigators suffer 1 additional physical trauma each.*"
+      ]
+    }
   }
 }

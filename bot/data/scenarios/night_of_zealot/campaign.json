@@ -2,8 +2,8 @@
   "code": "night_of_zealot",
   "name": "The Night of the Zealot",
   "scenarios": [
-    "01_the_gathering",
-    "02_the_midnight_masks",
-    "03_the_devourer_below"
+    { "key": "the_gathering",  "name": "The Gathering",      "file": "01_the_gathering"    },
+    { "key": "midnight_masks", "name": "The Midnight Masks", "file": "02_the_midnight_masks" },
+    { "key": "devourer_below", "name": "The Devourer Below", "file": "03_the_devourer_below" }
   ]
 }

@@ -1,0 +1,64 @@
+{
+  "code": "08_dim_carcosa",
+  "name": "Dim Carcosa",
+  "pack": "path_to_carcosa",
+  "acts": [
+    { "index": 0, "name": "Dim Carcosa",            "card_code": "03320", "doom_threshold": null },
+    { "index": 1, "name": "The Last Stand",          "card_code": "03321", "doom_threshold": null },
+    { "index": 2, "name": "The King's Throne",       "card_code": "03322", "doom_threshold": null },
+    { "index": 3, "name": "The Final Confrontation", "card_code": "03323", "doom_threshold": null },
+    { "index": 4, "name": "The End",                 "card_code": "03324", "doom_threshold": null }
+  ],
+  "agendas": [
+    { "index": 0, "name": "Hastur's Reign",          "card_code": "03317", "doom_threshold": 3 },
+    { "index": 1, "name": "The King Approaches",     "card_code": "03318", "doom_threshold": 6 },
+    { "index": 2, "name": "The End of All Things",   "card_code": "03319", "doom_threshold": 999 }
+  ],
+  "locations": [],
+  "encounter_sets": [
+    "cult_of_the_yellow_sign",
+    "hasturs_gift",
+    "decaying_reality",
+    "inhabitants_of_carcosa",
+    "striking_fear",
+    "ancient_evils"
+  ],
+  "intro_text": [
+    "This is Carcosa. It is not a place. It is not a time. It is what remains when the King in Yellow has consumed everything else.",
+    "The Lake of Hali stretches endlessly in every direction. The twin suns have set behind the black stars. The Pallid Mask watches from the distant shore.",
+    "There is one thing left to do. There has always only been one thing left to do."
+  ],
+  "setup_instructions": [
+    "Dim Carcosa has no standard locations. The scenario is played on a narrative track.",
+    "Each act card contains its own location instructions — follow the text on the act card.",
+    "Hastur (03325) begins in play, set aside until Act 2 is reached.",
+    "Review all campaign log entries before beginning. Each record modifies the scenario."
+  ],
+  "resolutions": {
+    "R1": {
+      "label": "Resolution 1 — Hastur is defeated",
+      "text": [
+        "It is done. Against all reason, against all odds, you have confronted the King in Yellow in his own realm and you have not blinked.",
+        "Carcosa fades. The twin suns rise. You find yourself in Arkham, in an alley you do not recognise, as the sun rises over the city.",
+        "It is over. For now.",
+        "Record in the campaign log: *The investigators defeated Hastur. Campaign victory. Each investigator earns 5 bonus XP.*"
+      ]
+    },
+    "R2": {
+      "label": "Resolution 2 — You found a way out",
+      "text": [
+        "You could not defeat the King. But you found a crack in his domain — a door that did not belong here.",
+        "You stepped through it, and the door closed behind you. Carcosa remains. Hastur remains. But you are alive.",
+        "Record in the campaign log: *The investigators escaped Carcosa. Campaign ends — pyrrhic survival.*"
+      ]
+    },
+    "defeat": {
+      "label": "Defeat — Consumed by Carcosa",
+      "text": [
+        "The King in Yellow extends his hand. You take it. There is nothing else to do.",
+        "Carcosa is eternal. And now, so are you.",
+        "Record in the campaign log: *The investigators were defeated in Dim Carcosa. Campaign ends in defeat.*"
+      ]
+    }
+  }
+}

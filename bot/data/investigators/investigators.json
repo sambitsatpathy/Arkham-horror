@@ -1,0 +1,1122 @@
+[
+  {
+    "code": "01001",
+    "name": "Roland Banks",
+    "subname": "The Fed",
+    "faction": "guardian",
+    "health": 9,
+    "sanity": 5,
+    "skills": {
+      "willpower": 3,
+      "intellect": 3,
+      "combat": 4,
+      "agility": 2
+    },
+    "deck_size": 30,
+    "pack_code": "core"
+  },
+  {
+    "code": "01002",
+    "name": "Daisy Walker",
+    "subname": "The Librarian",
+    "faction": "seeker",
+    "health": 5,
+    "sanity": 9,
+    "skills": {
+      "willpower": 3,
+      "intellect": 5,
+      "combat": 2,
+      "agility": 2
+    },
+    "deck_size": 30,
+    "pack_code": "core"
+  },
+  {
+    "code": "01003",
+    "name": "\"Skids\" O'Toole",
+    "subname": "The Ex-Con",
+    "faction": "rogue",
+    "health": 8,
+    "sanity": 6,
+    "skills": {
+      "willpower": 2,
+      "intellect": 3,
+      "combat": 3,
+      "agility": 4
+    },
+    "deck_size": 30,
+    "pack_code": "core"
+  },
+  {
+    "code": "01004",
+    "name": "Agnes Baker",
+    "subname": "The Waitress",
+    "faction": "mystic",
+    "health": 6,
+    "sanity": 8,
+    "skills": {
+      "willpower": 5,
+      "intellect": 2,
+      "combat": 2,
+      "agility": 3
+    },
+    "deck_size": 30,
+    "pack_code": "core"
+  },
+  {
+    "code": "01005",
+    "name": "Wendy Adams",
+    "subname": "The Urchin",
+    "faction": "survivor",
+    "health": 7,
+    "sanity": 7,
+    "skills": {
+      "willpower": 4,
+      "intellect": 3,
+      "combat": 1,
+      "agility": 4
+    },
+    "deck_size": 30,
+    "pack_code": "core"
+  },
+  {
+    "code": "01501",
+    "name": "Roland Banks",
+    "subname": "The Fed",
+    "faction": "guardian",
+    "health": 9,
+    "sanity": 5,
+    "skills": {
+      "willpower": 3,
+      "intellect": 3,
+      "combat": 4,
+      "agility": 2
+    },
+    "deck_size": 30,
+    "pack_code": "rcore"
+  },
+  {
+    "code": "01502",
+    "name": "Daisy Walker",
+    "subname": "The Librarian",
+    "faction": "seeker",
+    "health": 5,
+    "sanity": 9,
+    "skills": {
+      "willpower": 3,
+      "intellect": 5,
+      "combat": 2,
+      "agility": 2
+    },
+    "deck_size": 30,
+    "pack_code": "rcore"
+  },
+  {
+    "code": "01503",
+    "name": "\"Skids\" O'Toole",
+    "subname": "The Ex-Con",
+    "faction": "rogue",
+    "health": 8,
+    "sanity": 6,
+    "skills": {
+      "willpower": 2,
+      "intellect": 3,
+      "combat": 3,
+      "agility": 4
+    },
+    "deck_size": 30,
+    "pack_code": "rcore"
+  },
+  {
+    "code": "01504",
+    "name": "Agnes Baker",
+    "subname": "The Waitress",
+    "faction": "mystic",
+    "health": 6,
+    "sanity": 8,
+    "skills": {
+      "willpower": 5,
+      "intellect": 2,
+      "combat": 2,
+      "agility": 3
+    },
+    "deck_size": 30,
+    "pack_code": "rcore"
+  },
+  {
+    "code": "01505",
+    "name": "Wendy Adams",
+    "subname": "The Urchin",
+    "faction": "survivor",
+    "health": 7,
+    "sanity": 7,
+    "skills": {
+      "willpower": 4,
+      "intellect": 3,
+      "combat": 1,
+      "agility": 4
+    },
+    "deck_size": 30,
+    "pack_code": "rcore"
+  },
+  {
+    "code": "02001",
+    "name": "Zoey Samaras",
+    "subname": "The Chef",
+    "faction": "guardian",
+    "health": 9,
+    "sanity": 6,
+    "skills": {
+      "willpower": 4,
+      "intellect": 2,
+      "combat": 4,
+      "agility": 2
+    },
+    "deck_size": 30,
+    "pack_code": "dwl"
+  },
+  {
+    "code": "02002",
+    "name": "Rex Murphy",
+    "subname": "The Reporter",
+    "faction": "seeker",
+    "health": 6,
+    "sanity": 9,
+    "skills": {
+      "willpower": 3,
+      "intellect": 4,
+      "combat": 2,
+      "agility": 3
+    },
+    "deck_size": 30,
+    "pack_code": "dwl"
+  },
+  {
+    "code": "02003",
+    "name": "Jenny Barnes",
+    "subname": "The Dilettante",
+    "faction": "rogue",
+    "health": 8,
+    "sanity": 7,
+    "skills": {
+      "willpower": 3,
+      "intellect": 3,
+      "combat": 3,
+      "agility": 3
+    },
+    "deck_size": 30,
+    "pack_code": "dwl"
+  },
+  {
+    "code": "02004",
+    "name": "Jim Culver",
+    "subname": "The Musician",
+    "faction": "mystic",
+    "health": 7,
+    "sanity": 8,
+    "skills": {
+      "willpower": 4,
+      "intellect": 3,
+      "combat": 3,
+      "agility": 2
+    },
+    "deck_size": 30,
+    "pack_code": "dwl"
+  },
+  {
+    "code": "02005",
+    "name": "\"Ashcan\" Pete",
+    "subname": "The Drifter",
+    "faction": "survivor",
+    "health": 6,
+    "sanity": 5,
+    "skills": {
+      "willpower": 4,
+      "intellect": 2,
+      "combat": 2,
+      "agility": 3
+    },
+    "deck_size": 30,
+    "pack_code": "dwl"
+  },
+  {
+    "code": "03001",
+    "name": "Mark Harrigan",
+    "subname": "The Soldier",
+    "faction": "guardian",
+    "health": 9,
+    "sanity": 5,
+    "skills": {
+      "willpower": 3,
+      "intellect": 2,
+      "combat": 5,
+      "agility": 3
+    },
+    "deck_size": 30,
+    "pack_code": "ptc"
+  },
+  {
+    "code": "03002",
+    "name": "Minh Thi Phan",
+    "subname": "The Secretary",
+    "faction": "seeker",
+    "health": 7,
+    "sanity": 7,
+    "skills": {
+      "willpower": 4,
+      "intellect": 4,
+      "combat": 2,
+      "agility": 2
+    },
+    "deck_size": 30,
+    "pack_code": "ptc"
+  },
+  {
+    "code": "03003",
+    "name": "Sefina Rousseau",
+    "subname": "The Painter",
+    "faction": "rogue",
+    "health": 5,
+    "sanity": 9,
+    "skills": {
+      "willpower": 4,
+      "intellect": 2,
+      "combat": 2,
+      "agility": 4
+    },
+    "deck_size": 33,
+    "pack_code": "ptc"
+  },
+  {
+    "code": "03004",
+    "name": "Akachi Onyele",
+    "subname": "The Shaman",
+    "faction": "mystic",
+    "health": 6,
+    "sanity": 8,
+    "skills": {
+      "willpower": 5,
+      "intellect": 2,
+      "combat": 3,
+      "agility": 3
+    },
+    "deck_size": 30,
+    "pack_code": "ptc"
+  },
+  {
+    "code": "03005",
+    "name": "William Yorick",
+    "subname": "The Gravedigger",
+    "faction": "survivor",
+    "health": 8,
+    "sanity": 6,
+    "skills": {
+      "willpower": 3,
+      "intellect": 2,
+      "combat": 4,
+      "agility": 3
+    },
+    "deck_size": 30,
+    "pack_code": "ptc"
+  },
+  {
+    "code": "03006",
+    "name": "Lola Hayes",
+    "subname": "The Actress",
+    "faction": "neutral",
+    "health": 6,
+    "sanity": 6,
+    "skills": {
+      "willpower": 3,
+      "intellect": 3,
+      "combat": 3,
+      "agility": 3
+    },
+    "deck_size": 35,
+    "pack_code": "ptc"
+  },
+  {
+    "code": "04001",
+    "name": "Leo Anderson",
+    "subname": "The Expedition Leader",
+    "faction": "guardian",
+    "health": 8,
+    "sanity": 6,
+    "skills": {
+      "willpower": 4,
+      "intellect": 3,
+      "combat": 4,
+      "agility": 1
+    },
+    "deck_size": 30,
+    "pack_code": "tfa"
+  },
+  {
+    "code": "04002",
+    "name": "Ursula Downs",
+    "subname": "The Explorer",
+    "faction": "seeker",
+    "health": 7,
+    "sanity": 7,
+    "skills": {
+      "willpower": 3,
+      "intellect": 4,
+      "combat": 1,
+      "agility": 4
+    },
+    "deck_size": 30,
+    "pack_code": "tfa"
+  },
+  {
+    "code": "04003",
+    "name": "Finn Edwards",
+    "subname": "The Bootlegger",
+    "faction": "rogue",
+    "health": 7,
+    "sanity": 7,
+    "skills": {
+      "willpower": 1,
+      "intellect": 4,
+      "combat": 3,
+      "agility": 4
+    },
+    "deck_size": 30,
+    "pack_code": "tfa"
+  },
+  {
+    "code": "04004",
+    "name": "Father Mateo",
+    "subname": "The Priest",
+    "faction": "mystic",
+    "health": 6,
+    "sanity": 8,
+    "skills": {
+      "willpower": 4,
+      "intellect": 3,
+      "combat": 2,
+      "agility": 3
+    },
+    "deck_size": 30,
+    "pack_code": "tfa"
+  },
+  {
+    "code": "04005",
+    "name": "Calvin Wright",
+    "subname": "The Haunted",
+    "faction": "survivor",
+    "health": 6,
+    "sanity": 6,
+    "skills": {
+      "willpower": 0,
+      "intellect": 0,
+      "combat": 0,
+      "agility": 0
+    },
+    "deck_size": 30,
+    "pack_code": "tfa"
+  },
+  {
+    "code": "05001",
+    "name": "Carolyn Fern",
+    "subname": "The Psychologist",
+    "faction": "guardian",
+    "health": 6,
+    "sanity": 9,
+    "skills": {
+      "willpower": 3,
+      "intellect": 4,
+      "combat": 2,
+      "agility": 2
+    },
+    "deck_size": 30,
+    "pack_code": "tcu"
+  },
+  {
+    "code": "05002",
+    "name": "Joe Diamond",
+    "subname": "The Private Investigator",
+    "faction": "seeker",
+    "health": 8,
+    "sanity": 6,
+    "skills": {
+      "willpower": 2,
+      "intellect": 4,
+      "combat": 4,
+      "agility": 2
+    },
+    "deck_size": 40,
+    "pack_code": "tcu"
+  },
+  {
+    "code": "05003",
+    "name": "Preston Fairmont",
+    "subname": "The Millionaire",
+    "faction": "rogue",
+    "health": 7,
+    "sanity": 7,
+    "skills": {
+      "willpower": 1,
+      "intellect": 1,
+      "combat": 1,
+      "agility": 1
+    },
+    "deck_size": 30,
+    "pack_code": "tcu"
+  },
+  {
+    "code": "05004",
+    "name": "Diana Stanley",
+    "subname": "The Redeemed Cultist",
+    "faction": "mystic",
+    "health": 7,
+    "sanity": 7,
+    "skills": {
+      "willpower": 1,
+      "intellect": 3,
+      "combat": 3,
+      "agility": 3
+    },
+    "deck_size": 35,
+    "pack_code": "tcu"
+  },
+  {
+    "code": "05005",
+    "name": "Rita Young",
+    "subname": "The Athlete",
+    "faction": "survivor",
+    "health": 9,
+    "sanity": 5,
+    "skills": {
+      "willpower": 3,
+      "intellect": 2,
+      "combat": 3,
+      "agility": 5
+    },
+    "deck_size": 30,
+    "pack_code": "tcu"
+  },
+  {
+    "code": "05006",
+    "name": "Marie Lambeau",
+    "subname": "The Entertainer",
+    "faction": "mystic",
+    "health": 6,
+    "sanity": 8,
+    "skills": {
+      "willpower": 4,
+      "intellect": 4,
+      "combat": 1,
+      "agility": 3
+    },
+    "deck_size": 30,
+    "pack_code": "tcu"
+  },
+  {
+    "code": "06001",
+    "name": "Tommy Muldoon",
+    "subname": "The Rookie Cop",
+    "faction": "guardian",
+    "health": 8,
+    "sanity": 6,
+    "skills": {
+      "willpower": 3,
+      "intellect": 3,
+      "combat": 4,
+      "agility": 2
+    },
+    "deck_size": 30,
+    "pack_code": "tde"
+  },
+  {
+    "code": "06002",
+    "name": "Mandy Thompson",
+    "subname": "The Researcher",
+    "faction": "seeker",
+    "health": 6,
+    "sanity": 8,
+    "skills": {
+      "willpower": 3,
+      "intellect": 5,
+      "combat": 1,
+      "agility": 3
+    },
+    "deck_size": 30,
+    "pack_code": "tde"
+  },
+  {
+    "code": "06003",
+    "name": "Tony Morgan",
+    "subname": "The Bounty Hunter",
+    "faction": "rogue",
+    "health": 9,
+    "sanity": 5,
+    "skills": {
+      "willpower": 2,
+      "intellect": 3,
+      "combat": 5,
+      "agility": 2
+    },
+    "deck_size": 30,
+    "pack_code": "tde"
+  },
+  {
+    "code": "06004",
+    "name": "Luke Robinson",
+    "subname": "The Dreamer",
+    "faction": "mystic",
+    "health": 5,
+    "sanity": 9,
+    "skills": {
+      "willpower": 4,
+      "intellect": 3,
+      "combat": 2,
+      "agility": 3
+    },
+    "deck_size": 30,
+    "pack_code": "tde"
+  },
+  {
+    "code": "06005",
+    "name": "Patrice Hathaway",
+    "subname": "The Violinist",
+    "faction": "survivor",
+    "health": 7,
+    "sanity": 7,
+    "skills": {
+      "willpower": 4,
+      "intellect": 2,
+      "combat": 2,
+      "agility": 2
+    },
+    "deck_size": 42,
+    "pack_code": "tde"
+  },
+  {
+    "code": "07001",
+    "name": "Sister Mary",
+    "subname": "The Nun",
+    "faction": "guardian",
+    "health": 5,
+    "sanity": 9,
+    "skills": {
+      "willpower": 4,
+      "intellect": 2,
+      "combat": 3,
+      "agility": 3
+    },
+    "deck_size": 30,
+    "pack_code": "tic"
+  },
+  {
+    "code": "07002",
+    "name": "Amanda Sharpe",
+    "subname": "The Student",
+    "faction": "seeker",
+    "health": 7,
+    "sanity": 7,
+    "skills": {
+      "willpower": 2,
+      "intellect": 2,
+      "combat": 2,
+      "agility": 2
+    },
+    "deck_size": 30,
+    "pack_code": "tic"
+  },
+  {
+    "code": "07003",
+    "name": "Trish Scarborough",
+    "subname": "The Spy",
+    "faction": "rogue",
+    "health": 8,
+    "sanity": 6,
+    "skills": {
+      "willpower": 2,
+      "intellect": 4,
+      "combat": 2,
+      "agility": 4
+    },
+    "deck_size": 30,
+    "pack_code": "tic"
+  },
+  {
+    "code": "07004",
+    "name": "Dexter Drake",
+    "subname": "The Magician",
+    "faction": "mystic",
+    "health": 6,
+    "sanity": 8,
+    "skills": {
+      "willpower": 5,
+      "intellect": 2,
+      "combat": 3,
+      "agility": 2
+    },
+    "deck_size": 30,
+    "pack_code": "tic"
+  },
+  {
+    "code": "07005",
+    "name": "Silas Marsh",
+    "subname": "The Sailor",
+    "faction": "survivor",
+    "health": 9,
+    "sanity": 5,
+    "skills": {
+      "willpower": 2,
+      "intellect": 2,
+      "combat": 4,
+      "agility": 4
+    },
+    "deck_size": 30,
+    "pack_code": "tic"
+  },
+  {
+    "code": "08001",
+    "name": "Daniela Reyes",
+    "subname": "The Mechanic",
+    "faction": "guardian",
+    "health": 8,
+    "sanity": 6,
+    "skills": {
+      "willpower": 4,
+      "intellect": 1,
+      "combat": 5,
+      "agility": 2
+    },
+    "deck_size": 30,
+    "pack_code": "eoep"
+  },
+  {
+    "code": "08004",
+    "name": "Norman Withers",
+    "subname": "The Astronomer",
+    "faction": "seeker",
+    "health": 6,
+    "sanity": 8,
+    "skills": {
+      "willpower": 4,
+      "intellect": 5,
+      "combat": 2,
+      "agility": 1
+    },
+    "deck_size": 30,
+    "pack_code": "eoep"
+  },
+  {
+    "code": "08007",
+    "name": "Monterey Jack",
+    "subname": "The Archaeologist",
+    "faction": "rogue",
+    "health": 8,
+    "sanity": 6,
+    "skills": {
+      "willpower": 1,
+      "intellect": 4,
+      "combat": 2,
+      "agility": 5
+    },
+    "deck_size": 30,
+    "pack_code": "eoep"
+  },
+  {
+    "code": "08010",
+    "name": "Lily Chen",
+    "subname": "The Martial Artist",
+    "faction": "mystic",
+    "health": 7,
+    "sanity": 7,
+    "skills": {
+      "willpower": 3,
+      "intellect": 2,
+      "combat": 4,
+      "agility": 3
+    },
+    "deck_size": 30,
+    "pack_code": "eoep"
+  },
+  {
+    "code": "08016",
+    "name": "Bob Jenkins",
+    "subname": "The Salesman",
+    "faction": "survivor",
+    "health": 6,
+    "sanity": 8,
+    "skills": {
+      "willpower": 2,
+      "intellect": 4,
+      "combat": 3,
+      "agility": 3
+    },
+    "deck_size": 30,
+    "pack_code": "eoep"
+  },
+  {
+    "code": "09001",
+    "name": "Carson Sinclair",
+    "subname": "The Butler",
+    "faction": "guardian",
+    "health": 6,
+    "sanity": 6,
+    "skills": {
+      "willpower": 2,
+      "intellect": 2,
+      "combat": 2,
+      "agility": 2
+    },
+    "deck_size": 30,
+    "pack_code": "tskp"
+  },
+  {
+    "code": "09004",
+    "name": "Vincent Lee",
+    "subname": "The Doctor",
+    "faction": "seeker",
+    "health": 9,
+    "sanity": 6,
+    "skills": {
+      "willpower": 3,
+      "intellect": 4,
+      "combat": 3,
+      "agility": 1
+    },
+    "deck_size": 30,
+    "pack_code": "tskp"
+  },
+  {
+    "code": "09008",
+    "name": "Kymani Jones",
+    "subname": "The Security Consultant",
+    "faction": "rogue",
+    "health": 8,
+    "sanity": 6,
+    "skills": {
+      "willpower": 3,
+      "intellect": 2,
+      "combat": 2,
+      "agility": 5
+    },
+    "deck_size": 30,
+    "pack_code": "tskp"
+  },
+  {
+    "code": "09011",
+    "name": "Amina Zidane",
+    "subname": "The Operator",
+    "faction": "mystic",
+    "health": 5,
+    "sanity": 9,
+    "skills": {
+      "willpower": 3,
+      "intellect": 3,
+      "combat": 3,
+      "agility": 3
+    },
+    "deck_size": 30,
+    "pack_code": "tskp"
+  },
+  {
+    "code": "09015",
+    "name": "Darrell Simmons",
+    "subname": "The Photographer",
+    "faction": "survivor",
+    "health": 6,
+    "sanity": 8,
+    "skills": {
+      "willpower": 2,
+      "intellect": 5,
+      "combat": 2,
+      "agility": 3
+    },
+    "deck_size": 30,
+    "pack_code": "tskp"
+  },
+  {
+    "code": "09018",
+    "name": "Charlie Kane",
+    "subname": "The Politician",
+    "faction": "neutral",
+    "health": 6,
+    "sanity": 6,
+    "skills": {
+      "willpower": 1,
+      "intellect": 1,
+      "combat": 1,
+      "agility": 1
+    },
+    "deck_size": 30,
+    "pack_code": "tskp"
+  },
+  {
+    "code": "10001",
+    "name": "Wilson Richards",
+    "subname": "The Handyman",
+    "faction": "guardian",
+    "health": 8,
+    "sanity": 6,
+    "skills": {
+      "willpower": 3,
+      "intellect": 3,
+      "combat": 3,
+      "agility": 3
+    },
+    "deck_size": 30,
+    "pack_code": "fhvp"
+  },
+  {
+    "code": "10004",
+    "name": "Kate Winthrop",
+    "subname": "The Scientist",
+    "faction": "seeker",
+    "health": 6,
+    "sanity": 8,
+    "skills": {
+      "willpower": 2,
+      "intellect": 4,
+      "combat": 2,
+      "agility": 4
+    },
+    "deck_size": 30,
+    "pack_code": "fhvp"
+  },
+  {
+    "code": "10009",
+    "name": "Alessandra Zorzi",
+    "subname": "The Countess",
+    "faction": "rogue",
+    "health": 7,
+    "sanity": 7,
+    "skills": {
+      "willpower": 3,
+      "intellect": 4,
+      "combat": 2,
+      "agility": 4
+    },
+    "deck_size": 30,
+    "pack_code": "fhvp"
+  },
+  {
+    "code": "10012",
+    "name": "Kōhaku Narukami",
+    "subname": "The Folklorist",
+    "faction": "mystic",
+    "health": 6,
+    "sanity": 8,
+    "skills": {
+      "willpower": 4,
+      "intellect": 4,
+      "combat": 3,
+      "agility": 1
+    },
+    "deck_size": 30,
+    "pack_code": "fhvp"
+  },
+  {
+    "code": "10015",
+    "name": "Hank Samson",
+    "subname": "The Farmhand",
+    "faction": "survivor",
+    "health": 5,
+    "sanity": 5,
+    "skills": {
+      "willpower": 3,
+      "intellect": 1,
+      "combat": 5,
+      "agility": 3
+    },
+    "deck_size": 35,
+    "pack_code": "fhvp"
+  },
+  {
+    "code": "11001",
+    "name": "Marion Tavares",
+    "subname": "The Trawler",
+    "faction": "guardian",
+    "health": 8,
+    "sanity": 6,
+    "skills": {
+      "willpower": 2,
+      "intellect": 3,
+      "combat": 4,
+      "agility": 3
+    },
+    "deck_size": 30,
+    "pack_code": "tdcp"
+  },
+  {
+    "code": "11004",
+    "name": "Lucius Galloway",
+    "subname": "The Poet",
+    "faction": "seeker",
+    "health": 8,
+    "sanity": 6,
+    "skills": {
+      "willpower": 2,
+      "intellect": 4,
+      "combat": 1,
+      "agility": 5
+    },
+    "deck_size": 30,
+    "pack_code": "tdcp"
+  },
+  {
+    "code": "11007",
+    "name": "Agatha Crane",
+    "subname": "The Parapsychologist",
+    "faction": "seeker",
+    "health": 6,
+    "sanity": 8,
+    "skills": {
+      "willpower": 4,
+      "intellect": 4,
+      "combat": 1,
+      "agility": 3
+    },
+    "deck_size": 35,
+    "pack_code": "tdcp"
+  },
+  {
+    "code": "11008",
+    "name": "Agatha Crane",
+    "subname": "The Parapsychologist",
+    "faction": "mystic",
+    "health": 6,
+    "sanity": 8,
+    "skills": {
+      "willpower": 4,
+      "intellect": 4,
+      "combat": 1,
+      "agility": 3
+    },
+    "deck_size": 35,
+    "pack_code": "tdcp"
+  },
+  {
+    "code": "11011",
+    "name": "Michael McGlen",
+    "subname": "The Gangster",
+    "faction": "rogue",
+    "health": 9,
+    "sanity": 5,
+    "skills": {
+      "willpower": 3,
+      "intellect": 1,
+      "combat": 5,
+      "agility": 3
+    },
+    "deck_size": 30,
+    "pack_code": "tdcp"
+  },
+  {
+    "code": "11014",
+    "name": "Gloria Goldberg",
+    "subname": "The Writer",
+    "faction": "mystic",
+    "health": 5,
+    "sanity": 9,
+    "skills": {
+      "willpower": 5,
+      "intellect": 4,
+      "combat": 2,
+      "agility": 1
+    },
+    "deck_size": 30,
+    "pack_code": "tdcp"
+  },
+  {
+    "code": "11017",
+    "name": "George Barnaby",
+    "subname": "The Lawyer",
+    "faction": "survivor",
+    "health": 7,
+    "sanity": 7,
+    "skills": {
+      "willpower": 2,
+      "intellect": 4,
+      "combat": 3,
+      "agility": 3
+    },
+    "deck_size": 35,
+    "pack_code": "tdcp"
+  },
+  {
+    "code": "60101",
+    "name": "Nathaniel Cho",
+    "subname": "The Boxer",
+    "faction": "guardian",
+    "health": 9,
+    "sanity": 6,
+    "skills": {
+      "willpower": 3,
+      "intellect": 2,
+      "combat": 5,
+      "agility": 2
+    },
+    "deck_size": 30,
+    "pack_code": "nat"
+  },
+  {
+    "code": "60201",
+    "name": "Harvey Walters",
+    "subname": "The Professor",
+    "faction": "seeker",
+    "health": 7,
+    "sanity": 8,
+    "skills": {
+      "willpower": 4,
+      "intellect": 5,
+      "combat": 1,
+      "agility": 2
+    },
+    "deck_size": 30,
+    "pack_code": "har"
+  },
+  {
+    "code": "60301",
+    "name": "Winifred Habbamock",
+    "subname": "The Aviatrix",
+    "faction": "rogue",
+    "health": 8,
+    "sanity": 7,
+    "skills": {
+      "willpower": 1,
+      "intellect": 3,
+      "combat": 3,
+      "agility": 5
+    },
+    "deck_size": 30,
+    "pack_code": "win"
+  },
+  {
+    "code": "60401",
+    "name": "Jacqueline Fine",
+    "subname": "The Psychic",
+    "faction": "mystic",
+    "health": 6,
+    "sanity": 9,
+    "skills": {
+      "willpower": 5,
+      "intellect": 3,
+      "combat": 2,
+      "agility": 2
+    },
+    "deck_size": 30,
+    "pack_code": "jac"
+  },
+  {
+    "code": "60501",
+    "name": "Stella Clark",
+    "subname": "The Letter Carrier",
+    "faction": "survivor",
+    "health": 8,
+    "sanity": 8,
+    "skills": {
+      "willpower": 3,
+      "intellect": 2,
+      "combat": 3,
+      "agility": 4
+    },
+    "deck_size": 30,
+    "pack_code": "ste"
+  }
+]

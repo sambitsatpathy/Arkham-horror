@@ -1,5 +1,28 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { requireSession, requireHost, getCampaign, getPlayers, getSession, updateSession, updatePlayer, addCampaignLog, getDb } = require('../../engine/gameState');
+const { requireSession, requireHost, getCampaign, getPlayers, getSession, updateSession, updatePlayer, addCampaignLog } = require('../../engine/gameState');
+const path = require('path');
+const fs = require('fs');
+
+const CAMPAIGNS = {
+  night_of_zealot: 'night_of_zealot',
+  dunwich_legacy:  'dunwich_legacy',
+  path_to_carcosa: 'path_to_carcosa',
+  forgotten_age:   'forgotten_age',
+  circle_undone:   'circle_undone',
+  dream_eaters:    'dream_eaters',
+  innsmouth:       'innsmouth',
+  edge_of_earth:   'edge_of_earth',
+  scarlet_keys:    'scarlet_keys',
+  feast_hemlock:   'feast_hemlock',
+  drowned_city:    'drowned_city',
+};
+
+function loadScenario(session) {
+  const dir = session.campaign_dir || 'night_of_zealot';
+  const filePath = path.join(__dirname, '../../data/scenarios', dir, session.scenario_code + '.json');
+  if (!fs.existsSync(filePath)) return null;
+  return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+}
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -9,7 +32,28 @@ module.exports = {
       opt.setName('result')
         .setDescription('victory or defeat')
         .setRequired(true)
-        .addChoices({ name: 'victory', value: 'victory' }, { name: 'defeat', value: 'defeat' })),
+        .addChoices({ name: 'victory', value: 'victory' }, { name: 'defeat', value: 'defeat' }))
+    .addStringOption(opt =>
+      opt.setName('resolution')
+        .setDescription('Resolution to read aloud (from scenario text)')
+        .setRequired(false)
+        .setAutocomplete(true)),
+
+  async autocomplete(interaction) {
+    const session = getSession();
+    if (!session) return interaction.respond([]);
+
+    const scenario = loadScenario(session);
+    if (!scenario?.resolutions) return interaction.respond([]);
+
+    const focused = interaction.options.getFocused().toLowerCase();
+    const choices = Object.entries(scenario.resolutions)
+      .filter(([, r]) => !focused || r.label.toLowerCase().includes(focused))
+      .slice(0, 25)
+      .map(([key, r]) => ({ name: r.label, value: key }));
+
+    await interaction.respond(choices);
+  },
 
   async execute(interaction) {
     const session = requireSession(interaction);
@@ -17,9 +61,24 @@ module.exports = {
     requireHost(interaction);
 
     const result = interaction.options.getString('result');
+    const resolutionKey = interaction.options.getString('resolution');
     const campaign = getCampaign();
     const players = getPlayers(campaign.id);
     const db = require('../../db/database').getDb();
+
+    const scenario = loadScenario(session);
+
+    // Post resolution narration first if provided
+    const pregame = interaction.guild.channels.cache.find(c => c.name === 'pregame');
+    if (resolutionKey && scenario?.resolutions?.[resolutionKey]) {
+      const res = scenario.resolutions[resolutionKey];
+      const resLines = [
+        `## 📖 ${res.label}`,
+        '',
+        ...res.text.map(p => `*${p}*`),
+      ];
+      if (pregame) await pregame.send(resLines.join('\n'));
+    }
 
     // Calculate XP
     const defeatedEnemies = db.prepare(
@@ -55,9 +114,8 @@ module.exports = {
     db.prepare('UPDATE campaign SET scenario_index = scenario_index + 1 WHERE id = ?').run(campaign.id);
     updateSession(session.id, { phase: 'end' });
 
-    const pregame = interaction.guild.channels.cache.find(c => c.name === 'pregame');
     const lines = [
-      `# Scenario ${result === 'victory' ? '✅ Victory' : '❌ Defeat'}: ${session.scenario_code.replace(/_/g, ' ').replace(/\d+ /g, '')}`,
+      `# Scenario ${result === 'victory' ? '✅ Victory' : '❌ Defeat'}: ${scenario?.name || session.scenario_code.replace(/_/g, ' ')}`,
       '',
       `**XP earned:** ${totalXp} per investigator (base: ${baseXp}, enemies: ${enemyXp})`,
       '',

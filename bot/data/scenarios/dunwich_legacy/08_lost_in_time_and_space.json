@@ -1,0 +1,64 @@
+{
+  "code": "08_lost_in_time_and_space",
+  "name": "Lost in Time and Space",
+  "pack": "litas",
+  "acts": [
+    { "index": 0, "name": "Out of this World",  "card_code": "02316", "doom_threshold": null },
+    { "index": 1, "name": "Into the Beyond",    "card_code": "02317", "doom_threshold": null },
+    { "index": 2, "name": "Close the Rift",     "card_code": "02318", "doom_threshold": null },
+    { "index": 3, "name": "Finding a New Way",  "card_code": "02319", "doom_threshold": null }
+  ],
+  "agendas": [
+    { "index": 0, "name": "All is One",              "card_code": "02312", "doom_threshold": 4 },
+    { "index": 1, "name": "Past, Present and Future","card_code": "02313", "doom_threshold": 8 },
+    { "index": 2, "name": "Breaking Through",        "card_code": "02314", "doom_threshold": 12 },
+    { "index": 3, "name": "The End of All Things",   "card_code": "02315", "doom_threshold": 999 }
+  ],
+  "locations": [
+    { "code": "another_dimension",   "name": "Another Dimension",     "card_code": "02320", "act_index": 0, "shroud": 6, "clues_per_investigator": 0, "start_revealed": true,  "starting_location": true },
+    { "code": "edge_of_universe",    "name": "The Edge of the Universe","card_code":"02321","act_index": 0, "shroud": 2, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "tear_through_time",   "name": "Tear Through Time",     "card_code": "02322", "act_index": 0, "shroud": 2, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "tear_through_space",  "name": "Tear Through Space",    "card_code": "02324", "act_index": 0, "shroud": 1, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "prismatic_cascade",   "name": "Prismatic Cascade",     "card_code": "02325", "act_index": 0, "shroud": 2, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "endless_bridge",      "name": "Endless Bridge",        "card_code": "02326", "act_index": 0, "shroud": 4, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "steps_of_yhaghrl",   "name": "Steps of Y'hagharl",    "card_code": "02327", "act_index": 0, "shroud": 3, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "dimensional_doorway", "name": "Dimensional Doorway",   "card_code": "02328", "act_index": 0, "shroud": 2, "clues_per_investigator": 0, "start_revealed": false }
+  ],
+  "encounter_sets": [
+    "lost_in_time_and_space", "sorcery", "ancient_evils", "striking_fear", "hideous_abominations"
+  ],
+  "intro_text": [
+    "You have been pulled through the gate — or perhaps you stepped through willingly, knowing there was no other choice. Either way, you are no longer in Dunwich. You are no longer anywhere.",
+    "Around you: geometries that hurt to perceive. Colors that have no names. Time moves in directions it was not meant to move. You must find a way back — or make one."
+  ],
+  "setup_instructions": [
+    "Investigators begin at Another Dimension.",
+    "All other locations begin hidden — they are revealed as investigators explore.",
+    "Yog-Sothoth may appear in this scenario — place it as directed by campaign log results.",
+    "The goal is to find and use the Dimensional Doorway to escape."
+  ],
+  "resolutions": {
+    "R1": {
+      "label": "Resolution 1 — You find a way home",
+      "text": [
+        "Through the Dimensional Doorway, you glimpse Arkham — battered, cold, real. You step through, and the gate collapses behind you.",
+        "The Dunwich Legacy is over. Whatever else may come, you have faced the Lurker at the Threshold and survived.",
+        "Record in the campaign log: *The investigators escaped from Lost in Time and Space.* Each investigator earns 5 bonus XP. Campaign complete."
+      ]
+    },
+    "R2": {
+      "label": "Resolution 2 — Some are left behind",
+      "text": [
+        "Not everyone makes it through the Doorway before it collapses. Those left behind are... gone. Not dead. Just somewhere else. Forever.",
+        "Record in the campaign log: *Some investigators were lost in time and space.* Those investigators are permanently removed from the campaign."
+      ]
+    },
+    "defeat": {
+      "label": "Defeat — Consumed",
+      "text": [
+        "You cannot find the way home. The impossible geometries of this place wear you down until you simply stop. Yog-Sothoth claims what remains.",
+        "Record in the campaign log: *The investigators were defeated at Lost in Time and Space.* Campaign ends."
+      ]
+    }
+  }
+}

@@ -1,11 +1,14 @@
-const { SlashCommandBuilder, AttachmentBuilder, ChannelType, PermissionFlagsBits } = require('discord.js');
-const { requireSession, requireHost, getSession, updateSession, getCampaign, getPlayers } = require('../../engine/gameState');
+const { SlashCommandBuilder, AttachmentBuilder, ChannelType } = require('discord.js');
+const { requireSession, requireHost, getSession, updateSession, updatePlayer, getCampaign, getPlayers, getLocation } = require('../../engine/gameState');
 const { findCardByCode } = require('../../engine/cardLookup');
+const { revealLocation } = require('../../engine/locationManager');
+const { getDb } = require('../../db/database');
 const path = require('path');
 const fs = require('fs');
 
-function loadScenario(scenarioCode) {
-  const filePath = path.join(__dirname, '../../data/scenarios/night_of_zealot', scenarioCode + '.json');
+function loadScenario(session) {
+  const dir = session.campaign_dir || 'night_of_zealot';
+  const filePath = path.join(__dirname, '../../data/scenarios', dir, session.scenario_code + '.json');
   return JSON.parse(fs.readFileSync(filePath, 'utf8'));
 }
 
@@ -25,7 +28,7 @@ module.exports = {
     requireHost(interaction);
 
     const type = interaction.options.getString('type');
-    const scenario = loadScenario(session.scenario_code);
+    const scenario = loadScenario(session);
 
     if (type === 'act') {
       const nextIndex = session.act_index + 1;
@@ -51,26 +54,59 @@ module.exports = {
       // Unlock next act category, lock previous
       const prevCatName = `🔍 ACT ${nextIndex} —`;
       const nextCatName = `🔒 ACT ${nextIndex + 1} —`;
-      const prevCat = interaction.guild.channels.cache.find(c => c.type === ChannelType.GuildCategory && c.name.startsWith(prevCatName));
+      const prevCat = interaction.guild.channels.cache.find(c =>
+        c.type === ChannelType.GuildCategory && c.name.startsWith(prevCatName));
       if (prevCat) {
         await prevCat.permissionOverwrites.edit(interaction.guild.roles.everyone, { ViewChannel: false });
       }
-      const nextCat = interaction.guild.channels.cache.find(c => c.type === ChannelType.GuildCategory && c.name.startsWith(nextCatName));
+      const nextCat = interaction.guild.channels.cache.find(c =>
+        c.type === ChannelType.GuildCategory && c.name.startsWith(nextCatName));
       if (nextCat) {
         await nextCat.permissionOverwrites.delete(interaction.guild.roles.everyone);
-        const newCatName = nextCat.name.replace('🔒', '🔍');
-        await nextCat.setName(newCatName);
+        await nextCat.setName(nextCat.name.replace('🔒', '🔍'));
       }
 
       const doomCh = interaction.guild.channels.cache.get(session.doom_channel_id);
       if (doomCh) await doomCh.send(`📖 Act advanced: **${newAct.name}**`);
-      await interaction.reply(`✅ Act advanced to **${newAct.name}**.`);
+
+      // Auto-move all investigators if the act specifies a forced location
+      const forcedLocation = newAct.move_investigators_to;
+      if (forcedLocation) {
+        const campaign = getCampaign();
+        const players = getPlayers(campaign.id).filter(p => !p.is_eliminated);
+        const db = getDb();
+        const locRow = db.prepare('SELECT * FROM locations WHERE session_id = ? AND code = ?')
+          .get(session.id, forcedLocation);
+
+        // Reveal the location if still hidden
+        if (locRow && locRow.status === 'hidden') {
+          await revealLocation(interaction.guild, session, locRow, players);
+        }
+
+        // Move every investigator there
+        for (const p of players) {
+          updatePlayer(p.id, { location_code: forcedLocation });
+        }
+
+        const locName = locRow?.name || forcedLocation;
+        if (doomCh) {
+          await doomCh.send(
+            `📍 All investigators have been moved to **${locName}** as required by the act.`
+          );
+        }
+
+        await interaction.reply(
+          `✅ Act advanced to **${newAct.name}**. All investigators moved to **${locName}**.`
+        );
+      } else {
+        await interaction.reply(`✅ Act advanced to **${newAct.name}**.`);
+      }
     }
 
     else if (type === 'agenda') {
       const nextIndex = session.agenda_index + 1;
       if (nextIndex >= scenario.agendas.length) {
-        return interaction.reply({ content: '💀 Final agenda reached — scenario defeat!',  });
+        return interaction.reply({ content: '💀 Final agenda reached — scenario defeat!' });
       }
 
       const newAgenda = scenario.agendas[nextIndex];

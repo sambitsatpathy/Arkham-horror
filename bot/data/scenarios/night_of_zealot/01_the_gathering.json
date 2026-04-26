@@ -68,13 +68,38 @@
     "ancient_evils",
     "chilling_cold"
   ],
+  "intro_text": [
+    "You and your partners have been investigating strange events in Arkham for several weeks now. Disappearances, odd sightings, and unsettling rumors have all led to this moment.",
+    "Tonight you are gathering at your home to discuss your findings. Before you can begin, you hear strange noises coming from below — and a sense of dread settles over you."
+  ],
   "setup_instructions": [
     "Set aside Ghoul Priest (01116). It will enter play during the scenario.",
     "Investigators begin in the Study.",
     "Place clues on each location equal to clues_per_investigator × number of investigators."
   ],
-  "resolution": {
-    "victory": ["Investigators defeated the Ghoul Priest or escaped through the Parlor."],
-    "defeat": ["The agenda advanced to They're Getting Out! or all investigators were eliminated."]
+  "resolutions": {
+    "R1": {
+      "label": "Resolution 1 — You escaped… but barely",
+      "text": [
+        "You barely escaped with your lives. The creatures that have been terrorizing your home scatter as you flee into the night.",
+        "The threat remains, and you know this is only the beginning. Whatever is lurking beneath Arkham will not be stopped so easily.",
+        "Each investigator earns 1 bonus XP for escaping. Record in the campaign log: *The investigators escaped the Gathering.*"
+      ]
+    },
+    "R2": {
+      "label": "Resolution 2 — The Ghoul Priest is defeated",
+      "text": [
+        "With a final, desperate blow, you strike down the Ghoul Priest. Its wretched body collapses, and the ghouls retreat into the darkness.",
+        "You have won a small victory tonight — but the rites that summoned these creatures are still incomplete. Something far worse may yet come to pass.",
+        "Each investigator earns 2 bonus XP. Record in the campaign log: *The investigators defeated the Ghoul Priest.*"
+      ]
+    },
+    "defeat": {
+      "label": "Defeat — Overwhelmed",
+      "text": [
+        "The creatures overwhelm you. You wake some time later, battered and confused, with only fragments of memory remaining.",
+        "Whatever happened in that house, it was only the beginning of a much greater nightmare. Record in the campaign log: *The investigators were defeated at the Gathering.*"
+      ]
+    }
   }
 }

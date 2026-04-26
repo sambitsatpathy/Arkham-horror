@@ -1,0 +1,61 @@
+{
+  "code": "02_the_house_always_wins",
+  "name": "The House Always Wins",
+  "pack": "dwl",
+  "acts": [
+    { "index": 0, "name": "Beginner's Luck", "card_code": "02066", "doom_threshold": null },
+    { "index": 1, "name": "Skin Game",       "card_code": "02067", "doom_threshold": null },
+    { "index": 2, "name": "All In",          "card_code": "02068", "doom_threshold": null }
+  ],
+  "agendas": [
+    { "index": 0, "name": "The Clover Club",         "card_code": "02063", "doom_threshold": 6 },
+    { "index": 1, "name": "Underground Muscle",      "card_code": "02064", "doom_threshold": 10 },
+    { "index": 2, "name": "Chaos in the Clover Club","card_code": "02065", "doom_threshold": 999 }
+  ],
+  "locations": [
+    { "code": "la_bella_luna",       "name": "La Bella Luna",       "card_code": "02070", "act_index": 0, "shroud": 2, "clues_per_investigator": 0, "start_revealed": true,  "starting_location": true },
+    { "code": "clover_club_lounge",  "name": "Clover Club Lounge",  "card_code": "02071", "act_index": 0, "shroud": 2, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "clover_club_bar",     "name": "Clover Club Bar",     "card_code": "02072", "act_index": 0, "shroud": 3, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "clover_club_cardroom","name": "Clover Club Cardroom","card_code": "02073", "act_index": 0, "shroud": 3, "clues_per_investigator": 2, "start_revealed": false },
+    { "code": "darkened_hall",       "name": "Darkened Hall",       "card_code": "02074", "act_index": 0, "shroud": 4, "clues_per_investigator": 2, "start_revealed": false },
+    { "code": "art_gallery",         "name": "Art Gallery",         "card_code": "02075", "act_index": 0, "shroud": 2, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "vip_area",            "name": "VIP Area",            "card_code": "02076", "act_index": 0, "shroud": 3, "clues_per_investigator": 2, "start_revealed": false },
+    { "code": "back_alley",          "name": "Back Alley",          "card_code": "02077", "act_index": 0, "shroud": 1, "clues_per_investigator": 0, "start_revealed": false }
+  ],
+  "encounter_sets": [
+    "the_house_always_wins", "sorcery", "naomis_crew", "bad_luck", "ancient_evils", "striking_fear"
+  ],
+  "intro_text": [
+    "Dr. Armitage has a lead: Dr. Francis Morgan, the other missing professor, was last seen at La Bella Luna — a restaurant connected to the Clover Club, Arkham's most exclusive underground gambling den.",
+    "The Clover Club is run by a man named Harlan Earnstone, and rumor has it he has friends in very dark places. Getting inside won't be easy. Getting back out might be harder still."
+  ],
+  "setup_instructions": [
+    "Investigators begin at La Bella Luna.",
+    "The Clover Club interior (Lounge, Bar, Cardroom, Darkened Hall, Art Gallery, VIP Area) starts hidden.",
+    "Naomi's Crew enemies may be used as guards — spawn them per scenario rules."
+  ],
+  "resolutions": {
+    "R1": {
+      "label": "Resolution 1 — Morgan is rescued",
+      "text": [
+        "You find Dr. Morgan in the Clover Club's hidden back rooms, apparently engaged of his own free will — though in a state of spiritual compromise you find deeply unsettling.",
+        "He agrees to come with you. Whatever deal he made with Harlan Earnstone, it will have consequences.",
+        "Record in the campaign log: *Dr. Morgan was rescued.* Each investigator earns 1 bonus XP."
+      ]
+    },
+    "R2": {
+      "label": "Resolution 2 — Morgan is not found",
+      "text": [
+        "You search the Clover Club thoroughly, but Morgan is nowhere to be found. Harlan Earnstone's men make it clear you have overstayed your welcome.",
+        "Record in the campaign log: *Dr. Morgan was not found.* The investigators suffer a penalty in future scenarios."
+      ]
+    },
+    "defeat": {
+      "label": "Defeat — Thrown out",
+      "text": [
+        "Earnstone's muscle escorts you out — not gently. Your investigation of the Clover Club is over before it began.",
+        "Record in the campaign log: *The investigators were defeated at the Clover Club.*"
+      ]
+    }
+  }
+}

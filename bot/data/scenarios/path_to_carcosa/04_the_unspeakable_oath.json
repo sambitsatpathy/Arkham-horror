@@ -1,0 +1,137 @@
+{
+  "code": "04_the_unspeakable_oath",
+  "name": "The Unspeakable Oath",
+  "pack": "path_to_carcosa",
+  "acts": [
+    { "index": 0, "name": "The Unspeakable Oath",   "card_code": "03163", "doom_threshold": null },
+    { "index": 1, "name": "Secrets and Lies",        "card_code": "03164", "doom_threshold": null },
+    { "index": 2, "name": "Into the Darkness",       "card_code": "03165", "doom_threshold": null },
+    { "index": 3, "name": "The Truth Revealed",      "card_code": "03166", "doom_threshold": null },
+    { "index": 4, "name": "The Final Blow",          "card_code": "03167", "doom_threshold": null }
+  ],
+  "agendas": [
+    { "index": 0, "name": "Lost Mind",              "card_code": "03160", "doom_threshold": 4 },
+    { "index": 1, "name": "Maddening Delusions",    "card_code": "03161", "doom_threshold": 8 },
+    { "index": 2, "name": "Cascading Losses",       "card_code": "03162", "doom_threshold": 999 }
+  ],
+  "locations": [
+    {
+      "code": "asylum_halls_1",
+      "name": "Asylum Halls",
+      "card_code": "03168",
+      "act_index": 0,
+      "shroud": 2,
+      "clues_per_investigator": 1,
+      "start_revealed": true,
+      "starting_location": true
+    },
+    {
+      "code": "asylum_halls_2",
+      "name": "Asylum Halls",
+      "card_code": "03169",
+      "act_index": 0,
+      "shroud": 2,
+      "clues_per_investigator": 1,
+      "start_revealed": false
+    },
+    {
+      "code": "asylum_halls_3",
+      "name": "Asylum Halls",
+      "card_code": "03170",
+      "act_index": 0,
+      "shroud": 3,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    },
+    {
+      "code": "asylum_halls_4",
+      "name": "Asylum Halls",
+      "card_code": "03171",
+      "act_index": 0,
+      "shroud": 3,
+      "clues_per_investigator": 1,
+      "start_revealed": false
+    },
+    {
+      "code": "kitchen",
+      "name": "Kitchen",
+      "card_code": "03172",
+      "act_index": 0,
+      "shroud": 2,
+      "clues_per_investigator": 1,
+      "start_revealed": false
+    },
+    {
+      "code": "mess_hall",
+      "name": "Mess Hall",
+      "card_code": "03173",
+      "act_index": 0,
+      "shroud": 2,
+      "clues_per_investigator": 0,
+      "start_revealed": false
+    },
+    {
+      "code": "infirmary",
+      "name": "Infirmary",
+      "card_code": "03174",
+      "act_index": 0,
+      "shroud": 3,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    },
+    {
+      "code": "yard",
+      "name": "Yard",
+      "card_code": "03175",
+      "act_index": 0,
+      "shroud": 1,
+      "clues_per_investigator": 0,
+      "start_revealed": false
+    }
+  ],
+  "encounter_sets": [
+    "cult_of_the_yellow_sign",
+    "hasturs_gift",
+    "decaying_reality",
+    "inhabitants_of_carcosa",
+    "striking_fear",
+    "ancient_evils",
+    "chilling_cold"
+  ],
+  "intro_text": [
+    "The trail has led you to Arkham Asylum. One of the cult's inner circle — a man known only as 'The Harbinger' — is a patient here. Or so the records claim.",
+    "The warden has agreed to let you speak with the inmates, under supervision. But within an hour of your arrival, the lights go out.",
+    "In the darkness, someone whispers: 'The oath has been spoken. There is no way back.'"
+  ],
+  "setup_instructions": [
+    "Investigators begin in the Asylum Halls (03168).",
+    "Shuffle all remaining Asylum Halls locations and place face-down.",
+    "The Harbinger (03176) is set aside. He enters play when investigators reach the correct location.",
+    "Each investigator gains the Amnesia weakness card at scenario start."
+  ],
+  "resolutions": {
+    "R1": {
+      "label": "Resolution 1 — The Harbinger is found",
+      "text": [
+        "You locate the Harbinger in the deepest cell of the asylum. What he tells you is difficult to hear — and impossible to forget.",
+        "The path to Carcosa is becoming clear. You wish it weren't.",
+        "Record in the campaign log: *The investigators found the Harbinger. Each investigator earns 2 bonus XP.*"
+      ]
+    },
+    "R2": {
+      "label": "Resolution 2 — You escaped before dawn",
+      "text": [
+        "The asylum became something else in the night. You ran, and you did not look back.",
+        "The Harbinger's words follow you still.",
+        "Record in the campaign log: *The investigators fled the asylum. Each investigator gains 1 mental trauma.*"
+      ]
+    },
+    "defeat": {
+      "label": "Defeat — Committed",
+      "text": [
+        "When dawn comes, the staff finds you in the corridors. There is no explanation for what you have experienced. No one would believe you anyway.",
+        "Record in the campaign log: *The investigators were defeated at The Unspeakable Oath. Each investigator gains 2 mental trauma.*"
+      ]
+    }
+  }
+}

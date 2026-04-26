@@ -1161,3 +1161,177 @@ Bot needs these Discord permissions:
 - **Live status messages are edits, not new messages.** Store message IDs in DB, fetch and edit them.
 - **Scenario JSON is the source of truth** for locations, acts, agendas, encounter sets.
 - **Bot only tracks what players tell it.** Card effects are not auto-resolved. Bot displays cards, players resolve, bot updates state on command.
+
+---
+
+## Expansion Roadmap
+
+### Phase 1 — Campaign Selection in `/startgame` *(next)*
+
+`/startgame` currently hardcodes Night of the Zealot scenarios as static `addChoices`. Replace with:
+1. A `campaign` string option with static choices (one per supported campaign).
+2. A `scenario` option with `setAutocomplete(true)` — autocomplete handler filters scenarios to the chosen campaign by loading that campaign's `campaign.json`.
+
+**Campaign registry to add in `startgame.js`:**
+```js
+const CAMPAIGNS = {
+  night_of_zealot: { name: 'The Night of the Zealot', dir: 'night_of_zealot' },
+  dunwich_legacy:  { name: 'The Dunwich Legacy',       dir: 'dunwich_legacy'  },
+  path_to_carcosa: { name: 'The Path to Carcosa',      dir: 'path_to_carcosa' },
+  forgotten_age:   { name: 'The Forgotten Age',        dir: 'forgotten_age'   },
+  circle_undone:   { name: 'The Circle Undone',        dir: 'circle_undone'   },
+  dream_eaters:    { name: 'The Dream-Eaters',         dir: 'dream_eaters'    },
+  innsmouth:       { name: 'The Innsmouth Conspiracy', dir: 'innsmouth'       },
+  edge_of_earth:   { name: 'Edge of the Earth',        dir: 'edge_of_earth'   },
+  scarlet_keys:    { name: 'The Scarlet Keys',         dir: 'scarlet_keys'    },
+  feast_hemlock:   { name: 'Feast of Hemlock Vale',    dir: 'feast_hemlock'   },
+  drowned_city:    { name: 'The Drowned City',         dir: 'drowned_city'    },
+};
+```
+
+**`campaign.json` schema** (one per `bot/data/scenarios/<dir>/`):
+```json
+{
+  "code": "dunwich_legacy",
+  "name": "The Dunwich Legacy",
+  "scenarios": [
+    { "key": "extracurricular_activity", "name": "Extracurricular Activity", "file": "01_extracurricular_activity" },
+    { "key": "house_always_wins",        "name": "The House Always Wins",    "file": "02_the_house_always_wins"   }
+  ]
+}
+```
+
+---
+
+### Phase 2 — Investigator Expansion
+
+Currently only the 5 core investigators are in `core2.json` and `/investigator` uses static `addChoices` (Discord cap: 25).
+
+**Changes needed:**
+- `bot/data/investigators/core2.json` → expand to `investigators.json` covering all investigators
+- `bot/commands/pregame/investigator.js` → replace `addChoices` with `setAutocomplete(true)` + autocomplete handler
+
+**Investigator data format** (same as current `core2.json` entries):
+```json
+{
+  "code": "02001",
+  "name": "Harvey Walters",
+  "subname": "The Professor",
+  "faction": "seeker",
+  "health": 7,
+  "sanity": 9,
+  "skills": { "willpower": 4, "intellect": 5, "combat": 2, "agility": 1 },
+  "deck_size": 30,
+  "deck_options": [...]
+}
+```
+Values can be pulled from each pack's `cards.json` for `type_code === "investigator"` entries.
+
+**Investigators to add by cycle:**
+
+| Cycle | Investigators |
+|-------|--------------|
+| Dunwich Legacy | Rex Murphy, Jenny Barnes, Jim Culver, "Ashcan" Pete |
+| Path to Carcosa | Mark Harrigan, Minh Thi Phan, Sefina Rousseau, Akachi Onyele, William Yorick |
+| Forgotten Age | Leo Anderson, Ursula Downs, Finn Edwards, Father Mateo, Calvin Wright |
+| Circle Undone | Joe Diamond, Patrice Hathaway, Monterey Jack |
+| Dream-Eaters | Luke Robinson, Diana Stanley, Rita Young, Marie Lambeau |
+| Standalone starters | Jacqueline Fine, Stella Clark, Nathaniel Cho, Harvey Walters, Winifred Habbamock |
+| Edge of the Earth | Carolyn Fern, Tommy Muldoon, Mandy Thompson, Tony Morgan, Lola Hayes |
+| Scarlet Keys | Bob Jenkins, Kymani Jones, Amina Zidane, Hank Samson |
+| Feast of Hemlock Vale | Darrell Simmons, Kate Winthrop, Alessio Rivaldi, Becca Carroll |
+
+---
+
+### Phase 3 — Scenario JSON Authoring
+
+Each scenario JSON needs (see `01_the_gathering.json` for the full schema):
+- `code`, `name`, `pack`
+- `acts[]` — `index`, `name`, `card_code`, `doom_threshold`, `move_investigators_to?` (optional location code — if set, all investigators are automatically moved there and the location is revealed when this act is reached)
+- `agendas[]` — `index`, `name`, `card_code`, `doom_threshold`
+- `locations[]` — `code`, `name`, `card_code`, `act_index`, `shroud`, `clues_per_investigator`, `start_revealed`, `starting_location?`
+- `encounter_sets[]` — array of `encounter_code` strings matching card data `encounter_code` field
+- `setup_instructions[]` — strings shown in `#pregame` at game start
+
+**Priority order:**
+1. ✅ Dunwich Legacy (8 scenarios) — done
+2. ✅ Path to Carcosa (8 scenarios) — done
+3. Forgotten Age (8 scenarios) — next
+4. Remaining cycles in release order
+
+---
+
+### Phase 4 — Starter Decks
+
+`bot/data/investigators/starter_decks.json` currently only covers the core 5. For each new investigator add:
+```json
+"02001": {
+  "deck": { "01000": 2, "02010": 1 },
+  "signature_cards": ["02006", "02007"]
+}
+```
+Slot data can be pulled from ArkhamDB `/api/public/decklists/by_investigator/<code>.json` or authored from official starter deck lists.
+
+---
+
+---
+
+### Phase 5 — Narrative Text (parallel with Phase 3)
+
+Each scenario JSON should carry its full narrative so the bot can narrate at the right moment without any external API calls.
+
+**Fields to add to every scenario JSON:**
+
+```json
+{
+  "intro_text": ["Paragraph 1 of the opening narration...", "Paragraph 2..."],
+  "setup_instructions": ["...existing field..."],
+  "resolutions": {
+    "A": { "label": "Resolution A — Title", "text": ["Paragraph 1...", "Paragraph 2..."] },
+    "B": { "label": "Resolution B — Title", "text": ["..."] },
+    "interlude": { "label": "Interlude", "text": ["..."] }
+  }
+}
+```
+
+**When each field is used:**
+
+| Field | Trigger | Where posted |
+|-------|---------|-------------|
+| `intro_text` | `/startgame` | `#pregame` before setup instructions |
+| `setup_instructions` | `/startgame` | `#pregame` after intro |
+| `resolutions.*` | `/endscenario resolution:<A/B/C>` | `#pregame` as closing narration |
+
+**Changes needed:**
+- `bot/commands/pregame/startgame.js` — post `intro_text` paragraphs before `setup_instructions`
+- `bot/commands/campaign/endscenario.js` — add `resolution` string option with autocomplete from scenario's `resolutions` keys; post the chosen resolution text to `#pregame`
+- All scenario JSONs — add `intro_text` and `resolutions` when authoring (source text from the physical rulebook or ArkhamDB's scenario pages)
+
+**Source for text:** The physical scenario booklets are the canonical source. ArkhamDB's card data has act/agenda `back_text` which contains some resolution text — cross-reference when authoring.
+
+---
+
+### Implementation Order
+
+| Step | Status | Track |
+|------|--------|-------|
+| Campaign + scenario autocomplete in `/startgame` | ✅ Done | Phase 1 |
+| Investigator autocomplete in `/investigator` | ✅ Done | Phase 2 |
+| Expand `investigators.json` (all 70 investigators) | ✅ Done | Phase 2 |
+| Dunwich Legacy scenario JSONs (8 scenarios) | ✅ Done | Phase 3 |
+| Dunwich Legacy starter decks (5 investigators) | ✅ Done | Phase 4 |
+| Narrative text fields in scenario JSONs | ✅ Done | Phase 5 (parallel with 3) |
+| `/startgame` intro narration | ✅ Done | Phase 5 |
+| `/endscenario` resolution narration | ✅ Done | Phase 5 |
+| Path to Carcosa scenario JSONs (8 scenarios) | ✅ Done | Phase 3 |
+| Path to Carcosa starter decks (6 investigators) | Pending | Phase 4 |
+| Forgotten Age scenario JSONs (8 scenarios) | Pending | Phase 3 |
+| Forgotten Age starter decks (5 investigators) | Pending | Phase 4 |
+| Circle Undone scenario JSONs (8 scenarios) | Pending | Phase 3 |
+| Dream-Eaters scenario JSONs (8 scenarios) | Pending | Phase 3 |
+| Innsmouth Conspiracy scenario JSONs (8 scenarios) | Pending | Phase 3 |
+| Edge of the Earth scenario JSONs (8 scenarios) | Pending | Phase 3 |
+| Scarlet Keys scenario JSONs (8 scenarios) | Pending | Phase 3 |
+| Feast of Hemlock Vale scenario JSONs (8 scenarios) | Pending | Phase 3 |
+| Drowned City scenario JSONs (8 scenarios) | Pending | Phase 3 |
+| Starter decks for remaining cycles | Pending | Phase 4 |

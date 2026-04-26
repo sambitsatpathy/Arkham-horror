@@ -1,0 +1,112 @@
+{
+  "code": "02_the_last_king",
+  "name": "The Last King",
+  "pack": "path_to_carcosa",
+  "acts": [
+    { "index": 0, "name": "The Last King",           "card_code": "03064", "doom_threshold": null }
+  ],
+  "agendas": [
+    { "index": 0, "name": "Strangers in the Night",  "card_code": "03062", "doom_threshold": 6 },
+    { "index": 1, "name": "The Masquerade",          "card_code": "03063", "doom_threshold": 999 }
+  ],
+  "locations": [
+    {
+      "code": "ballroom",
+      "name": "Ballroom",
+      "card_code": "03065",
+      "act_index": 0,
+      "shroud": 2,
+      "clues_per_investigator": 0,
+      "start_revealed": true,
+      "starting_location": true
+    },
+    {
+      "code": "cloak_room",
+      "name": "Cloak Room",
+      "card_code": "03066",
+      "act_index": 0,
+      "shroud": 2,
+      "clues_per_investigator": 1,
+      "start_revealed": false
+    },
+    {
+      "code": "gallery",
+      "name": "Gallery",
+      "card_code": "03067",
+      "act_index": 0,
+      "shroud": 3,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    },
+    {
+      "code": "courtyard",
+      "name": "Courtyard",
+      "card_code": "03068",
+      "act_index": 0,
+      "shroud": 2,
+      "clues_per_investigator": 1,
+      "start_revealed": false
+    },
+    {
+      "code": "dining_room",
+      "name": "Dining Room",
+      "card_code": "03069",
+      "act_index": 0,
+      "shroud": 3,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    },
+    {
+      "code": "cellar",
+      "name": "Cellar",
+      "card_code": "03070",
+      "act_index": 0,
+      "shroud": 4,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    }
+  ],
+  "encounter_sets": [
+    "cult_of_the_yellow_sign",
+    "hasturs_gift",
+    "inhabitants_of_carcosa",
+    "striking_fear",
+    "ancient_evils"
+  ],
+  "intro_text": [
+    "In the aftermath of the Ward Theatre disaster, you have pieced together a name: Nigel Engram, patron of the arts and rumoured devotee of something far older than theatre.",
+    "Tonight he is hosting a private masquerade at his estate. The guest list includes names you recognise from the cult's ledger. You have obtained an invitation — forged or otherwise — and you intend to find answers.",
+    "Beneath the masks and the music, something is watching."
+  ],
+  "setup_instructions": [
+    "Investigators begin at the Ballroom.",
+    "Place 1 Cultist enemy at each unrevealed location.",
+    "The 5 Guest enemies are shuffled and placed face-down; 1 per investigator enters play during setup.",
+    "Nigel Engram (03071) is set aside and enters play when his location is revealed."
+  ],
+  "resolutions": {
+    "R1": {
+      "label": "Resolution 1 — The conspiracy is exposed",
+      "text": [
+        "You have gathered enough evidence to understand the shape of the cult and its purpose. The masquerade is over — at least for tonight.",
+        "But Nigel Engram escaped, and the Yellow Sign has been seen in places it should not be. The path leads on.",
+        "Record in the campaign log: *The investigators uncovered the conspiracy. Each investigator earns 1 bonus XP per Cultist identified.*"
+      ]
+    },
+    "R2": {
+      "label": "Resolution 2 — You fled the estate",
+      "text": [
+        "The guests began to change. Behind their masks were faces that were not faces. You ran.",
+        "You survived, but whatever Nigel Engram was planning is now complete. The Yellow Sign glows in your memory.",
+        "Record in the campaign log: *The investigators fled the estate.*"
+      ]
+    },
+    "defeat": {
+      "label": "Defeat — Consumed by the masquerade",
+      "text": [
+        "The masks come off at midnight. What is underneath is not human. You do not escape.",
+        "Record in the campaign log: *The investigators were defeated at The Last King. Each investigator gains 1 physical and 1 mental trauma.*"
+      ]
+    }
+  }
+}

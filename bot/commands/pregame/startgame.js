@@ -5,18 +5,31 @@ const { buildGameServer } = require('../../engine/serverBuilder');
 const { buildEncounterDeck, shuffle, postEncounterCard } = require('../../engine/encounterEngine');
 const { pinInitialStatus, pinHiddenStatus } = require('../../engine/locationManager');
 const { findCard, findCardByCode, loadAllCards } = require('../../engine/cardLookup');
-const { AttachmentBuilder: AB } = require('discord.js');
 const path = require('path');
 const fs = require('fs');
 
-const SCENARIOS = {
-  'the_gathering': '01_the_gathering',
-  'midnight_masks': '02_the_midnight_masks',
-  'devourer_below': '03_the_devourer_below',
+const CAMPAIGNS = {
+  night_of_zealot: { name: 'The Night of the Zealot', dir: 'night_of_zealot' },
+  dunwich_legacy:  { name: 'The Dunwich Legacy',       dir: 'dunwich_legacy'  },
+  path_to_carcosa: { name: 'The Path to Carcosa',      dir: 'path_to_carcosa' },
+  forgotten_age:   { name: 'The Forgotten Age',        dir: 'forgotten_age'   },
+  circle_undone:   { name: 'The Circle Undone',        dir: 'circle_undone'   },
+  dream_eaters:    { name: 'The Dream-Eaters',         dir: 'dream_eaters'    },
+  innsmouth:       { name: 'The Innsmouth Conspiracy', dir: 'innsmouth'       },
+  edge_of_earth:   { name: 'Edge of the Earth',        dir: 'edge_of_earth'   },
+  scarlet_keys:    { name: 'The Scarlet Keys',         dir: 'scarlet_keys'    },
+  feast_hemlock:   { name: 'Feast of Hemlock Vale',    dir: 'feast_hemlock'   },
+  drowned_city:    { name: 'The Drowned City',         dir: 'drowned_city'    },
 };
 
-function loadScenario(code) {
-  const filePath = path.join(__dirname, '../../data/scenarios/night_of_zealot', code + '.json');
+function loadCampaignIndex(dir) {
+  const filePath = path.join(__dirname, '../../data/scenarios', dir, 'campaign.json');
+  if (!fs.existsSync(filePath)) return null;
+  return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+}
+
+function loadScenario(dir, file) {
+  const filePath = path.join(__dirname, '../../data/scenarios', dir, file + '.json');
   return JSON.parse(fs.readFileSync(filePath, 'utf8'));
 }
 
@@ -25,28 +38,64 @@ module.exports = {
     .setName('startgame')
     .setDescription('Start the game. Host only.')
     .addStringOption(opt =>
+      opt.setName('campaign')
+        .setDescription('Campaign to play')
+        .setRequired(true)
+        .addChoices(
+          ...Object.entries(CAMPAIGNS).map(([value, { name }]) => ({ name, value }))
+        ))
+    .addStringOption(opt =>
       opt.setName('scenario')
         .setDescription('Scenario to play')
         .setRequired(true)
-        .addChoices(
-          { name: 'The Gathering', value: 'the_gathering' },
-          { name: 'The Midnight Masks', value: 'midnight_masks' },
-          { name: 'The Devourer Below', value: 'devourer_below' },
-        ))
+        .setAutocomplete(true))
     .addStringOption(opt =>
       opt.setName('difficulty')
         .setDescription('Difficulty')
         .setRequired(true)
         .addChoices(
-          { name: 'Easy', value: 'easy' },
+          { name: 'Easy',     value: 'easy'     },
           { name: 'Standard', value: 'standard' },
-          { name: 'Hard', value: 'hard' },
-          { name: 'Expert', value: 'expert' },
+          { name: 'Hard',     value: 'hard'     },
+          { name: 'Expert',   value: 'expert'   },
         )),
+
+  async autocomplete(interaction) {
+    const campaignKey = interaction.options.getString('campaign');
+    const focused = interaction.options.getFocused().toLowerCase();
+
+    const campaign = CAMPAIGNS[campaignKey];
+    if (!campaign) return interaction.respond([]);
+
+    const index = loadCampaignIndex(campaign.dir);
+    if (!index) {
+      return interaction.respond([{ name: '⚠️ No scenarios authored yet for this campaign', value: '__none__' }]);
+    }
+
+    const choices = index.scenarios
+      .filter(s => !focused || s.name.toLowerCase().includes(focused))
+      .slice(0, 25)
+      .map(s => ({ name: s.name, value: s.file }));
+
+    await interaction.respond(choices);
+  },
 
   async execute(interaction) {
     const host = requireHost(interaction);
     if (!host) return;
+
+    const campaignKey = interaction.options.getString('campaign');
+    const scenarioFile = interaction.options.getString('scenario');
+    const difficulty = interaction.options.getString('difficulty');
+
+    if (scenarioFile === '__none__') {
+      return interaction.reply({ content: '❌ No scenarios have been authored for that campaign yet.', flags: 64 });
+    }
+
+    const campaignMeta = CAMPAIGNS[campaignKey];
+    if (!campaignMeta) {
+      return interaction.reply({ content: '❌ Unknown campaign.', flags: 64 });
+    }
 
     const campaign = getCampaign();
     const players = getPlayers(campaign.id);
@@ -69,10 +118,7 @@ module.exports = {
 
     await interaction.deferReply();
 
-    const scenarioKey = interaction.options.getString('scenario');
-    const difficulty = interaction.options.getString('difficulty');
-    const scenarioCode = SCENARIOS[scenarioKey];
-    const scenario = loadScenario(scenarioCode);
+    const scenario = loadScenario(campaignMeta.dir, scenarioFile);
     const allCards = loadAllCards();
 
     // Build Discord server structure
@@ -95,12 +141,12 @@ module.exports = {
     const db = getDb();
     const sessionResult = db.prepare(`
       INSERT INTO game_session
-        (campaign_id, scenario_code, difficulty, phase, doom, doom_threshold,
+        (campaign_id, scenario_code, campaign_dir, difficulty, phase, doom, doom_threshold,
          encounter_deck, doom_channel_id, agenda_channel_id, act_channel_id,
          chaos_channel_id, encounter_channel_id)
-      VALUES (?, ?, ?, 'investigation', 0, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, 'investigation', 0, ?, ?, ?, ?, ?, ?, ?)
     `).run(
-      campaign.id, scenarioCode, difficulty, doomThreshold,
+      campaign.id, scenarioFile, campaignMeta.dir, difficulty, doomThreshold,
       JSON.stringify(shuffledEncounter),
       channelIds.doom, channelIds.agenda, channelIds.act,
       channelIds.chaos, channelIds.encounter,
@@ -142,15 +188,39 @@ module.exports = {
       });
     }
 
-    // Post setup instructions in pregame channel
+    // Post intro narration + setup instructions in pregame channel
     const pregame = interaction.guild.channels.cache.find(c => c.name === 'pregame');
     if (pregame) {
+      // Post intro text paragraphs first if present
+      if (scenario.intro_text?.length) {
+        const introLines = [
+          `# 🎴 ${scenario.name}`,
+          '',
+          ...scenario.intro_text.map(p => `*${p}*`),
+        ];
+        await pregame.send(introLines.join('\n'));
+      }
+
+      const startingLocationLine = startLoc
+        ? [``, `📍 **All investigators begin at: ${startLoc.name}**`]
+        : [];
+      const header = scenario.intro_text?.length
+        ? `## Setup — ${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}`
+        : `# 🎴 ${scenario.name} — ${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}`;
+
       await pregame.send([
-        `# 🎴 ${scenario.name} — ${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}`,
+        header,
         '',
         '**Setup Instructions:**',
         ...scenario.setup_instructions.map(s => `• ${s}`),
+        ...startingLocationLine,
       ].join('\n'));
+    }
+
+    // Announce starting location in doom-track so it's visible in the main channel
+    const doomChEarly = interaction.guild.channels.cache.get(channelIds.doom);
+    if (doomChEarly && startLoc) {
+      await doomChEarly.send(`📍 All investigators start at **${startLoc.name}**.`);
     }
 
     // Pin location cards: revealed locations get full status; hidden ones get the back face

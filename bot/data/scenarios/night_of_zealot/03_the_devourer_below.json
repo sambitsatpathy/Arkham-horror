@@ -97,13 +97,39 @@
     "ancient_evils",
     "locked_doors"
   ],
+  "intro_text": [
+    "You have followed the trail of the cult deep into the Arkham Woods. The trees are unnaturally still. The stars above seem wrong — too bright, too close.",
+    "Somewhere in these woods, the final rite is being performed. You must stop it before Umôrdhoth tears through the veil entirely."
+  ],
   "setup_instructions": [
     "Investigators begin on the Main Path.",
     "Shuffle the 6 Arkham Woods locations and place them face-down.",
     "Umôrdhoth (01157) is set aside and enters play when the ritual is disrupted."
   ],
-  "resolution": {
-    "victory": ["Investigators disrupted the ritual before Umôrdhoth fully manifested."],
-    "defeat": ["Umôrdhoth devoured the investigators or all were eliminated."]
+  "resolutions": {
+    "R1": {
+      "label": "Resolution 1 — Umôrdhoth is banished",
+      "text": [
+        "With a desperate final act, you disrupt the ritual at its heart. Umôrdhoth shrieks as the dimensional rift closes, hurling it back into the void from which it came.",
+        "Arkham is safe — for now. But the cult's master has been denied its feast, and its servants will not forgive you.",
+        "Record in the campaign log: *Umôrdhoth was banished. Each investigator earns 3 bonus XP.*"
+      ]
+    },
+    "R2": {
+      "label": "Resolution 2 — You fled before the ritual concluded",
+      "text": [
+        "Overwhelmed by the horrors at the ritual site, you retreat into the woods. Behind you, you hear a sound like the tearing of reality itself.",
+        "You survived. But Umôrdhoth has partially crossed over. The nightmare is not over.",
+        "Record in the campaign log: *The investigators fled the Devourer Below.*"
+      ]
+    },
+    "defeat": {
+      "label": "Defeat — Consumed",
+      "text": [
+        "Umôrdhoth is fully summoned. Its vast form blots out the sky above the woods, and its tendrils reach for you.",
+        "You are consumed. What comes next is beyond mortal comprehension.",
+        "Record in the campaign log: *The investigators were defeated by Umôrdhoth. Campaign ends.*"
+      ]
+    }
   }
 }

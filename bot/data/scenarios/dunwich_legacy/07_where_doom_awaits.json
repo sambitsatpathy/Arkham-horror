@@ -1,0 +1,55 @@
+{
+  "code": "07_where_doom_awaits",
+  "name": "Where Doom Awaits",
+  "pack": "wda",
+  "acts": [
+    { "index": 0, "name": "The Path to the Hill",    "card_code": "02277", "doom_threshold": null },
+    { "index": 1, "name": "Ascending the Hill (v.I)","card_code": "02278", "doom_threshold": null },
+    { "index": 2, "name": "The Gate Opens",          "card_code": "02281", "doom_threshold": null }
+  ],
+  "agendas": [
+    { "index": 0, "name": "Calling Forth the Old Ones","card_code": "02275", "doom_threshold": 5 },
+    { "index": 1, "name": "Beckoning for Power",       "card_code": "02276", "doom_threshold": 10 }
+  ],
+  "locations": [
+    { "code": "base_of_hill",   "name": "Base of the Hill",  "card_code": "02282", "act_index": 0, "shroud": 3, "clues_per_investigator": 1, "start_revealed": true,  "starting_location": true },
+    { "code": "ascending_path", "name": "Ascending Path",    "card_code": "02283", "act_index": 0, "shroud": 3, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "sentinel_peak",  "name": "Sentinel Peak",     "card_code": "02284", "act_index": 0, "shroud": 4, "clues_per_investigator": 2, "start_revealed": false },
+    { "code": "slaughtered_woods","name":"Slaughtered Woods", "card_code": "02285", "act_index": 0, "shroud": 2, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "eerie_glade",    "name": "Eerie Glade",       "card_code": "02286", "act_index": 0, "shroud": 4, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "destroyed_path", "name": "Destroyed Path",   "card_code": "02287", "act_index": 0, "shroud": 3, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "frozen_spring",  "name": "Frozen Spring",    "card_code": "02288", "act_index": 0, "shroud": 3, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "dimensional_gap","name": "Dimensional Gap",  "card_code": "02289", "act_index": 1, "shroud": 3, "clues_per_investigator": 0, "start_revealed": false },
+    { "code": "tear_in_path",   "name": "A Tear in the Path","card_code": "02290","act_index": 1, "shroud": 3, "clues_per_investigator": 0, "start_revealed": false },
+    { "code": "uprooted_woods", "name": "Uprooted Woods",   "card_code": "02291", "act_index": 1, "shroud": 2, "clues_per_investigator": 0, "start_revealed": false },
+    { "code": "lost_memories",  "name": "Lost Memories",    "card_code": "02292", "act_index": 1, "shroud": 2, "clues_per_investigator": 0, "start_revealed": false }
+  ],
+  "encounter_sets": [
+    "where_doom_awaits", "dunwich", "sorcery", "beast_thralls", "bishops_thralls", "whippoorwills", "ancient_evils", "striking_fear"
+  ],
+  "intro_text": [
+    "You have pieced together the truth: a gate is being opened atop Sentinel Hill — the same hill where the Whateley family once performed their terrible rites.",
+    "The cultists are already ascending. If they complete the ritual at the summit, Yog-Sothoth will pass through, and nothing in this world will stop it. You must reach the top first."
+  ],
+  "setup_instructions": [
+    "Investigators begin at the Base of the Hill.",
+    "Act 2 locations (Dimensional Gap, Tear in the Path, Uprooted Woods, Lost Memories) are placed face-down — they appear when Act 2 begins.",
+    "Randomly select which Act 1 hill locations are used this scenario per rulebook."
+  ],
+  "resolutions": {
+    "R1": {
+      "label": "Resolution 1 — The gate is sealed",
+      "text": [
+        "You reach the summit and, with every ounce of your remaining strength, seal the gate before Yog-Sothoth can fully cross over. The sky above Dunwich darkens, then clears.",
+        "Record in the campaign log: *The gate was sealed.* Each investigator earns 3 bonus XP."
+      ]
+    },
+    "defeat": {
+      "label": "Defeat — The gate opens",
+      "text": [
+        "The cultists complete the rite. The gate tears open atop Sentinel Hill, and through it comes something vast and incomprehensible — the Lurker at the Threshold itself.",
+        "Record in the campaign log: *The gate was opened.* Proceed to Lost in Time and Space under the worst possible conditions."
+      ]
+    }
+  }
+}

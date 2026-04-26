@@ -1,0 +1,135 @@
+{
+  "code": "07_black_stars_rise",
+  "name": "Black Stars Rise",
+  "pack": "path_to_carcosa",
+  "acts": [
+    { "index": 0, "name": "Black Stars Rise",         "card_code": "03281", "doom_threshold": null },
+    { "index": 1, "name": "The Final Rite",            "card_code": "03282", "doom_threshold": null }
+  ],
+  "agendas": [
+    { "index": 0, "name": "The Flood Below",          "card_code": "03275", "doom_threshold": 5 },
+    { "index": 1, "name": "The Vortex Above",         "card_code": "03276", "doom_threshold": 9 },
+    { "index": 2, "name": "The Flooding of Ythill",   "card_code": "03277", "doom_threshold": 5 },
+    { "index": 3, "name": "The Vortex Descends",      "card_code": "03278", "doom_threshold": 9 },
+    { "index": 4, "name": "The Stars Are Right",      "card_code": "03279", "doom_threshold": 3 },
+    { "index": 5, "name": "Hastur Ascends",            "card_code": "03280", "doom_threshold": 999 }
+  ],
+  "locations": [
+    {
+      "code": "porte_de_lavancee",
+      "name": "Porte de l'Avancée",
+      "card_code": "03283",
+      "act_index": 0,
+      "shroud": 2,
+      "clues_per_investigator": 0,
+      "start_revealed": true,
+      "starting_location": true
+    },
+    {
+      "code": "grand_rue",
+      "name": "Grand Rue",
+      "card_code": "03284",
+      "act_index": 0,
+      "shroud": 2,
+      "clues_per_investigator": 1,
+      "start_revealed": false
+    },
+    {
+      "code": "outer_wall_1",
+      "name": "Outer Wall",
+      "card_code": "03285",
+      "act_index": 0,
+      "shroud": 3,
+      "clues_per_investigator": 1,
+      "start_revealed": false
+    },
+    {
+      "code": "outer_wall_2",
+      "name": "Outer Wall",
+      "card_code": "03286",
+      "act_index": 0,
+      "shroud": 3,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    },
+    {
+      "code": "north_tower_1",
+      "name": "North Tower",
+      "card_code": "03287",
+      "act_index": 0,
+      "shroud": 4,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    },
+    {
+      "code": "north_tower_2",
+      "name": "North Tower",
+      "card_code": "03288",
+      "act_index": 0,
+      "shroud": 4,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    },
+    {
+      "code": "broken_steps_1",
+      "name": "Broken Steps",
+      "card_code": "03289",
+      "act_index": 0,
+      "shroud": 3,
+      "clues_per_investigator": 1,
+      "start_revealed": false
+    },
+    {
+      "code": "broken_steps_2",
+      "name": "Broken Steps",
+      "card_code": "03290",
+      "act_index": 0,
+      "shroud": 3,
+      "clues_per_investigator": 1,
+      "start_revealed": false
+    }
+  ],
+  "encounter_sets": [
+    "cult_of_the_yellow_sign",
+    "hasturs_gift",
+    "decaying_reality",
+    "inhabitants_of_carcosa",
+    "striking_fear",
+    "ancient_evils"
+  ],
+  "intro_text": [
+    "Mont-Saint-Michel. The monastery rises from the sea like a dream. Or a nightmare.",
+    "The cult has gathered here for their final rite. Above, the black stars are aligning. Below, the tide is rising — and it is not water.",
+    "You must choose: seal the flood from below, or stop the vortex above. You cannot do both. The King in Yellow is nearly here."
+  ],
+  "setup_instructions": [
+    "This scenario has two parallel agenda decks: Flood (left) and Vortex (right). Use the deck that matches your campaign's current path.",
+    "Investigators begin at Porte de l'Avancée.",
+    "All locations begin face-down. Reveal them as investigators explore.",
+    "Hastur (03291) is set aside. He enters play if both agendas reach their final card."
+  ],
+  "resolutions": {
+    "R1": {
+      "label": "Resolution 1 — The flood is sealed",
+      "text": [
+        "You close the rift below Mont-Saint-Michel. The waters recede. The vortex above grows brighter — but it is incomplete without the flood.",
+        "You have bought the world one more night.",
+        "Record in the campaign log: *The flood was sealed. Continue to Dim Carcosa.*"
+      ]
+    },
+    "R2": {
+      "label": "Resolution 2 — The vortex is closed",
+      "text": [
+        "You shatter the ritual circle. The vortex collapses, pulling the cult's leader with it. But the flood continues to rise.",
+        "Record in the campaign log: *The vortex was closed. Continue to Dim Carcosa.*"
+      ]
+    },
+    "defeat": {
+      "label": "Defeat — The stars align",
+      "text": [
+        "Both the flood and the vortex complete. The stars are right. The King in Yellow steps through.",
+        "Record in the campaign log: *The investigators were defeated at Black Stars Rise. Campaign ends in defeat.*"
+      ]
+    }
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "code": "03_the_miskatonic_museum",
+  "name": "The Miskatonic Museum",
+  "pack": "tmm",
+  "acts": [
+    { "index": 0, "name": "Finding a Way Inside",   "card_code": "02122", "doom_threshold": null },
+    { "index": 1, "name": "Night at the Museum",    "card_code": "02123", "doom_threshold": null },
+    { "index": 2, "name": "Breaking and Entering",  "card_code": "02124", "doom_threshold": null },
+    { "index": 3, "name": "Searching for the Tome", "card_code": "02125", "doom_threshold": null }
+  ],
+  "agendas": [
+    { "index": 0, "name": "Restricted Access", "card_code": "02119", "doom_threshold": 4 },
+    { "index": 1, "name": "Shadows Deepen",    "card_code": "02120", "doom_threshold": 8 },
+    { "index": 2, "name": "In Every Shadow",   "card_code": "02121", "doom_threshold": 999 }
+  ],
+  "locations": [
+    { "code": "museum_entrance",   "name": "Museum Entrance",    "card_code": "02126", "act_index": 0, "shroud": 3, "clues_per_investigator": 0, "start_revealed": true,  "starting_location": true },
+    { "code": "museum_halls",      "name": "Museum Halls",       "card_code": "02127", "act_index": 0, "shroud": 2, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "security_office_a", "name": "Security Office",    "card_code": "02128", "act_index": 0, "shroud": 2, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "security_office_b", "name": "Security Office",    "card_code": "02129", "act_index": 0, "shroud": 3, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "admin_office_a",    "name": "Administration Office","card_code": "02130","act_index": 0, "shroud": 1, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "admin_office_b",    "name": "Administration Office","card_code": "02131","act_index": 0, "shroud": 2, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "exhibit_hall_a",    "name": "Exhibit Hall",       "card_code": "02132", "act_index": 0, "shroud": 1, "clues_per_investigator": 0, "start_revealed": false },
+    { "code": "exhibit_hall_b",    "name": "Exhibit Hall",       "card_code": "02133", "act_index": 0, "shroud": 2, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "exhibit_hall_c",    "name": "Exhibit Hall",       "card_code": "02134", "act_index": 0, "shroud": 4, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "exhibit_hall_d",    "name": "Exhibit Hall",       "card_code": "02135", "act_index": 0, "shroud": 3, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "exhibit_hall_e",    "name": "Exhibit Hall",       "card_code": "02136", "act_index": 0, "shroud": 3, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "exhibit_hall_f",    "name": "Exhibit Hall",       "card_code": "02137", "act_index": 0, "shroud": 3, "clues_per_investigator": 1, "start_revealed": false }
+  ],
+  "encounter_sets": [
+    "the_miskatonic_museum", "sorcery", "bishops_thralls", "whippoorwills", "ancient_evils", "striking_fear", "locked_doors"
+  ],
+  "intro_text": [
+    "Dr. Armitage believes that a copy of the Necronomicon held in Miskatonic University's museum may hold the key to stopping what is coming. The museum is closed for the evening, but that cannot stop you.",
+    "Something else is in the museum tonight. The Hunting Horror — a creature of impossible angles and writhing darkness — has been drawn here, and it will not let you leave with the tome."
+  ],
+  "setup_instructions": [
+    "Set aside the Hunting Horror (02141). It enters play when the exhibit halls are disturbed.",
+    "The Necronomicon is placed face-down in one of the exhibit halls — place it randomly.",
+    "Investigators begin at the Museum Entrance.",
+    "The museum is closed; all inner locations start hidden."
+  ],
+  "resolutions": {
+    "R1": {
+      "label": "Resolution 1 — The Necronomicon is secured",
+      "text": [
+        "You find the Necronomicon and escape the museum before the Hunting Horror can claim you. The tome is dangerous in your hands — but far more dangerous in the wrong ones.",
+        "Record in the campaign log: *The investigators have the Necronomicon.* Add it to the campaign log as a key item. Each investigator earns 2 bonus XP."
+      ]
+    },
+    "R2": {
+      "label": "Resolution 2 — The tome is lost",
+      "text": [
+        "The Hunting Horror prevents you from reaching the Necronomicon. You escape with your lives, but the tome remains in the museum — and the creature now guards it.",
+        "Record in the campaign log: *The Necronomicon remains at the museum.*"
+      ]
+    },
+    "defeat": {
+      "label": "Defeat — Consumed by the dark",
+      "text": [
+        "The Hunting Horror pursues you through the galleries. When you finally escape, you are not sure all of you made it out intact.",
+        "Record in the campaign log: *The investigators were defeated at the Miskatonic Museum.*"
+      ]
+    }
+  }
+}

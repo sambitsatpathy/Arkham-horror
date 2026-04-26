@@ -1,0 +1,14 @@
+{
+  "code": "dunwich_legacy",
+  "name": "The Dunwich Legacy",
+  "scenarios": [
+    { "key": "extracurricular_activity", "name": "Extracurricular Activity", "file": "01_extracurricular_activity" },
+    { "key": "house_always_wins",        "name": "The House Always Wins",    "file": "02_the_house_always_wins"   },
+    { "key": "miskatonic_museum",        "name": "The Miskatonic Museum",    "file": "03_the_miskatonic_museum"   },
+    { "key": "essex_county_express",     "name": "The Essex County Express", "file": "04_the_essex_county_express"},
+    { "key": "blood_on_the_altar",       "name": "Blood on the Altar",       "file": "05_blood_on_the_altar"      },
+    { "key": "undimensioned_and_unseen", "name": "Undimensioned and Unseen", "file": "06_undimensioned_and_unseen"},
+    { "key": "where_doom_awaits",        "name": "Where Doom Awaits",        "file": "07_where_doom_awaits"       },
+    { "key": "lost_in_time_and_space",   "name": "Lost in Time and Space",   "file": "08_lost_in_time_and_space"  }
+  ]
+}

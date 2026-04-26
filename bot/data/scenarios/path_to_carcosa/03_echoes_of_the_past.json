@@ -1,0 +1,133 @@
+{
+  "code": "03_echoes_of_the_past",
+  "name": "Echoes of the Past",
+  "pack": "path_to_carcosa",
+  "acts": [
+    { "index": 0, "name": "Secrets of the Historical Society", "card_code": "03124", "doom_threshold": null },
+    { "index": 1, "name": "The Baleful Star",                  "card_code": "03125", "doom_threshold": null },
+    { "index": 2, "name": "The Bitter Truth",                  "card_code": "03126", "doom_threshold": null }
+  ],
+  "agendas": [
+    { "index": 0, "name": "Mysteries of the Past",  "card_code": "03121", "doom_threshold": 4 },
+    { "index": 1, "name": "The Curtain Rises",      "card_code": "03122", "doom_threshold": 8 },
+    { "index": 2, "name": "The Final Act",           "card_code": "03123", "doom_threshold": 999 }
+  ],
+  "locations": [
+    {
+      "code": "entry_hall",
+      "name": "Entry Hall",
+      "card_code": "03127",
+      "act_index": 0,
+      "shroud": 2,
+      "clues_per_investigator": 0,
+      "start_revealed": true,
+      "starting_location": true
+    },
+    {
+      "code": "historical_society_1",
+      "name": "Historical Society",
+      "card_code": "03128",
+      "act_index": 0,
+      "shroud": 2,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    },
+    {
+      "code": "historical_society_2",
+      "name": "Historical Society",
+      "card_code": "03129",
+      "act_index": 0,
+      "shroud": 3,
+      "clues_per_investigator": 1,
+      "start_revealed": false
+    },
+    {
+      "code": "historical_society_3",
+      "name": "Historical Society",
+      "card_code": "03130",
+      "act_index": 0,
+      "shroud": 3,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    },
+    {
+      "code": "historical_society_4",
+      "name": "Historical Society",
+      "card_code": "03131",
+      "act_index": 0,
+      "shroud": 4,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    },
+    {
+      "code": "historical_society_5",
+      "name": "Historical Society",
+      "card_code": "03132",
+      "act_index": 0,
+      "shroud": 2,
+      "clues_per_investigator": 1,
+      "start_revealed": false
+    },
+    {
+      "code": "historical_society_6",
+      "name": "Historical Society",
+      "card_code": "03133",
+      "act_index": 0,
+      "shroud": 3,
+      "clues_per_investigator": 1,
+      "start_revealed": false
+    },
+    {
+      "code": "historical_society_7",
+      "name": "Historical Society",
+      "card_code": "03134",
+      "act_index": 0,
+      "shroud": 4,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    }
+  ],
+  "encounter_sets": [
+    "cult_of_the_yellow_sign",
+    "hasturs_gift",
+    "decaying_reality",
+    "striking_fear",
+    "ancient_evils",
+    "locked_doors"
+  ],
+  "intro_text": [
+    "The Arkham Historical Society maintains archives that stretch back to the city's founding. Hidden within those records — if the whispers are to be believed — is evidence of the Yellow Sign's presence in Arkham going back centuries.",
+    "You have broken into the society after hours. The building is dark, the curator absent. But you are not alone.",
+    "Something has been here before you, and it has left its mark on every room."
+  ],
+  "setup_instructions": [
+    "Investigators begin at the Entry Hall.",
+    "Shuffle the 7 Historical Society locations and arrange them face-down around the Entry Hall.",
+    "The True Magick tome (03135) is set aside; it is found during the scenario.",
+    "Distribute Omen tokens as instructed by the act card."
+  ],
+  "resolutions": {
+    "R1": {
+      "label": "Resolution 1 — The secret is uncovered",
+      "text": [
+        "Deep in the archives you find it: a complete record of the Yellow Sign's history in Arkham. Names, dates, rituals. The cult is older than the city itself.",
+        "The knowledge is a burden. But it is also a weapon.",
+        "Record in the campaign log: *The investigators uncovered the secret history. Each investigator earns 2 bonus XP.*"
+      ]
+    },
+    "R2": {
+      "label": "Resolution 2 — Partial records recovered",
+      "text": [
+        "You escaped with what you could carry. Some pages were burned, some stolen by the thing that stalked the halls. But you have enough to continue.",
+        "Record in the campaign log: *The investigators recovered partial records. Each investigator earns 1 bonus XP.*"
+      ]
+    },
+    "defeat": {
+      "label": "Defeat — Lost in the archives",
+      "text": [
+        "The shelves close around you. The entries in the books are changing — and one of them is about you.",
+        "Record in the campaign log: *The investigators were defeated at Echoes of the Past.*"
+      ]
+    }
+  }
+}

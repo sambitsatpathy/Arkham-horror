@@ -1,0 +1,64 @@
+{
+  "code": "06_undimensioned_and_unseen",
+  "name": "Undimensioned and Unseen",
+  "pack": "uau",
+  "acts": [
+    { "index": 0, "name": "Saracenic Script",      "card_code": "02240", "doom_threshold": null },
+    { "index": 1, "name": "They Must Be Destroyed!","card_code": "02241", "doom_threshold": null }
+  ],
+  "agendas": [
+    { "index": 0, "name": "Rampaging Creatures", "card_code": "02237", "doom_threshold": 5 },
+    { "index": 1, "name": "Biding Its Time",     "card_code": "02238", "doom_threshold": 9 },
+    { "index": 2, "name": "Horrors Unleashed",   "card_code": "02239", "doom_threshold": 999 }
+  ],
+  "locations": [
+    { "code": "dunwich_village_a",  "name": "Dunwich Village",  "card_code": "02242", "act_index": 0, "shroud": 3, "clues_per_investigator": 1, "start_revealed": true,  "starting_location": true },
+    { "code": "dunwich_village_b",  "name": "Dunwich Village",  "card_code": "02243", "act_index": 0, "shroud": 2, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "cold_spring_glen_a", "name": "Cold Spring Glen", "card_code": "02244", "act_index": 0, "shroud": 3, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "cold_spring_glen_b", "name": "Cold Spring Glen", "card_code": "02245", "act_index": 0, "shroud": 2, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "ten_acre_meadow_a",  "name": "Ten-Acre Meadow",  "card_code": "02246", "act_index": 0, "shroud": 3, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "ten_acre_meadow_b",  "name": "Ten-Acre Meadow",  "card_code": "02247", "act_index": 0, "shroud": 2, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "blasted_heath_a",    "name": "Blasted Heath",    "card_code": "02248", "act_index": 0, "shroud": 4, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "blasted_heath_b",    "name": "Blasted Heath",    "card_code": "02249", "act_index": 0, "shroud": 3, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "whateley_ruins_a",   "name": "Whateley Ruins",   "card_code": "02250", "act_index": 0, "shroud": 3, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "whateley_ruins_b",   "name": "Whateley Ruins",   "card_code": "02251", "act_index": 0, "shroud": 2, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "devils_hop_yard_a",  "name": "Devil's Hop Yard", "card_code": "02252", "act_index": 0, "shroud": 1, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "devils_hop_yard_b",  "name": "Devil's Hop Yard", "card_code": "02253", "act_index": 0, "shroud": 2, "clues_per_investigator": 1, "start_revealed": false }
+  ],
+  "encounter_sets": [
+    "undimensioned_and_unseen", "dunwich", "beast_thralls", "whippoorwills", "ancient_evils", "striking_fear"
+  ],
+  "intro_text": [
+    "The creature you have been tracking — the Dunwich Horror — is not alone. Invisible, enormous, and terrifyingly hungry, several of its kin have been sighted throughout the hills surrounding Dunwich.",
+    "Armed with a ritual from the Necronomicon (or what knowledge you could piece together), you must hunt them down before they devastate the region."
+  ],
+  "setup_instructions": [
+    "Spawn one Dunwich Horror at each of 4 randomly selected locations.",
+    "Investigators begin at Dunwich Village.",
+    "The Dunwich Horrors are invisible — they cannot be damaged normally. Use the ritual to make them vulnerable.",
+    "Randomly select which locations are used this scenario (per rulebook)."
+  ],
+  "resolutions": {
+    "R1": {
+      "label": "Resolution 1 — All Horrors destroyed",
+      "text": [
+        "Through desperate effort and the power of the ritual, you destroy every last Dunwich Horror. The hills fall silent.",
+        "Record in the campaign log: *All Dunwich Horrors were destroyed.* Each investigator earns 3 bonus XP."
+      ]
+    },
+    "R2": {
+      "label": "Resolution 2 — Some Horrors remain",
+      "text": [
+        "You destroy most of the creatures but not all. One or more of the Horrors escapes into the hills.",
+        "Record in the campaign log: *Some Dunwich Horrors escaped.* Note how many — each will appear as a penalty in a future scenario."
+      ]
+    },
+    "defeat": {
+      "label": "Defeat — Overwhelmed",
+      "text": [
+        "The Dunwich Horrors prove too much. You are driven from the hills, battered and terrified.",
+        "Record in the campaign log: *The investigators were defeated at Undimensioned and Unseen.* Each investigator suffers 1 physical and 1 mental trauma."
+      ]
+    }
+  }
+}

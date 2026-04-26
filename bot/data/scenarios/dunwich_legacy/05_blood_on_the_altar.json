@@ -1,0 +1,67 @@
+{
+  "code": "05_blood_on_the_altar",
+  "name": "Blood on the Altar",
+  "pack": "bota",
+  "acts": [
+    { "index": 0, "name": "Searching for Answers",    "card_code": "02199", "doom_threshold": null },
+    { "index": 1, "name": "The Chamber of the Beast", "card_code": "02200", "doom_threshold": null }
+  ],
+  "agendas": [
+    { "index": 0, "name": "Strange Disappearances", "card_code": "02196", "doom_threshold": 4 },
+    { "index": 1, "name": "The Old Ones Hunger",    "card_code": "02197", "doom_threshold": 8 },
+    { "index": 2, "name": "Feed the Beast",         "card_code": "02198", "doom_threshold": 999 }
+  ],
+  "locations": [
+    { "code": "village_commons",      "name": "Village Commons",      "card_code": "02201", "act_index": 0, "shroud": 3, "clues_per_investigator": 1, "start_revealed": true,  "starting_location": true },
+    { "code": "bishops_brook_a",      "name": "Bishop's Brook",       "card_code": "02202", "act_index": 0, "shroud": 3, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "bishops_brook_b",      "name": "Bishop's Brook",       "card_code": "02203", "act_index": 0, "shroud": 3, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "burned_ruins_a",       "name": "Burned Ruins",         "card_code": "02204", "act_index": 0, "shroud": 3, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "burned_ruins_b",       "name": "Burned Ruins",         "card_code": "02205", "act_index": 0, "shroud": 2, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "osberns_store_a",      "name": "Osborn's General Store","card_code": "02206","act_index": 0, "shroud": 2, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "osberns_store_b",      "name": "Osborn's General Store","card_code": "02207","act_index": 0, "shroud": 3, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "congregational_church_a","name":"Congregational Church","card_code": "02208","act_index": 0, "shroud": 1, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "congregational_church_b","name":"Congregational Church","card_code": "02209","act_index": 0, "shroud": 2, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "house_in_reeds_a",     "name": "House in the Reeds",   "card_code": "02210", "act_index": 0, "shroud": 2, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "house_in_reeds_b",     "name": "House in the Reeds",   "card_code": "02211", "act_index": 0, "shroud": 1, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "schoolhouse_a",        "name": "Schoolhouse",          "card_code": "02212", "act_index": 0, "shroud": 4, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "schoolhouse_b",        "name": "Schoolhouse",          "card_code": "02213", "act_index": 0, "shroud": 4, "clues_per_investigator": 1, "start_revealed": false },
+    { "code": "the_hidden_chamber",   "name": "The Hidden Chamber",   "card_code": "02214", "act_index": 1, "shroud": 3, "clues_per_investigator": 0, "start_revealed": false }
+  ],
+  "encounter_sets": [
+    "blood_on_the_altar", "dunwich", "beast_thralls", "whippoorwills", "ancient_evils", "striking_fear"
+  ],
+  "intro_text": [
+    "You have arrived in Dunwich — a forsaken village in the hills, its people diminished and its buildings rotting. The locals regard you with suspicion, and with good reason.",
+    "Children have gone missing. The elders speak in hushed tones about the Dunwich Horror. And somewhere beneath the village, something old is stirring — and hungry."
+  ],
+  "setup_instructions": [
+    "Set aside Silas Bishop (02225). He is encountered during the scenario.",
+    "Investigators begin at the Village Commons.",
+    "Randomly select which locations are used this scenario (6 of the named locations), per the scenario rules.",
+    "Place clues on each selected location."
+  ],
+  "resolutions": {
+    "R1": {
+      "label": "Resolution 1 — The ritual is disrupted",
+      "text": [
+        "You find the hidden chamber beneath the Congregational Church and disrupt the ritual before Silas Bishop can complete his sacrifice.",
+        "The village breathes easier — but you know this is not the end. The cult will not stop.",
+        "Record in the campaign log: *The ritual was disrupted.* Each investigator earns 2 bonus XP."
+      ]
+    },
+    "R2": {
+      "label": "Resolution 2 — Too late",
+      "text": [
+        "By the time you find the hidden chamber, the ritual is complete. Silas Bishop has fed the beast.",
+        "Record in the campaign log: *The ritual was completed.* Each investigator suffers 1 mental trauma."
+      ]
+    },
+    "defeat": {
+      "label": "Defeat — Driven from Dunwich",
+      "text": [
+        "The horrors of Dunwich drive you from the village. You flee into the hills as something vast and invisible shakes the ground behind you.",
+        "Record in the campaign log: *The investigators were defeated at Dunwich.*"
+      ]
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "code": "path_to_carcosa",
+  "name": "The Path to Carcosa",
+  "scenarios": [
+    { "key": "01_curtain_call",         "name": "Curtain Call",          "file": "01_curtain_call"         },
+    { "key": "02_the_last_king",        "name": "The Last King",         "file": "02_the_last_king"        },
+    { "key": "03_echoes_of_the_past",   "name": "Echoes of the Past",    "file": "03_echoes_of_the_past"   },
+    { "key": "04_the_unspeakable_oath", "name": "The Unspeakable Oath",  "file": "04_the_unspeakable_oath" },
+    { "key": "05_a_phantom_of_truth",   "name": "A Phantom of Truth",    "file": "05_a_phantom_of_truth"   },
+    { "key": "06_the_pallid_mask",      "name": "The Pallid Mask",       "file": "06_the_pallid_mask"      },
+    { "key": "07_black_stars_rise",     "name": "Black Stars Rise",      "file": "07_black_stars_rise"     },
+    { "key": "08_dim_carcosa",          "name": "Dim Carcosa",           "file": "08_dim_carcosa"          }
+  ]
+}

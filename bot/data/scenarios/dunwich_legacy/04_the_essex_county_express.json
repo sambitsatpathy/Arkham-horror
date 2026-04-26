@@ -1,0 +1,58 @@
+{
+  "code": "04_the_essex_county_express",
+  "name": "The Essex County Express",
+  "pack": "ece",
+  "acts": [
+    { "index": 0, "name": "Run!",                    "card_code": "02165", "doom_threshold": null },
+    { "index": 1, "name": "Get the Engine Running!", "card_code": "02166", "doom_threshold": null }
+  ],
+  "agendas": [
+    { "index": 0, "name": "A Tear in Reality", "card_code": "02160", "doom_threshold": 3 },
+    { "index": 1, "name": "The Maw Widens",    "card_code": "02161", "doom_threshold": 6 },
+    { "index": 2, "name": "Rolling Backwards", "card_code": "02162", "doom_threshold": 8 },
+    { "index": 3, "name": "Drawn In",          "card_code": "02163", "doom_threshold": 10 },
+    { "index": 4, "name": "Out of Time",       "card_code": "02164", "doom_threshold": 999 }
+  ],
+  "locations": [
+    { "code": "passenger_car_1", "name": "Passenger Car", "card_code": "02167", "act_index": 0, "shroud": 1, "clues_per_investigator": 0, "start_revealed": true, "starting_location": true },
+    { "code": "passenger_car_2", "name": "Passenger Car", "card_code": "02168", "act_index": 0, "shroud": 4, "clues_per_investigator": 1, "start_revealed": true },
+    { "code": "passenger_car_3", "name": "Passenger Car", "card_code": "02169", "act_index": 0, "shroud": 2, "clues_per_investigator": 1, "start_revealed": true },
+    { "code": "passenger_car_4", "name": "Passenger Car", "card_code": "02170", "act_index": 0, "shroud": 3, "clues_per_investigator": 1, "start_revealed": true },
+    { "code": "passenger_car_5", "name": "Passenger Car", "card_code": "02171", "act_index": 0, "shroud": 1, "clues_per_investigator": 0, "start_revealed": true },
+    { "code": "sleeping_car",    "name": "Sleeping Car",  "card_code": "02172", "act_index": 0, "shroud": 4, "clues_per_investigator": 1, "start_revealed": true },
+    { "code": "dining_car",      "name": "Dining Car",    "card_code": "02173", "act_index": 0, "shroud": 2, "clues_per_investigator": 0, "start_revealed": true },
+    { "code": "parlor_car",      "name": "Parlor Car",    "card_code": "02174", "act_index": 0, "shroud": 3, "clues_per_investigator": 1, "start_revealed": true },
+    { "code": "engine_car_a",    "name": "Engine Car",    "card_code": "02175", "act_index": 0, "shroud": 4, "clues_per_investigator": 0, "start_revealed": false },
+    { "code": "engine_car_b",    "name": "Engine Car",    "card_code": "02176", "act_index": 0, "shroud": 2, "clues_per_investigator": 0, "start_revealed": false },
+    { "code": "engine_car_c",    "name": "Engine Car",    "card_code": "02177", "act_index": 0, "shroud": 1, "clues_per_investigator": 0, "start_revealed": false }
+  ],
+  "encounter_sets": [
+    "essex_county_express", "sorcery", "beast_thralls", "bishops_thralls", "whippoorwills", "ancient_evils", "striking_fear"
+  ],
+  "intro_text": [
+    "The trail has led you to Dunwich — a decaying village in the hills north of Arkham. You board the Essex County Express, hoping to arrive before nightfall.",
+    "But something is wrong with the train. Cars are disappearing from the rear — swallowed by a tear in reality that is consuming the tracks behind you. You must reach the engine before the train ceases to exist entirely."
+  ],
+  "setup_instructions": [
+    "All passenger cars begin revealed. Engine cars are hidden until reached.",
+    "Each round, the rearmost car is eliminated — investigators in that car take damage and are moved forward.",
+    "Investigators begin in the rearmost Passenger Car.",
+    "Goal: reach the Engine Car and stop the train before all cars are consumed."
+  ],
+  "resolutions": {
+    "R1": {
+      "label": "Resolution 1 — The train is stopped",
+      "text": [
+        "With seconds to spare, you reach the engine and apply the brakes. The train lurches to a halt on the edge of the void, and the tear seals behind you.",
+        "You survive — though the rear half of the train is simply gone. Record in the campaign log: *The investigators stopped the Essex County Express.* Each investigator earns 2 bonus XP."
+      ]
+    },
+    "defeat": {
+      "label": "Defeat — Lost to the void",
+      "text": [
+        "The tear in reality consumes the last car with you in it. You tumble through impossible dimensions before landing, battered, somewhere in Dunwich — with no memory of how you arrived.",
+        "Record in the campaign log: *The investigators were lost on the Essex County Express.* Each investigator suffers 1 physical trauma."
+      ]
+    }
+  }
+}

@@ -1,0 +1,134 @@
+{
+  "code": "01_curtain_call",
+  "name": "Curtain Call",
+  "pack": "path_to_carcosa",
+  "acts": [
+    { "index": 0, "name": "Curtain Call",           "card_code": "03046", "doom_threshold": null },
+    { "index": 1, "name": "The Way Out",             "card_code": "03047", "doom_threshold": null },
+    { "index": 2, "name": "The Final Performance",   "card_code": "03048", "doom_threshold": null }
+  ],
+  "agendas": [
+    { "index": 0, "name": "The Theatre",             "card_code": "03044", "doom_threshold": 3 },
+    { "index": 1, "name": "The King's Decree",       "card_code": "03045", "doom_threshold": 999 }
+  ],
+  "locations": [
+    {
+      "code": "theatre",
+      "name": "Theatre",
+      "card_code": "03049",
+      "act_index": 0,
+      "shroud": 2,
+      "clues_per_investigator": 0,
+      "start_revealed": true,
+      "starting_location": true
+    },
+    {
+      "code": "lobby",
+      "name": "Lobby",
+      "card_code": "03050",
+      "act_index": 0,
+      "shroud": 2,
+      "clues_per_investigator": 1,
+      "start_revealed": false
+    },
+    {
+      "code": "balcony",
+      "name": "Balcony",
+      "card_code": "03051",
+      "act_index": 0,
+      "shroud": 3,
+      "clues_per_investigator": 1,
+      "start_revealed": false
+    },
+    {
+      "code": "backstage",
+      "name": "Backstage",
+      "card_code": "03052",
+      "act_index": 0,
+      "shroud": 3,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    },
+    {
+      "code": "lighting_box",
+      "name": "Lighting Box",
+      "card_code": "03053",
+      "act_index": 0,
+      "shroud": 4,
+      "clues_per_investigator": 1,
+      "start_revealed": false
+    },
+    {
+      "code": "box_office",
+      "name": "Box Office",
+      "card_code": "03054",
+      "act_index": 0,
+      "shroud": 2,
+      "clues_per_investigator": 1,
+      "start_revealed": false
+    },
+    {
+      "code": "green_room",
+      "name": "Green Room",
+      "card_code": "03055",
+      "act_index": 0,
+      "shroud": 3,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    },
+    {
+      "code": "dressing_room",
+      "name": "Dressing Room",
+      "card_code": "03056",
+      "act_index": 0,
+      "shroud": 2,
+      "clues_per_investigator": 1,
+      "start_revealed": false
+    }
+  ],
+  "encounter_sets": [
+    "cult_of_the_yellow_sign",
+    "decaying_reality",
+    "hasturs_gift",
+    "inhabitants_of_carcosa",
+    "striking_fear",
+    "ancient_evils",
+    "chilling_cold"
+  ],
+  "intro_text": [
+    "The year is 1921. You have been invited to the Ward Theatre in Arkham to attend the premiere of a new play — 'The King in Yellow.' From the moment the curtain rises, something feels wrong.",
+    "The actors move with unnatural grace. The dialogue is not what was printed in the programme. And the audience around you has grown eerily still.",
+    "By the time you realise what is happening, the exits are blocked. You are trapped inside a performance that should never have been staged."
+  ],
+  "setup_instructions": [
+    "Investigators begin at the Theatre.",
+    "Shuffle all 6 unrevealed locations and place them face-down in the Theatre's connections.",
+    "Place 1 Cultist enemy at a random unrevealed location.",
+    "The Mysterious Stranger (03057) is set aside; it enters play during the scenario."
+  ],
+  "resolutions": {
+    "R1": {
+      "label": "Resolution 1 — You escaped the theatre",
+      "text": [
+        "You burst through a side exit just as the theatre's reality collapses behind you. The screams of the audience fade into an eerie silence.",
+        "You survived — but the play is not over. Its words have already taken root in your mind, and you know the Yellow King will not be denied a second time.",
+        "Record in the campaign log: *The investigators escaped the theatre. Each investigator earns 1 bonus XP.*"
+      ]
+    },
+    "R2": {
+      "label": "Resolution 2 — The final performance concluded",
+      "text": [
+        "The play reaches its conclusion. The King in Yellow takes a bow, and in that moment you understand — you were never the audience. You were always part of the cast.",
+        "Something has changed in you. The veil between worlds is thinner now. The path to Carcosa has begun.",
+        "Record in the campaign log: *The investigators witnessed the final performance. Each investigator gains 1 mental trauma.*"
+      ]
+    },
+    "defeat": {
+      "label": "Defeat — Lost to the Yellow King",
+      "text": [
+        "The theatre folds around you like a painted backdrop. The King in Yellow smiles, and you are no longer sure you are real.",
+        "Record in the campaign log: *The investigators were defeated at Curtain Call. Each investigator gains 1 mental trauma.*"
+      ]
+    }
+  }
+}
