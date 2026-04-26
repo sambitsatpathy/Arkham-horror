@@ -1,0 +1,6 @@
+{
+  "easy": ["+1","+1","0","0","0","-1","-1","-1","-2","-2","skull","skull","cultist","tablet","elder_thing","auto_fail","elder_sign"],
+  "standard": ["+1","0","0","-1","-1","-1","-2","-2","-3","-4","skull","skull","cultist","tablet","elder_thing","auto_fail","elder_sign"],
+  "hard": ["0","0","0","-1","-1","-2","-2","-3","-3","-4","-5","skull","skull","skull","cultist","tablet","elder_thing","auto_fail","elder_sign"],
+  "expert": ["0","-1","-1","-2","-2","-3","-3","-4","-4","-5","-6","-8","skull","skull","skull","cultist","tablet","elder_thing","auto_fail","elder_sign"]
+}

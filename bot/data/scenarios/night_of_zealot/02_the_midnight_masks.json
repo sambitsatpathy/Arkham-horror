@@ -1,0 +1,131 @@
+{
+  "code": "02_the_midnight_masks",
+  "name": "The Midnight Masks",
+  "pack": "core",
+  "acts": [
+    { "index": 0, "name": "Uncovering the Conspiracy", "card_code": "01123", "doom_threshold": null }
+  ],
+  "agendas": [
+    { "index": 0, "name": "Predator or Prey?", "card_code": "01121a", "doom_threshold": 9 },
+    { "index": 1, "name": "Time Is Running Short", "card_code": "01122", "doom_threshold": 13 }
+  ],
+  "locations": [
+    {
+      "code": "your_house",
+      "name": "Your House",
+      "card_code": "01124",
+      "act_index": 0,
+      "shroud": 2,
+      "clues_per_investigator": 0,
+      "start_revealed": true,
+      "starting_location": true
+    },
+    {
+      "code": "rivertown",
+      "name": "Rivertown",
+      "card_code": "01125",
+      "act_index": 0,
+      "shroud": 1,
+      "clues_per_investigator": 0,
+      "start_revealed": false
+    },
+    {
+      "code": "southside_historical",
+      "name": "Southside",
+      "card_code": "01126",
+      "act_index": 0,
+      "shroud": 2,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    },
+    {
+      "code": "southside_boarding",
+      "name": "Southside",
+      "card_code": "01127",
+      "act_index": 0,
+      "shroud": 3,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    },
+    {
+      "code": "st_marys",
+      "name": "St. Mary's Hospital",
+      "card_code": "01128",
+      "act_index": 0,
+      "shroud": 3,
+      "clues_per_investigator": 1,
+      "start_revealed": false
+    },
+    {
+      "code": "miskatonic",
+      "name": "Miskatonic University",
+      "card_code": "01129",
+      "act_index": 0,
+      "shroud": 3,
+      "clues_per_investigator": 1,
+      "start_revealed": false
+    },
+    {
+      "code": "downtown_diner",
+      "name": "Downtown",
+      "card_code": "01130",
+      "act_index": 0,
+      "shroud": 2,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    },
+    {
+      "code": "downtown_police",
+      "name": "Downtown",
+      "card_code": "01131",
+      "act_index": 0,
+      "shroud": 1,
+      "clues_per_investigator": 0,
+      "start_revealed": false
+    },
+    {
+      "code": "easttown",
+      "name": "Easttown",
+      "card_code": "01132",
+      "act_index": 0,
+      "shroud": 2,
+      "clues_per_investigator": 1,
+      "start_revealed": false
+    },
+    {
+      "code": "graveyard",
+      "name": "Graveyard",
+      "card_code": "01133",
+      "act_index": 0,
+      "shroud": 4,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    },
+    {
+      "code": "northside",
+      "name": "Northside",
+      "card_code": "01134",
+      "act_index": 0,
+      "shroud": 2,
+      "clues_per_investigator": 1,
+      "start_revealed": false
+    }
+  ],
+  "encounter_sets": [
+    "arkham",
+    "cultists",
+    "nightgaunts",
+    "striking_fear",
+    "ancient_evils",
+    "locked_doors"
+  ],
+  "setup_instructions": [
+    "Set aside the 5 Cultist enemies. Shuffle them and place one face-down under each of 5 random non-starting locations.",
+    "Investigators begin in Your House.",
+    "The goal is to discover the cultists' identities before the ritual is complete."
+  ],
+  "resolution": {
+    "victory": ["Investigators gathered enough clues to identify the cultists before doom advanced."],
+    "defeat": ["Doom reached the final threshold and the ritual was completed."]
+  }
+}

@@ -1,0 +1,77 @@
+[
+  {
+    "code": "01501",
+    "name": "Roland Banks",
+    "subname": "The Fed",
+    "faction": "guardian",
+    "health": 9,
+    "sanity": 5,
+    "skills": { "willpower": 3, "intellect": 3, "combat": 4, "agility": 2 },
+    "deck_size": 30,
+    "deck_options": [
+      { "faction": "guardian", "level": { "min": 0, "max": 5 } },
+      { "faction": "neutral", "level": { "min": 0, "max": 5 } },
+      { "faction": ["seeker"], "level": { "min": 0, "max": 2 } }
+    ]
+  },
+  {
+    "code": "01502",
+    "name": "Daisy Walker",
+    "subname": "The Librarian",
+    "faction": "seeker",
+    "health": 5,
+    "sanity": 9,
+    "skills": { "willpower": 3, "intellect": 5, "combat": 2, "agility": 2 },
+    "deck_size": 30,
+    "deck_options": [
+      { "faction": "seeker", "level": { "min": 0, "max": 5 } },
+      { "faction": "neutral", "level": { "min": 0, "max": 5 } },
+      { "faction": ["mystic"], "level": { "min": 0, "max": 2 } }
+    ]
+  },
+  {
+    "code": "01503",
+    "name": "\"Skids\" O'Toole",
+    "subname": "The Ex-Con",
+    "faction": "rogue",
+    "health": 8,
+    "sanity": 6,
+    "skills": { "willpower": 2, "intellect": 3, "combat": 3, "agility": 4 },
+    "deck_size": 30,
+    "deck_options": [
+      { "faction": "rogue", "level": { "min": 0, "max": 5 } },
+      { "faction": "neutral", "level": { "min": 0, "max": 5 } },
+      { "faction": ["guardian", "seeker"], "level": { "min": 0, "max": 2 } }
+    ]
+  },
+  {
+    "code": "01504",
+    "name": "Agnes Baker",
+    "subname": "The Waitress",
+    "faction": "mystic",
+    "health": 6,
+    "sanity": 8,
+    "skills": { "willpower": 5, "intellect": 2, "combat": 2, "agility": 3 },
+    "deck_size": 30,
+    "deck_options": [
+      { "faction": "mystic", "level": { "min": 0, "max": 5 } },
+      { "faction": "neutral", "level": { "min": 0, "max": 5 } },
+      { "faction": ["survivor"], "level": { "min": 0, "max": 2 } }
+    ]
+  },
+  {
+    "code": "01505",
+    "name": "Wendy Adams",
+    "subname": "The Urchin",
+    "faction": "survivor",
+    "health": 7,
+    "sanity": 7,
+    "skills": { "willpower": 4, "intellect": 3, "combat": 1, "agility": 4 },
+    "deck_size": 30,
+    "deck_options": [
+      { "faction": "survivor", "level": { "min": 0, "max": 5 } },
+      { "faction": "neutral", "level": { "min": 0, "max": 5 } },
+      { "faction": ["rogue"], "level": { "min": 0, "max": 2 } }
+    ]
+  }
+]

@@ -1,0 +1,80 @@
+{
+  "code": "01_the_gathering",
+  "name": "The Gathering",
+  "pack": "core",
+  "acts": [
+    { "index": 0, "name": "Trapped", "card_code": "01108", "doom_threshold": null },
+    { "index": 1, "name": "The Barrier", "card_code": "01109", "doom_threshold": null },
+    { "index": 2, "name": "What Have You Done?", "card_code": "01110", "doom_threshold": null }
+  ],
+  "agendas": [
+    { "index": 0, "name": "What's Going On?!", "card_code": "01105", "doom_threshold": 3 },
+    { "index": 1, "name": "Rise of the Ghouls", "card_code": "01106", "doom_threshold": 7 },
+    { "index": 2, "name": "They're Getting Out!", "card_code": "01107", "doom_threshold": 10 }
+  ],
+  "locations": [
+    {
+      "code": "study",
+      "name": "Study",
+      "card_code": "01111",
+      "act_index": 0,
+      "shroud": 2,
+      "clues_per_investigator": 2,
+      "start_revealed": true,
+      "starting_location": true
+    },
+    {
+      "code": "hallway",
+      "name": "Hallway",
+      "card_code": "01112",
+      "act_index": 0,
+      "shroud": 1,
+      "clues_per_investigator": 0,
+      "start_revealed": false
+    },
+    {
+      "code": "attic",
+      "name": "Attic",
+      "card_code": "01113",
+      "act_index": 0,
+      "shroud": 4,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    },
+    {
+      "code": "cellar",
+      "name": "Cellar",
+      "card_code": "01114",
+      "act_index": 0,
+      "shroud": 4,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    },
+    {
+      "code": "parlor",
+      "name": "Parlor",
+      "card_code": "01115",
+      "act_index": 0,
+      "shroud": 2,
+      "clues_per_investigator": 0,
+      "start_revealed": false
+    }
+  ],
+  "encounter_sets": [
+    "torch",
+    "rats",
+    "ghouls",
+    "striking_fear",
+    "ancient_evils",
+    "chilling_cold"
+  ],
+  "setup_instructions": [
+    "Set aside Ghoul Priest (01116). It will enter play during the scenario.",
+    "Investigators begin in the Study.",
+    "Place clues on each location equal to clues_per_investigator × number of investigators."
+  ],
+  "resolution": {
+    "victory": ["Investigators defeated the Ghoul Priest or escaped through the Parlor."],
+    "defeat": ["The agenda advanced to They're Getting Out! or all investigators were eliminated."]
+  }
+}

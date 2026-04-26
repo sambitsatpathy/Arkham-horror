@@ -1,0 +1,9 @@
+{
+  "code": "night_of_zealot",
+  "name": "The Night of the Zealot",
+  "scenarios": [
+    "01_the_gathering",
+    "02_the_midnight_masks",
+    "03_the_devourer_below"
+  ]
+}

@@ -1,0 +1,18 @@
+# Credentials
+bot/.env
+
+# Dependencies & generated files
+bot/node_modules/
+bot/db/arkham.db
+bot/data/location_backs/
+
+# Card image packs (~800 MB total, not committed to git)
+0*/
+1*/
+5*/
+6*/
+7*/
+8*/
+9*/
+
+*.log

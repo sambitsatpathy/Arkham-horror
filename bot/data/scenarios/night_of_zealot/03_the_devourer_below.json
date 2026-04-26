@@ -1,0 +1,109 @@
+{
+  "code": "03_the_devourer_below",
+  "name": "The Devourer Below",
+  "pack": "core",
+  "acts": [
+    { "index": 0, "name": "Investigating the Trail", "card_code": "01146", "doom_threshold": null },
+    { "index": 1, "name": "Into the Darkness", "card_code": "01147", "doom_threshold": null },
+    { "index": 2, "name": "Disrupting the Ritual", "card_code": "01148", "doom_threshold": null }
+  ],
+  "agendas": [
+    { "index": 0, "name": "The Arkham Woods", "card_code": "01143", "doom_threshold": 4 },
+    { "index": 1, "name": "The Ritual Begins", "card_code": "01144", "doom_threshold": 8 },
+    { "index": 2, "name": "Vengeance Awaits", "card_code": "01145", "doom_threshold": 999 }
+  ],
+  "locations": [
+    {
+      "code": "main_path",
+      "name": "Main Path",
+      "card_code": "01149",
+      "act_index": 0,
+      "shroud": 2,
+      "clues_per_investigator": 0,
+      "start_revealed": true,
+      "starting_location": true
+    },
+    {
+      "code": "arkham_woods_1",
+      "name": "Arkham Woods",
+      "card_code": "01150",
+      "act_index": 0,
+      "shroud": 3,
+      "clues_per_investigator": 1,
+      "start_revealed": false
+    },
+    {
+      "code": "arkham_woods_2",
+      "name": "Arkham Woods",
+      "card_code": "01151",
+      "act_index": 0,
+      "shroud": 4,
+      "clues_per_investigator": 1,
+      "start_revealed": false
+    },
+    {
+      "code": "arkham_woods_3",
+      "name": "Arkham Woods",
+      "card_code": "01152",
+      "act_index": 0,
+      "shroud": 3,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    },
+    {
+      "code": "arkham_woods_4",
+      "name": "Arkham Woods",
+      "card_code": "01153",
+      "act_index": 0,
+      "shroud": 2,
+      "clues_per_investigator": 1,
+      "start_revealed": false
+    },
+    {
+      "code": "arkham_woods_5",
+      "name": "Arkham Woods",
+      "card_code": "01154",
+      "act_index": 0,
+      "shroud": 4,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    },
+    {
+      "code": "arkham_woods_6",
+      "name": "Arkham Woods",
+      "card_code": "01155",
+      "act_index": 0,
+      "shroud": 3,
+      "clues_per_investigator": 1,
+      "start_revealed": false
+    },
+    {
+      "code": "ritual_site",
+      "name": "Ritual Site",
+      "card_code": "01156",
+      "act_index": 1,
+      "shroud": 5,
+      "clues_per_investigator": 0,
+      "start_revealed": false
+    }
+  ],
+  "encounter_sets": [
+    "tentacles",
+    "agents_of_hastur",
+    "agents_of_yog",
+    "agents_of_shub",
+    "agents_of_cthulhu",
+    "striking_fear",
+    "ancient_evils",
+    "locked_doors"
+  ],
+  "setup_instructions": [
+    "Investigators begin on the Main Path.",
+    "Shuffle the 6 Arkham Woods locations and place them face-down.",
+    "Umôrdhoth (01157) is set aside and enters play when the ritual is disrupted."
+  ],
+  "resolution": {
+    "victory": ["Investigators disrupted the ritual before Umôrdhoth fully manifested."],
+    "defeat": ["Umôrdhoth devoured the investigators or all were eliminated."]
+  }
+}
