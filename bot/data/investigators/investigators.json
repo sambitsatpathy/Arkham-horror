@@ -1,85 +1,5 @@
 [
   {
-    "code": "01001",
-    "name": "Roland Banks",
-    "subname": "The Fed",
-    "faction": "guardian",
-    "health": 9,
-    "sanity": 5,
-    "skills": {
-      "willpower": 3,
-      "intellect": 3,
-      "combat": 4,
-      "agility": 2
-    },
-    "deck_size": 30,
-    "pack_code": "core"
-  },
-  {
-    "code": "01002",
-    "name": "Daisy Walker",
-    "subname": "The Librarian",
-    "faction": "seeker",
-    "health": 5,
-    "sanity": 9,
-    "skills": {
-      "willpower": 3,
-      "intellect": 5,
-      "combat": 2,
-      "agility": 2
-    },
-    "deck_size": 30,
-    "pack_code": "core"
-  },
-  {
-    "code": "01003",
-    "name": "\"Skids\" O'Toole",
-    "subname": "The Ex-Con",
-    "faction": "rogue",
-    "health": 8,
-    "sanity": 6,
-    "skills": {
-      "willpower": 2,
-      "intellect": 3,
-      "combat": 3,
-      "agility": 4
-    },
-    "deck_size": 30,
-    "pack_code": "core"
-  },
-  {
-    "code": "01004",
-    "name": "Agnes Baker",
-    "subname": "The Waitress",
-    "faction": "mystic",
-    "health": 6,
-    "sanity": 8,
-    "skills": {
-      "willpower": 5,
-      "intellect": 2,
-      "combat": 2,
-      "agility": 3
-    },
-    "deck_size": 30,
-    "pack_code": "core"
-  },
-  {
-    "code": "01005",
-    "name": "Wendy Adams",
-    "subname": "The Urchin",
-    "faction": "survivor",
-    "health": 7,
-    "sanity": 7,
-    "skills": {
-      "willpower": 4,
-      "intellect": 3,
-      "combat": 1,
-      "agility": 4
-    },
-    "deck_size": 30,
-    "pack_code": "core"
-  },
-  {
     "code": "01501",
     "name": "Roland Banks",
     "subname": "The Fed",
@@ -964,22 +884,6 @@
     "name": "Agatha Crane",
     "subname": "The Parapsychologist",
     "faction": "seeker",
-    "health": 6,
-    "sanity": 8,
-    "skills": {
-      "willpower": 4,
-      "intellect": 4,
-      "combat": 1,
-      "agility": 3
-    },
-    "deck_size": 35,
-    "pack_code": "tdcp"
-  },
-  {
-    "code": "11008",
-    "name": "Agatha Crane",
-    "subname": "The Parapsychologist",
-    "faction": "mystic",
     "health": 6,
     "sanity": 8,
     "skills": {
