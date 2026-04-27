@@ -1,0 +1,14 @@
+{
+  "code": "forgotten_age",
+  "name": "The Forgotten Age",
+  "scenarios": [
+    { "key": "01_the_untamed_wilds",    "name": "The Untamed Wilds",       "file": "01_the_untamed_wilds" },
+    { "key": "02_the_doom_of_eztli",    "name": "The Doom of Eztli",       "file": "02_the_doom_of_eztli" },
+    { "key": "03_threads_of_fate",      "name": "Threads of Fate",         "file": "03_threads_of_fate" },
+    { "key": "04_the_boundary_beyond",  "name": "The Boundary Beyond",     "file": "04_the_boundary_beyond" },
+    { "key": "05_heart_of_the_elders",  "name": "Heart of the Elders",     "file": "05_heart_of_the_elders" },
+    { "key": "06_the_city_of_archives", "name": "The City of Archives",    "file": "06_the_city_of_archives" },
+    { "key": "07_the_depths_of_yoth",   "name": "The Depths of Yoth",      "file": "07_the_depths_of_yoth" },
+    { "key": "08_shattered_aeons",      "name": "Shattered Aeons",         "file": "08_shattered_aeons" }
+  ]
+}

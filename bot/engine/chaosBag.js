@@ -1,4 +1,3 @@
-const path = require('path');
 const { tokenDisplay } = require('../config');
 const chaosData = require('../data/chaos_bags.json');
 

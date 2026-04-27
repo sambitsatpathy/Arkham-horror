@@ -23,7 +23,7 @@ function checkBotPermissions(guild, botUserId) {
 async function ensureRole(guild, name, color = null) {
   let role = guild.roles.cache.find(r => r.name === name);
   if (!role) {
-    role = await guild.roles.create({ name, colors: color ?? 0x5865f2 });
+    role = await guild.roles.create({ name, color: color ?? 0x5865f2 });
   }
   return role;
 }

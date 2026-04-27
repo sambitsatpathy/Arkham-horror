@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { requireSession, requirePlayer, getSession, updateSession } = require('../../engine/gameState');
+const { requireSession, requirePlayer } = require('../../engine/gameState');
 
 module.exports = {
   data: new SlashCommandBuilder()

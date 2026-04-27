@@ -1,6 +1,6 @@
 const { SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
-const { requireSession, requireHost, requirePlayer, getSession, getEnemy, getLocation, getCampaign, getPlayers } = require('../../engine/gameState');
-const { spawnEnemyManual, damageEnemy, defeatEnemy } = require('../../engine/enemyEngine');
+const { requireSession, requireHost, requirePlayer, getEnemy, getEnemies, getLocation, getLocations, getCampaign, getPlayers } = require('../../engine/gameState');
+const { spawnEnemy, spawnEnemyManual, damageEnemy, defeatEnemy } = require('../../engine/enemyEngine');
 const { updateLocationStatus } = require('../../engine/locationManager');
 const { findCard, findCardByCode } = require('../../engine/cardLookup');
 
@@ -37,25 +37,21 @@ module.exports = {
     const sub = interaction.options.getSubcommand();
 
     if (sub === 'spawn') {
-      requireHost(interaction);
+      const host = requireHost(interaction);
+      if (!host) return;
+
       const nameQuery = interaction.options.getString('name');
       const locQuery = interaction.options.getString('location').toLowerCase();
-
-      const { getLocations } = require('../../engine/gameState');
       const locations = getLocations(session.id);
       const loc = locations.find(l => l.code.includes(locQuery) || l.name.toLowerCase().includes(locQuery));
       if (!loc) return interaction.reply({ content: `Location "${locQuery}" not found.`, flags: 64 });
 
-      // Try to look up card data
       const cardResult = findCard(nameQuery, { typeCode: 'enemy' });
       let enemyId;
 
       if (cardResult) {
         const c = cardResult.card;
-        const { spawnEnemy } = require('../../engine/enemyEngine');
-        // Build full card object for spawnEnemy
-        const { findCardByCode: fcbc } = require('../../engine/cardLookup');
-        const fullResult = fcbc(c.code);
+        const fullResult = findCardByCode(c.code);
         const fullCard = fullResult?.card || c;
         enemyId = spawnEnemy(session.id, loc.code, {
           code: c.code,
@@ -88,14 +84,14 @@ module.exports = {
       }
 
       const refreshedLoc = getLocation(session.id, loc.code);
-      const campaign = getCampaign();
-      const players = getPlayers(campaign.id);
       await updateLocationStatus(interaction.guild, session, refreshedLoc);
       await interaction.reply(`✅ Enemy spawned in **${loc.name}** (ID: ${enemyId}).`);
     }
 
     else if (sub === 'damage') {
-      requirePlayer(interaction);
+      const player = requirePlayer(interaction);
+      if (!player) return;
+
       const id = interaction.options.getInteger('id');
       const amount = interaction.options.getInteger('amount');
       const enemy = getEnemy(id);
@@ -105,11 +101,7 @@ module.exports = {
       if (newHp === 0) {
         defeatEnemy(id);
         const loc = getLocation(session.id, enemy.location_code);
-        if (loc) {
-          const campaign = getCampaign();
-          const players = getPlayers(campaign.id);
-          await updateLocationStatus(interaction.guild, session, loc);
-        }
+        if (loc) await updateLocationStatus(interaction.guild, session, loc);
         await interaction.reply(`💀 **${enemy.name}** (ID: ${id}) has been defeated!`);
       } else {
         await interaction.reply(`⚔️ **${enemy.name}** took ${amount} damage. HP: **${newHp}/${enemy.max_hp}**`);
@@ -117,25 +109,24 @@ module.exports = {
     }
 
     else if (sub === 'defeat') {
-      requireHost(interaction);
+      const host = requireHost(interaction);
+      if (!host) return;
+
       const id = interaction.options.getInteger('id');
       const enemy = getEnemy(id);
       if (!enemy) return interaction.reply({ content: `No enemy with ID ${id}.`, flags: 64 });
       defeatEnemy(id);
       const loc = getLocation(session.id, enemy.location_code);
-      if (loc) {
-        const campaign = getCampaign();
-        const players = getPlayers(campaign.id);
-        await updateLocationStatus(interaction.guild, session, loc);
-      }
+      if (loc) await updateLocationStatus(interaction.guild, session, loc);
       await interaction.reply(`💀 **${enemy.name}** (ID: ${id}) defeated.`);
     }
 
     else if (sub === 'list') {
-      const { getEnemies } = require('../../engine/gameState');
       const enemies = getEnemies(session.id);
       if (enemies.length === 0) return interaction.reply({ content: 'No active enemies.', flags: 64 });
-      const lines = enemies.map(e => `**[${e.id}]** ${e.name} @ ${e.location_code} — HP: ${e.hp}/${e.max_hp} | Fight: ${e.fight} | Evade: ${e.evade}`);
+      const lines = enemies.map(e =>
+        `**[${e.id}]** ${e.name} @ ${e.location_code} — HP: ${e.hp}/${e.max_hp} | Fight: ${e.fight} | Evade: ${e.evade}`
+      );
       await interaction.reply({ content: '👹 **Active Enemies:**\n' + lines.join('\n'), flags: 64 });
     }
   },

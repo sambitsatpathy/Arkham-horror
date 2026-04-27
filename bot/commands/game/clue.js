@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { requireSession, requirePlayer, getLocation, updateLocation } = require('../../engine/gameState');
+const { requireSession, requirePlayer, getLocation, getLocations, updateLocation } = require('../../engine/gameState');
 const { updateLocationStatus } = require('../../engine/locationManager');
 
 module.exports = {
@@ -31,7 +31,6 @@ module.exports = {
     const query = interaction.options.getString('location').toLowerCase();
     const count = interaction.options.getInteger('count');
 
-    const { getLocations } = require('../../engine/gameState');
     const locations = getLocations(session.id);
     let loc = locations.find(l => l.code.includes(query) || l.name.toLowerCase().includes(query));
     if (!loc) return interaction.reply({ content: `Location "${query}" not found.`, flags: 64 });

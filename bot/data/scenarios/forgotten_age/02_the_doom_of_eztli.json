@@ -1,0 +1,103 @@
+{
+  "code": "02_the_doom_of_eztli",
+  "name": "The Doom of Eztli",
+  "pack": "forgotten_age",
+  "acts": [
+    { "index": 0, "name": "Into the Ruins",     "card_code": "04057", "doom_threshold": null },
+    { "index": 1, "name": "Magic and Science",  "card_code": "04058", "doom_threshold": null },
+    { "index": 2, "name": "Escape the Ruins",   "card_code": "04059", "doom_threshold": null }
+  ],
+  "agendas": [
+    { "index": 0, "name": "Something Stirs…",   "card_code": "04055", "doom_threshold": 4 },
+    { "index": 1, "name": "The Temple Warden",  "card_code": "04056", "doom_threshold": 999 }
+  ],
+  "locations": [
+    {
+      "code": "entryway",
+      "name": "Entryway",
+      "card_code": "04060",
+      "act_index": 0,
+      "shroud": 2,
+      "clues_per_investigator": 0,
+      "start_revealed": true,
+      "starting_location": true
+    },
+    {
+      "code": "ancient_hall",
+      "name": "Ancient Hall",
+      "card_code": "04063",
+      "act_index": 0,
+      "shroud": 3,
+      "clues_per_investigator": 1,
+      "start_revealed": false
+    },
+    {
+      "code": "grand_chamber",
+      "name": "Grand Chamber",
+      "card_code": "04064",
+      "act_index": 0,
+      "shroud": 4,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    },
+    {
+      "code": "burial_pit",
+      "name": "Burial Pit",
+      "card_code": "04065",
+      "act_index": 0,
+      "shroud": 3,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    },
+    {
+      "code": "underground_ruins",
+      "name": "Underground Ruins",
+      "card_code": "04066",
+      "act_index": 0,
+      "shroud": 4,
+      "clues_per_investigator": 1,
+      "start_revealed": false
+    },
+    {
+      "code": "secret_passage",
+      "name": "Secret Passage",
+      "card_code": "04067",
+      "act_index": 0,
+      "shroud": 2,
+      "clues_per_investigator": 1,
+      "start_revealed": false
+    },
+    {
+      "code": "chamber_of_time",
+      "name": "Chamber of Time",
+      "card_code": "04068",
+      "act_index": 1,
+      "shroud": 5,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    }
+  ],
+  "encounter_sets": [
+    "eztli",
+    "agents_of_yig",
+    "guardians_of_time",
+    "doom_of_eztli"
+  ],
+  "intro_text": [
+    "Inside the Eztli ruins, the air is thick with ancient magic. Glyphs pulse with a faint light along the walls, and the floor is littered with the bones of those who came before.",
+    "Somewhere deeper in the structure lies the relic Harlan seeks — but the ruins are not empty. The serpents that guard this place have stirred, and the very walls seem to shift against you.",
+    "Find the Chamber of Time before the Temple Warden awakens — and escape with your lives."
+  ],
+  "setup_instructions": [
+    "Gather the Eztli encounter set and Doom of Eztli encounter set. The Rainforest set is not used in this scenario.",
+    "Place the Entryway (start revealed). Place all other locations face-down. The Chamber of Time is locked until Act 2 begins.",
+    "Each investigator begins at the Entryway.",
+    "Ichtaca is placed at the Chamber of Time as a guardian. She may become an ally depending on campaign log entries.",
+    "If the investigators carry any expedition supplies from Scenario 1, they may spend them as resources during setup."
+  ],
+  "resolutions": {
+    "R1": "You reach the Chamber of Time and claim the Eztli relic. The ruins begin to collapse as you flee into the jungle. Record in the campaign log: *The investigators took the relic from the Chamber of Time.* Each investigator earns 2 experience.",
+    "R2": "Ichtaca takes the relic before you can reach it and disappears into the jungle. The ruins collapse. Record in the campaign log: *Ichtaca claimed the relic.*",
+    "defeat": "The Temple Warden destroys your expedition. Each investigator suffers 1 physical trauma and 1 mental trauma."
+  }
+}

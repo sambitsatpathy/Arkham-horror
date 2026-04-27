@@ -2,6 +2,7 @@ const { SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
 const { requireSession, requirePlayer, getPlayer, updatePlayer } = require('../../engine/gameState');
 const { discardCard, playAsset } = require('../../engine/deck');
 const { findCardByCode, getCardCharges } = require('../../engine/cardLookup');
+const { handChannelName } = require('../../config');
 
 const TYPE_LABEL = {
   asset: 'Asset',
@@ -67,8 +68,7 @@ module.exports = {
       });
     }
 
-    const safeName = player.investigator_name.toLowerCase().replace(/[^a-z0-9]/g, '-') + '-hand';
-    const handCh = interaction.guild.channels.cache.find(c => c.name === safeName);
+    const handCh = interaction.guild.channels.cache.find(c => c.name === handChannelName(player.investigator_name));
 
     if (typeCode === 'skill') {
       return interaction.reply({
@@ -80,7 +80,11 @@ module.exports = {
     if (typeCode === 'asset') {
       const charges = getCardCharges(cardCode);
       playAsset(player, cardCode, name, charges);
-      if (cost > 0) updatePlayer(player.id, { resources: player.resources - cost });
+      // Single write: merge resource deduction with the asset update
+      if (cost > 0) {
+        const fresh = getPlayer(player.id);
+        updatePlayer(player.id, { resources: fresh.resources - cost });
+      }
 
       const chargesNote = charges > 0 ? ` with **${charges} charge${charges !== 1 ? 's' : ''}**` : '';
       const costNote = cost > 0 ? ` (spent ${cost} resource${cost !== 1 ? 's' : ''}, ${player.resources - cost} remaining)` : '';
@@ -96,9 +100,12 @@ module.exports = {
       return interaction.reply({ content: `✅ **${name}** is now in play${chargesNote}.${costNote}`, flags: 64 });
     }
 
-    // Event / everything else — play and discard
+    // Event / everything else — play and discard, deduct resources in one write
     discardCard(player, cardCode);
-    if (cost > 0) updatePlayer(player.id, { resources: player.resources - cost });
+    if (cost > 0) {
+      const fresh = getPlayer(player.id);
+      updatePlayer(player.id, { resources: fresh.resources - cost });
+    }
 
     const costNote = cost > 0 ? ` (spent ${cost} resource${cost !== 1 ? 's' : ''}, ${player.resources - cost} remaining)` : '';
     const msg = `▶️ Played: **${name}** *(discarded)*`;

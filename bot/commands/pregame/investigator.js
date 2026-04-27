@@ -1,6 +1,6 @@
 const { SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
 const { getCampaign, getPlayers, requirePlayer, updatePlayer } = require('../../engine/gameState');
-const { findInvestigator } = require('../../engine/cardLookup');
+const { findInvestigator, findCardByCode } = require('../../engine/cardLookup');
 const allInvestigators = require('../../data/investigators/investigators.json');
 
 const FACTION_LABEL = {
@@ -50,13 +50,8 @@ module.exports = {
       return interaction.reply({ content: `Unknown investigator code. Please select from the dropdown.`, flags: 64 });
     }
 
-    // Look up card image via cardLookup
     const result = findInvestigator(invData.name);
-    // Find the specific code match if multiple versions exist (e.g. core vs revised core)
-    const exactResult = (() => {
-      const { loadAllCards, findCardByCode } = require('../../engine/cardLookup');
-      return findCardByCode(code) || result;
-    })();
+    const exactResult = findCardByCode(code) || result;
 
     const card = exactResult?.card || result?.card;
     const imagePath = exactResult?.imagePath || result?.imagePath;

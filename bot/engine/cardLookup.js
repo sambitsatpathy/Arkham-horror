@@ -4,9 +4,14 @@ const { cardDataRoot } = require('../config');
 
 const BACK_CACHE_DIR = path.join(__dirname, '../data/location_backs');
 
-function findBackImageSrc(cardCode) {
-  // Look up backimagesrc from the full cards.json in each pack folder
-  if (!fs.existsSync(cardDataRoot)) return null;
+// Lazy cache of full cards.json data, keyed by card code.
+// Loaded once on first access; covers all packs.
+let _fullCards = null;
+
+function loadFullCards() {
+  if (_fullCards) return _fullCards;
+  _fullCards = new Map();
+  if (!fs.existsSync(cardDataRoot)) return _fullCards;
   const entries = fs.readdirSync(cardDataRoot, { withFileTypes: true });
   for (const entry of entries) {
     if (!entry.isDirectory()) continue;
@@ -14,11 +19,15 @@ function findBackImageSrc(cardCode) {
     if (!fs.existsSync(fullPath)) continue;
     try {
       const cards = JSON.parse(fs.readFileSync(fullPath, 'utf8'));
-      const card = cards.find(c => c.code === cardCode);
-      if (card?.backimagesrc) return card.backimagesrc; // e.g. "/bundles/cards/01111b.png"
+      for (const card of cards) _fullCards.set(card.code, card);
     } catch (_) {}
   }
-  return null;
+  return _fullCards;
+}
+
+function findBackImageSrc(cardCode) {
+  const card = loadFullCards().get(cardCode);
+  return card?.backimagesrc ?? null;
 }
 
 async function fetchLocationBackImage(cardCode) {
@@ -27,7 +36,6 @@ async function fetchLocationBackImage(cardCode) {
   const cachePath = path.join(BACK_CACHE_DIR, `${cardCode}b.png`);
   if (fs.existsSync(cachePath)) return cachePath;
 
-  // Get the backimagesrc path from cards.json, fall back to guessed URL
   const backSrc = findBackImageSrc(cardCode);
   const url = backSrc
     ? `https://arkhamdb.com${backSrc}`
@@ -76,7 +84,6 @@ function findImagePath(card) {
 
   const files = fs.readdirSync(dir);
 
-  // Try zero-padded variants: 1, 01, 001, 0001
   const padded = [
     String(pos),
     String(pos).padStart(2, '0'),
@@ -89,7 +96,6 @@ function findImagePath(card) {
     if (match) return path.join(dir, match);
   }
 
-  // fallback: match by code number
   const codeNum = String(parseInt(card.code, 10));
   const match2 = files.find(f => f.startsWith(codeNum + '_') && /\.(png|jpg|jpeg)$/i.test(f));
   if (match2) return path.join(dir, match2);
@@ -105,23 +111,18 @@ function findCard(query, opts = {}) {
   const cards = loadAllCards();
   const q = normalize(query);
 
-  // Filter by type if requested
   let pool = cards;
   if (opts.typeCode) pool = cards.filter(c => c.type_code === opts.typeCode);
   if (opts.packCode) pool = cards.filter(c => c.pack_code === opts.packCode);
 
-  // Exact code match
   let found = pool.find(c => c.code === query);
   if (found) return { card: found, imagePath: findImagePath(found) };
 
-  // Exact name match
   found = pool.find(c => normalize(c.name) === q);
   if (found) return { card: found, imagePath: findImagePath(found) };
 
-  // Partial name match
   const partials = pool.filter(c => normalize(c.name).includes(q));
   if (partials.length > 0) {
-    // prefer shorter name (closer match)
     partials.sort((a, b) => a.name.length - b.name.length);
     return { card: partials[0], imagePath: findImagePath(partials[0]) };
   }
@@ -140,29 +141,30 @@ function findInvestigator(query) {
   return findCard(query, { typeCode: 'investigator' });
 }
 
-// Returns the starting charge count for a card, or 0 if it has none.
-// Reads the full cards.json (which has "text") to parse "Uses (N charges)."
+// Returns starting charge count for a card, 0 if none.
 function getCardCharges(cardCode) {
-  if (!fs.existsSync(cardDataRoot)) return 0;
-  const entries = fs.readdirSync(cardDataRoot, { withFileTypes: true });
-  for (const entry of entries) {
-    if (!entry.isDirectory()) continue;
-    const fullPath = path.join(cardDataRoot, entry.name, 'cards.json');
-    if (!fs.existsSync(fullPath)) continue;
-    try {
-      const cards = JSON.parse(fs.readFileSync(fullPath, 'utf8'));
-      const card = cards.find(c => c.code === cardCode);
-      if (!card) continue;
-      const match = card.text?.match(/Uses \((\d+) charges?\)/i);
-      if (match) return parseInt(match[1], 10);
-      return 0;
-    } catch (_) {}
-  }
-  return 0;
+  const card = loadFullCards().get(cardCode);
+  if (!card) return 0;
+  const match = card.text?.match(/Uses \((\d+) charges?\)/i);
+  return match ? parseInt(match[1], 10) : 0;
+}
+
+// Returns { intellect, combat, willpower, agility, wild } skill icon counts.
+function getCardSkills(cardCode) {
+  const card = loadFullCards().get(cardCode);
+  if (!card) return { intellect: 0, combat: 0, willpower: 0, agility: 0, wild: 0 };
+  return {
+    intellect: card.skill_intellect || 0,
+    combat:    card.skill_combat    || 0,
+    willpower: card.skill_willpower || 0,
+    agility:   card.skill_agility   || 0,
+    wild:      card.skill_wild      || 0,
+  };
 }
 
 function invalidateCache() {
   _allCards = null;
+  _fullCards = null;
 }
 
-module.exports = { findCard, findCardByCode, findInvestigator, loadAllCards, invalidateCache, fetchLocationBackImage, getCardCharges };
+module.exports = { findCard, findCardByCode, findInvestigator, loadAllCards, invalidateCache, fetchLocationBackImage, getCardCharges, getCardSkills };

@@ -27,7 +27,7 @@ function init() {
     CREATE TABLE IF NOT EXISTS players (
       id                  INTEGER PRIMARY KEY,
       campaign_id         INTEGER NOT NULL,
-      discord_id          TEXT NOT NULL UNIQUE,
+      discord_id          TEXT NOT NULL,
       discord_name        TEXT NOT NULL,
       investigator_code   TEXT,
       investigator_name   TEXT,
@@ -53,7 +53,8 @@ function init() {
       deck_ready          INTEGER DEFAULT 0,
       arkhamdb_deck_id    TEXT,
       deck_name           TEXT,
-      FOREIGN KEY (campaign_id) REFERENCES campaign(id)
+      FOREIGN KEY (campaign_id) REFERENCES campaign(id),
+      UNIQUE (discord_id, campaign_id)
     );
 
     CREATE TABLE IF NOT EXISTS game_session (

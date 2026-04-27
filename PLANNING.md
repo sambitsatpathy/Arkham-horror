@@ -579,6 +579,7 @@ Token display map:
 | `/discard <card>` | Discard a card from hand. | Active player |
 | `/resource` | Gain 1 resource. | Active player |
 | `/pull` | Draw chaos token. Posts result in #chaos-bag. | Active player |
+| `/investigate [bonus]` | Investigate current location. Draws chaos token, compares intellect + token vs shroud. On success, transfers 1 clue from location to player. Posts result to location channel. | Active player |
 | `/stats [investigator]` | Show HP, sanity, resources, clues, hand size. | Anyone |
 | `/clue <add\|remove> <location> <count>` | Modify clue count on a location. Updates pin. | Active player |
 | `/doom <add\|remove> <count>` | Modify doom. Updates #doom-track. Checks agenda threshold. | Host |
@@ -1324,8 +1325,8 @@ Each scenario JSON should carry its full narrative so the bot can narrate at the
 | `/startgame` intro narration | ✅ Done | Phase 5 |
 | `/endscenario` resolution narration | ✅ Done | Phase 5 |
 | Path to Carcosa scenario JSONs (8 scenarios) | ✅ Done | Phase 3 |
-| Path to Carcosa starter decks (6 investigators) | Pending | Phase 4 |
-| Forgotten Age scenario JSONs (8 scenarios) | Pending | Phase 3 |
+| Path to Carcosa starter decks (6 investigators) | ✅ Done | Phase 4 |
+| Forgotten Age scenario JSONs (8 scenarios) | ✅ Done | Phase 3 |
 | Forgotten Age starter decks (5 investigators) | Pending | Phase 4 |
 | Circle Undone scenario JSONs (8 scenarios) | Pending | Phase 3 |
 | Dream-Eaters scenario JSONs (8 scenarios) | Pending | Phase 3 |

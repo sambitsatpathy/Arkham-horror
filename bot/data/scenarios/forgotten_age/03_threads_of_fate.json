@@ -1,0 +1,74 @@
+{
+  "code": "03_threads_of_fate",
+  "name": "Threads of Fate",
+  "pack": "forgotten_age",
+  "acts": [
+    { "index": 0, "name": "The Relic Is Missing! / Harlan Is in Danger!", "card_code": "04117", "doom_threshold": null },
+    { "index": 1, "name": "At the Exhibit / Harlan's Curse",              "card_code": "04119", "doom_threshold": null },
+    { "index": 2, "name": "Find the Relic / Recover the Relic",           "card_code": "04123", "doom_threshold": null },
+    { "index": 3, "name": "Search for Alejandro / Missing Persons",       "card_code": "04125", "doom_threshold": null },
+    { "index": 4, "name": "At the Station / Friends in High Places",      "card_code": "04127", "doom_threshold": null },
+    { "index": 5, "name": "Alejandro's Prison / Alejandro's Plight",      "card_code": "04131", "doom_threshold": null },
+    { "index": 6, "name": "Trial of the Huntress / The Guardian's Inquiry", "card_code": "04133", "doom_threshold": null },
+    { "index": 7, "name": "Strange Relics / Strange Occurrences",         "card_code": "04137", "doom_threshold": null }
+  ],
+  "agendas": [
+    { "index": 0, "name": "Three Fates",          "card_code": "04114", "doom_threshold": 4 },
+    { "index": 1, "name": "Behind the Curtain",   "card_code": "04115", "doom_threshold": 4 },
+    { "index": 2, "name": "Hidden Entanglements", "card_code": "04116", "doom_threshold": 999 }
+  ],
+  "locations": [
+    {
+      "code": "velmas_diner",
+      "name": "Velma's Diner",
+      "card_code": "04141",
+      "act_index": 0,
+      "shroud": 2,
+      "clues_per_investigator": 1,
+      "start_revealed": true,
+      "starting_location": true
+    },
+    {
+      "code": "curiositie_shoppe",
+      "name": "Curiositie Shoppe",
+      "card_code": "04142",
+      "act_index": 0,
+      "shroud": 3,
+      "clues_per_investigator": 2,
+      "start_revealed": true
+    },
+    {
+      "code": "town_hall",
+      "name": "Town Hall",
+      "card_code": "04143",
+      "act_index": 0,
+      "shroud": 3,
+      "clues_per_investigator": 2,
+      "start_revealed": true
+    }
+  ],
+  "encounter_sets": [
+    "threads_of_fate",
+    "agents_of_yig",
+    "brotherhood_of_the_beast",
+    "ancient_evils"
+  ],
+  "intro_text": [
+    "Back in Arkham, everything has gone wrong at once. The relic has vanished from Harlan's study, and Harlan himself is missing.",
+    "Three urgent threads pull at you simultaneously — find the stolen relic, locate Alejandro (Harlan's contact), and determine what the Brotherhood of the Beast wants with your expedition.",
+    "You have limited time. The doom clock advances whether or not you chase every lead. Choose wisely."
+  ],
+  "setup_instructions": [
+    "This scenario has three parallel act decks. During setup, the game master selects which acts are active based on campaign log entries from Scenarios 1 and 2.",
+    "Place all three Arkham locations (Velma's Diner, Curiositie Shoppe, Town Hall) face-up. Investigators may move freely between them.",
+    "Each investigator begins at Velma's Diner.",
+    "Shuffle the Threads of Fate and Brotherhood of the Beast encounter sets together into the encounter deck.",
+    "The scenario ends when all three act decks are resolved or the agenda advances past its final doom threshold."
+  ],
+  "resolutions": {
+    "R1": "You recover the relic, rescue Alejandro, and unmask the Brotherhood's agent. Record in the campaign log: *Investigators resolved all three threads.* Each investigator earns 3 experience.",
+    "R2": "You resolve two of the three threads. Record in the campaign log which threads remain unresolved. Each investigator earns 2 experience.",
+    "R3": "Only one thread is resolved. The Brotherhood grows stronger. Each investigator earns 1 experience.",
+    "defeat": "The Brotherhood completes its ritual. Each investigator suffers 1 mental trauma."
+  }
+}

@@ -1,5 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { requireSession, requireHost, getSession, updateSession, getCampaign, getPlayers } = require('../../engine/gameState');
+const { updateDoomTrack } = require('../../engine/doomTrack');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -19,7 +20,8 @@ module.exports = {
   async execute(interaction) {
     const session = requireSession(interaction);
     if (!session) return;
-    requireHost(interaction);
+    const host = requireHost(interaction);
+    if (!host) return;
 
     const action = interaction.options.getString('action');
     const count = interaction.options.getInteger('count');
@@ -32,7 +34,7 @@ module.exports = {
     if (doomCh) {
       const campaign = getCampaign();
       const players = getPlayers(campaign.id);
-      await updateDoomPin(doomCh, session, newDoom, players);
+      await updateDoomTrack(doomCh, newDoom, session.doom_threshold, session.round, session.phase, players);
     }
 
     const atThreshold = newDoom >= session.doom_threshold;
@@ -40,32 +42,3 @@ module.exports = {
     await interaction.reply(`💀 Doom ${action === 'add' ? '+' : '-'}${count} → **${newDoom}/${session.doom_threshold}**${warn}`);
   },
 };
-
-async function updateDoomPin(channel, session, doom, players) {
-  const filled = session.doom_threshold > 0 ? Math.min(10, Math.round((doom / session.doom_threshold) * 10)) : 0;
-  const bar = '█'.repeat(filled) + '░'.repeat(10 - filled);
-  const text = [
-    '☠️  **DOOM TRACK**',
-    '━━━━━━━━━━━━━━━━━━━━━━',
-    `Doom:    ${doom} / ${session.doom_threshold}  [${bar}]`,
-    `Round:   ${session.round}`,
-    `Phase:   ${session.phase}`,
-    '━━━━━━━━━━━━━━━━━━━━━━',
-    'Investigators:',
-    ...players.map(p => `  🔍 ${(p.investigator_name || p.discord_name).padEnd(20)} HP: ${p.hp}/${p.max_hp}  SAN: ${p.sanity}/${p.max_sanity}`),
-    '━━━━━━━━━━━━━━━━━━━━━━',
-  ].join('\n');
-
-  // Edit the pinned message if it exists, otherwise post new
-  try {
-    const pins = await channel.messages.fetchPinned();
-    const existing = pins.find(m => m.author.bot && m.content.includes('DOOM TRACK'));
-    if (existing) {
-      await existing.edit(text);
-      return;
-    }
-  } catch (_) {}
-
-  const msg = await channel.send(text);
-  await msg.pin();
-}

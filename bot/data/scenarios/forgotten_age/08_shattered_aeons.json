@@ -1,0 +1,46 @@
+{
+  "code": "08_shattered_aeons",
+  "name": "Shattered Aeons",
+  "pack": "forgotten_age",
+  "acts": [
+    { "index": 0, "name": "Worlds Beyond",           "card_code": "04318", "doom_threshold": null },
+    { "index": 1, "name": "Search for the Brotherhood", "card_code": "04319", "doom_threshold": null },
+    { "index": 2, "name": "The Yithian Relic",        "card_code": "04320", "doom_threshold": null },
+    { "index": 3, "name": "Mend the Shatter",         "card_code": "04321", "doom_threshold": null },
+    { "index": 4, "name": "Paradise Lost",            "card_code": "04322", "doom_threshold": null },
+    { "index": 5, "name": "Timelock",                 "card_code": "04323", "doom_threshold": null }
+  ],
+  "agendas": [
+    { "index": 0, "name": "Threads of Time",    "card_code": "04315", "doom_threshold": 6 },
+    { "index": 1, "name": "Pendulous Threads",  "card_code": "04316", "doom_threshold": 5 },
+    { "index": 2, "name": "Snapped Threads",    "card_code": "04317", "doom_threshold": 999 }
+  ],
+  "locations": [],
+  "encounter_sets": [
+    "shattered_aeons",
+    "agents_of_yig",
+    "guardians_of_time",
+    "brotherhood_of_the_beast",
+    "temporal_flux",
+    "ancient_evils"
+  ],
+  "intro_text": [
+    "Time itself is unravelling. The Eztli relic, the Brotherhood's ritual, the machinations of the Great Race — all threads converge here, in the fractured space between ages.",
+    "This is the final scenario of The Forgotten Age. The investigators must navigate timelines that keep shifting, face enemies from every era of the campaign, and make an impossible choice about what to preserve and what to sacrifice.",
+    "The locations of this scenario are drawn randomly from a shuffled pool spanning all eras — the rainforest, Eztli ruins, K'n-yan, and Pnakotus all bleed together. Nothing stays where it should be.",
+    "What you did across the entire campaign determines what is possible here. Check all campaign log entries before beginning."
+  ],
+  "setup_instructions": [
+    "Shattered Aeons uses a special location mechanic: all location cards from prior scenarios are shuffled into a single location deck. At the start of each round, 1-3 locations are drawn and placed, replacing those that 'slip' away.",
+    "Set the doom counter to the total Vengeance tokens accumulated in Scenario 7, plus any additional tokens earned for unresolved threads.",
+    "Ichtaca, Alejandro, and any other named allies or enemies from the campaign log enter based on their recorded fates.",
+    "The act deck progresses through Worlds Beyond, the Brotherhood confrontation, the Yithian Relic retrieval, and finally the Timelock that can seal the temporal rift permanently.",
+    "This scenario has no single starting location — investigators are scattered across time. Each investigator begins at a different randomly drawn location."
+  ],
+  "resolutions": {
+    "R1": "You mend the temporal rift and trap the Brotherhood's god outside of time. The Forgotten Age ends in triumph. Record: *The investigators sealed the rift.* Each investigator earns 5 experience and the campaign is won.",
+    "R2": "The rift is partially sealed but the Brotherhood escapes into another era. Record: *The Brotherhood fled through the rift.* The campaign ends in partial victory. Each investigator earns 3 experience.",
+    "R3": "The Eztli relic is destroyed and time stabilises, but at great cost. Record: *The investigators destroyed the relic.* Partial victory. Each investigator earns 2 experience.",
+    "defeat": "The threads of time snap entirely. This era is consumed by the void. The campaign ends in defeat. Each investigator is killed."
+  }
+}

@@ -1,0 +1,122 @@
+{
+  "code": "01_the_untamed_wilds",
+  "name": "The Untamed Wilds",
+  "pack": "forgotten_age",
+  "acts": [
+    { "index": 0, "name": "Exploring the Rainforest", "card_code": "04046", "doom_threshold": null },
+    { "index": 1, "name": "Huntress of the Eztli",    "card_code": "04047", "doom_threshold": null },
+    { "index": 2, "name": "Search for the Ruins",     "card_code": "04048", "doom_threshold": null },
+    { "index": 3, "name": "The Guarded Ruins",        "card_code": "04049", "doom_threshold": null }
+  ],
+  "agendas": [
+    { "index": 0, "name": "Expedition into the Wild", "card_code": "04044", "doom_threshold": 5 },
+    { "index": 1, "name": "Intruders",                "card_code": "04045", "doom_threshold": 999 }
+  ],
+  "locations": [
+    {
+      "code": "expedition_camp",
+      "name": "Expedition Camp",
+      "card_code": "04050",
+      "act_index": 0,
+      "shroud": 2,
+      "clues_per_investigator": 0,
+      "start_revealed": true,
+      "starting_location": true
+    },
+    {
+      "code": "path_of_thorns",
+      "name": "Path of Thorns",
+      "card_code": "04069",
+      "act_index": 0,
+      "shroud": 3,
+      "clues_per_investigator": 1,
+      "start_revealed": false
+    },
+    {
+      "code": "river_canyon",
+      "name": "River Canyon",
+      "card_code": "04070",
+      "act_index": 0,
+      "shroud": 4,
+      "clues_per_investigator": 1,
+      "start_revealed": false
+    },
+    {
+      "code": "rope_bridge",
+      "name": "Rope Bridge",
+      "card_code": "04071",
+      "act_index": 0,
+      "shroud": 3,
+      "clues_per_investigator": 1,
+      "start_revealed": false
+    },
+    {
+      "code": "serpents_haven",
+      "name": "Serpent's Haven",
+      "card_code": "04072",
+      "act_index": 0,
+      "shroud": 4,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    },
+    {
+      "code": "circuitous_trail",
+      "name": "Circuitous Trail",
+      "card_code": "04073",
+      "act_index": 0,
+      "shroud": 3,
+      "clues_per_investigator": 1,
+      "start_revealed": false
+    },
+    {
+      "code": "temple_of_the_fang",
+      "name": "Temple of the Fang",
+      "card_code": "04074",
+      "act_index": 0,
+      "shroud": 4,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    },
+    {
+      "code": "overgrown_ruins",
+      "name": "Overgrown Ruins",
+      "card_code": "04075",
+      "act_index": 0,
+      "shroud": 3,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    },
+    {
+      "code": "ruins_of_eztli",
+      "name": "Ruins of Eztli",
+      "card_code": "04053",
+      "act_index": 2,
+      "shroud": 4,
+      "clues_per_investigator": 0,
+      "start_revealed": false
+    }
+  ],
+  "encounter_sets": [
+    "rainforest",
+    "agents_of_yig",
+    "guardians_of_time",
+    "wilds"
+  ],
+  "intro_text": [
+    "The year is 1921. You have joined Professor Harlan Earnshaw's archaeological expedition deep into the jungles of southern Mexico, searching for a fabled Eztli ruin said to contain an artifact of untold power.",
+    "The jungle is alive — and it does not welcome you. Strange tracks cross the trail. Something watches from the undergrowth. The expedition camp feels less safe by the hour.",
+    "You must push deeper into the rainforest and find the ruins before Ichtaca, the Eztli Huntress, drives you back — or something worse claims you first."
+  ],
+  "setup_instructions": [
+    "Gather the Rainforest and Agents of Yig encounter sets. Set aside the Eztli encounter set for Scenario 2.",
+    "Place the Expedition Camp (start revealed). Shuffle the 7 rainforest locations face-down and reveal 3 at random. Place the Ruins of Eztli face-down in Act 2.",
+    "Each investigator begins at the Expedition Camp. Place 1 resource on each unrevealed location — these are the supplies they contain.",
+    "Ichtaca is placed at the Ruins of Eztli and will pursue investigators who linger.",
+    "The scenario ends when investigators reach the Ruins of Eztli and advance Act 3, or when the agenda advances past its final threshold."
+  ],
+  "resolutions": {
+    "R1": "You reach the Ruins of Eztli and secure a way inside. Harlan is overjoyed — whatever lies within could change history. Record in the campaign log: *The investigators found the entrance to the Eztli ruins.*",
+    "R2": "Ichtaca corners you at the camp and forces you to retreat. The ruins remain unseen. Record in the campaign log: *The investigators were forced to retreat from the jungle.*",
+    "defeat": "The jungle claimed you. Your expedition ends here. Each investigator suffers 1 physical trauma."
+  }
+}

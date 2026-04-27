@@ -1,0 +1,149 @@
+{
+  "code": "04_the_boundary_beyond",
+  "name": "The Boundary Beyond",
+  "pack": "forgotten_age",
+  "acts": [
+    { "index": 0, "name": "Crossing the Threshold", "card_code": "04165", "doom_threshold": null },
+    { "index": 1, "name": "Past and Present",        "card_code": "04166", "doom_threshold": null },
+    { "index": 2, "name": "The Return Trip",         "card_code": "04167", "doom_threshold": null }
+  ],
+  "agendas": [
+    { "index": 0, "name": "The Boundary, Broken", "card_code": "04162", "doom_threshold": 5 },
+    { "index": 1, "name": "The Barrier Is Thin",  "card_code": "04163", "doom_threshold": 4 },
+    { "index": 2, "name": "Time Collapsing",       "card_code": "04164", "doom_threshold": 999 }
+  ],
+  "locations": [
+    {
+      "code": "temple_ruins",
+      "name": "Temple Ruins",
+      "card_code": "04168",
+      "act_index": 0,
+      "shroud": 3,
+      "clues_per_investigator": 1,
+      "start_revealed": true,
+      "starting_location": true
+    },
+    {
+      "code": "metropolitan_cathedral",
+      "name": "Metropolitan Cathedral",
+      "card_code": "04169",
+      "act_index": 0,
+      "shroud": 3,
+      "clues_per_investigator": 1,
+      "start_revealed": true
+    },
+    {
+      "code": "chapultepec_park",
+      "name": "Chapultepec Park",
+      "card_code": "04170",
+      "act_index": 0,
+      "shroud": 2,
+      "clues_per_investigator": 1,
+      "start_revealed": false
+    },
+    {
+      "code": "zocalo",
+      "name": "Zócalo",
+      "card_code": "04171",
+      "act_index": 0,
+      "shroud": 3,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    },
+    {
+      "code": "xochimilco",
+      "name": "Xochimilco",
+      "card_code": "04172",
+      "act_index": 0,
+      "shroud": 4,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    },
+    {
+      "code": "coyoacan",
+      "name": "Coyoacán",
+      "card_code": "04173",
+      "act_index": 0,
+      "shroud": 3,
+      "clues_per_investigator": 1,
+      "start_revealed": false
+    },
+    {
+      "code": "templo_mayor",
+      "name": "Templo Mayor",
+      "card_code": "04174",
+      "act_index": 1,
+      "shroud": 5,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    },
+    {
+      "code": "temples_of_tenochtitlan",
+      "name": "Temples of Tenochtitlán",
+      "card_code": "04176",
+      "act_index": 1,
+      "shroud": 4,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    },
+    {
+      "code": "chapultepec_hill",
+      "name": "Chapultepec Hill",
+      "card_code": "04178",
+      "act_index": 1,
+      "shroud": 3,
+      "clues_per_investigator": 1,
+      "start_revealed": false
+    },
+    {
+      "code": "canals_of_tenochtitlan",
+      "name": "Canals of Tenochtitlán",
+      "card_code": "04180",
+      "act_index": 1,
+      "shroud": 4,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    },
+    {
+      "code": "lake_xochimilco",
+      "name": "Lake Xochimilco",
+      "card_code": "04182",
+      "act_index": 1,
+      "shroud": 3,
+      "clues_per_investigator": 1,
+      "start_revealed": false
+    },
+    {
+      "code": "sacred_woods",
+      "name": "Sacred Woods",
+      "card_code": "04184",
+      "act_index": 1,
+      "shroud": 4,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    }
+  ],
+  "encounter_sets": [
+    "the_boundary_beyond",
+    "agents_of_yig",
+    "guardians_of_time",
+    "ancient_evils"
+  ],
+  "intro_text": [
+    "Mexico City is fracturing. The past is bleeding through into the present — ancient Tenochtitlán overlapping with the modern city, ruins appearing where buildings should be, canals running through streets.",
+    "The Eztli relic is causing a temporal collapse. You must navigate both the 1921 city and its ancient Aztec counterpart simultaneously to find the source and seal the rift.",
+    "Every clue you gather in one era may reveal something hidden in the other. But the doom clock advances regardless — the barrier between past and present grows thinner with every passing minute."
+  ],
+  "setup_instructions": [
+    "Each location has a present-day and ancient version. Place the present-day side face-up initially.",
+    "When an investigator discovers the last clue on a location, flip it to its ancient side — the location now represents Tenochtitlán.",
+    "Investigators begin at Temple Ruins.",
+    "Serpents of Yig and Brotherhood cultists appear in both eras.",
+    "The scenario ends when investigators seal the temporal rift (advance Act 3) or time collapses completely (doom reaches the final threshold)."
+  ],
+  "resolutions": {
+    "R1": "You seal the temporal rift. Mexico City stabilises. Record in the campaign log: *The investigators sealed the boundary.* Each investigator earns 2 experience.",
+    "R2": "The rift seals partially but the damage is done. Record: *The boundary was partially sealed.* Each investigator earns 1 experience.",
+    "defeat": "Time collapses and the Eztli ruins swallow the city. Each investigator suffers 1 physical trauma and 1 mental trauma."
+  }
+}

@@ -1,5 +1,4 @@
-const { getDb } = require('../db/database');
-const { getSession, updateSession } = require('./gameState');
+const { updateSession, getSession } = require('./gameState');
 const { findCardByCode } = require('./cardLookup');
 const { AttachmentBuilder } = require('discord.js');
 
@@ -60,10 +59,7 @@ async function postEncounterCard(channel, cardCode) {
 
   if (imagePath) {
     const attachment = new AttachmentBuilder(imagePath, { name: 'encounter.png' });
-    await channel.send({
-      content: `🃏 **${card.name}** *(${typeLabel})*`,
-      files: [attachment],
-    });
+    await channel.send({ content: `🃏 **${card.name}** *(${typeLabel})*`, files: [attachment] });
   } else {
     await channel.send(`🃏 **${card.name}** *(${typeLabel})* — ⚠️ Image not found`);
   }
@@ -71,4 +67,27 @@ async function postEncounterCard(channel, cardCode) {
   return card;
 }
 
-module.exports = { buildEncounterDeck, drawEncounterCard, postEncounterCard, shuffle };
+// Draws one encounter card per investigator and posts to encounterCh.
+// Re-fetches session before each draw so deck state stays consistent.
+async function runMythosEncounters(encounterCh, sessionId, players) {
+  for (const player of players) {
+    const fresh = getSession();
+    const code = drawEncounterCard(fresh);
+    if (!code) {
+      if (encounterCh) await encounterCh.send(`⚠️ Encounter deck empty — no card for **${player.investigator_name}**.`);
+      continue;
+    }
+    const card = await postEncounterCard(encounterCh, code);
+    if (encounterCh && card) {
+      if (card.type_code === 'treachery') {
+        await encounterCh.send(`☠️ **${player.investigator_name}** draws a treachery. Resolve it, then use \`/resolved\`.`);
+      } else if (card.type_code === 'enemy') {
+        await encounterCh.send(`👹 **${player.investigator_name}** draws an enemy. Use \`/enemy spawn\` to place it.`);
+      } else {
+        await encounterCh.send(`📄 **${player.investigator_name}** draws a card. Resolve per card text.`);
+      }
+    }
+  }
+}
+
+module.exports = { buildEncounterDeck, drawEncounterCard, postEncounterCard, runMythosEncounters, shuffle };

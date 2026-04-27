@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { requireSession, requireHost, getCampaign, getPlayers, getLocation } = require('../../engine/gameState');
+const { requireSession, requireHost, getCampaign, getPlayers, getLocations } = require('../../engine/gameState');
 const { revealLocation } = require('../../engine/locationManager');
 
 module.exports = {
@@ -14,12 +14,12 @@ module.exports = {
   async execute(interaction) {
     const session = requireSession(interaction);
     if (!session) return;
-    requireHost(interaction);
+    const host = requireHost(interaction);
+    if (!host) return;
 
     const query = interaction.options.getString('location').toLowerCase();
-    const { getLocations } = require('../../engine/gameState');
     const locations = getLocations(session.id);
-    let loc = locations.find(l => l.code.includes(query) || l.name.toLowerCase().includes(query));
+    const loc = locations.find(l => l.code.includes(query) || l.name.toLowerCase().includes(query));
     if (!loc) return interaction.reply({ content: `Location "${query}" not found.`, flags: 64 });
 
     if (loc.status !== 'hidden') {

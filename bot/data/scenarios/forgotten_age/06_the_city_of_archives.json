@@ -1,0 +1,113 @@
+{
+  "code": "06_the_city_of_archives",
+  "name": "The City of Archives",
+  "pack": "forgotten_age",
+  "acts": [
+    { "index": 0, "name": "Exploring Pnakotus",  "card_code": "04241", "doom_threshold": null },
+    { "index": 1, "name": "Restricted Access",   "card_code": "04242", "doom_threshold": null },
+    { "index": 2, "name": "Repossession",         "card_code": "04243", "doom_threshold": null }
+  ],
+  "agendas": [
+    { "index": 0, "name": "City of the Great Race", "card_code": "04238", "doom_threshold": 5 },
+    { "index": 1, "name": "Lost Memories",           "card_code": "04239", "doom_threshold": 4 },
+    { "index": 2, "name": "Humanity Fading",          "card_code": "04240", "doom_threshold": 999 }
+  ],
+  "locations": [
+    {
+      "code": "interview_room_a",
+      "name": "Interview Room",
+      "card_code": "04245",
+      "act_index": 0,
+      "shroud": 2,
+      "clues_per_investigator": 1,
+      "start_revealed": true,
+      "starting_location": true
+    },
+    {
+      "code": "halls_of_pnakotus_a",
+      "name": "Halls of Pnakotus",
+      "card_code": "04248",
+      "act_index": 0,
+      "shroud": 3,
+      "clues_per_investigator": 1,
+      "start_revealed": false
+    },
+    {
+      "code": "halls_of_pnakotus_b",
+      "name": "Halls of Pnakotus (Deep)",
+      "card_code": "04249",
+      "act_index": 0,
+      "shroud": 4,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    },
+    {
+      "code": "great_library",
+      "name": "Great Library",
+      "card_code": "04251",
+      "act_index": 1,
+      "shroud": 3,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    },
+    {
+      "code": "yithian_orrery",
+      "name": "Yithian Orrery",
+      "card_code": "04252",
+      "act_index": 1,
+      "shroud": 4,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    },
+    {
+      "code": "laboratory_of_the_great_race",
+      "name": "Laboratory of the Great Race",
+      "card_code": "04253",
+      "act_index": 1,
+      "shroud": 4,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    },
+    {
+      "code": "deconstruction_room",
+      "name": "Deconstruction Room",
+      "card_code": "04254",
+      "act_index": 2,
+      "shroud": 5,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    },
+    {
+      "code": "towers_of_pnakotus",
+      "name": "Towers of Pnakotus",
+      "card_code": "04255",
+      "act_index": 2,
+      "shroud": 4,
+      "clues_per_investigator": 1,
+      "start_revealed": false
+    }
+  ],
+  "encounter_sets": [
+    "the_city_of_archives",
+    "great_race_of_yith",
+    "temporal_flux",
+    "ancient_evils"
+  ],
+  "intro_text": [
+    "Your mind has been… displaced. You wake in a cone-shaped body, your consciousness transferred into a member of the Great Race of Yith in their subterranean city of Pnakotus.",
+    "The Great Race is methodical and ancient beyond reckoning. They have brought you here to extract information from your era — but they have also taken something from you. You must recover your stolen memories and find a way back to your own body.",
+    "Navigate the impossible geometry of Pnakotus, avoid the flying polyps that haunt its depths, and reach the Deconstruction Room before your identity is erased entirely."
+  ],
+  "setup_instructions": [
+    "Each investigator's physical trauma is set aside — in this scenario, investigators cannot gain physical trauma (they have no physical body).",
+    "Place the Interview Room (start revealed). All investigators begin there, having just 'arrived' in Yithian bodies.",
+    "Investigators draw 2 fewer cards at the start of the game — their memories are fragmented.",
+    "The Great Race of Yith are not enemies by default; they become hostile when investigators act against the archive's rules.",
+    "Advance Act 1 when investigators gather enough clues to navigate Pnakotus. The Deconstruction Room is revealed only in Act 3."
+  ],
+  "resolutions": {
+    "R1": "You recover your memories and find the resonance device to return to your body. Record in the campaign log: *The investigators escaped from Pnakotus intact.* Each investigator earns 3 experience.",
+    "R2": "You escape but with fragmented memories. Record: *The investigators escaped but lost some memories.* Each investigator earns 2 experience but suffers 1 mental trauma.",
+    "defeat": "The Great Race repossesses your mind. Each investigator suffers 2 mental trauma and is eliminated."
+  }
+}

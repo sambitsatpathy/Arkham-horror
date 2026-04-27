@@ -58,10 +58,13 @@ function buildStarterDeck(investigatorCode, starterDecks) {
 
   const codes = flattenSlots(entry.deck);
   const sigs = entry.signature_cards || [];
-  const weakness = entry.weakness ? [entry.weakness] : [];
+  const weakness = entry.weakness
+    ? [entry.weakness]
+    : (entry.weakness_cards || []);
+  const displayName = entry.name || entry.investigator || investigatorCode;
 
   return {
-    deckName: `${entry.investigator} Starter Deck`,
+    deckName: `${displayName} Starter Deck`,
     codes: [...codes, ...sigs, ...weakness],
   };
 }

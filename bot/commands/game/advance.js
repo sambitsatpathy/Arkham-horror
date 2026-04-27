@@ -1,16 +1,9 @@
 const { SlashCommandBuilder, AttachmentBuilder, ChannelType } = require('discord.js');
-const { requireSession, requireHost, getSession, updateSession, updatePlayer, getCampaign, getPlayers, getLocation } = require('../../engine/gameState');
+const { requireSession, requireHost, updateSession, updatePlayer, getCampaign, getPlayers, getLocation } = require('../../engine/gameState');
 const { findCardByCode } = require('../../engine/cardLookup');
 const { revealLocation } = require('../../engine/locationManager');
+const { loadScenario } = require('../../engine/scenarioLoader');
 const { getDb } = require('../../db/database');
-const path = require('path');
-const fs = require('fs');
-
-function loadScenario(session) {
-  const dir = session.campaign_dir || 'night_of_zealot';
-  const filePath = path.join(__dirname, '../../data/scenarios', dir, session.scenario_code + '.json');
-  return JSON.parse(fs.readFileSync(filePath, 'utf8'));
-}
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -25,21 +18,27 @@ module.exports = {
   async execute(interaction) {
     const session = requireSession(interaction);
     if (!session) return;
-    requireHost(interaction);
+    const host = requireHost(interaction);
+    if (!host) return;
+
+    await interaction.deferReply();
+
+    const scenario = loadScenario(session);
+    if (!scenario) {
+      return interaction.editReply('❌ Scenario data not found. Check that the scenario file exists.');
+    }
 
     const type = interaction.options.getString('type');
-    const scenario = loadScenario(session);
 
     if (type === 'act') {
       const nextIndex = session.act_index + 1;
       if (nextIndex >= scenario.acts.length) {
-        return interaction.reply({ content: 'No more acts to advance.', flags: 64 });
+        return interaction.editReply('No more acts to advance.');
       }
 
       updateSession(session.id, { act_index: nextIndex });
       const newAct = scenario.acts[nextIndex];
 
-      // Post new act card
       const actCh = interaction.guild.channels.cache.get(session.act_channel_id);
       if (actCh) {
         const result = findCardByCode(newAct.card_code);
@@ -70,43 +69,33 @@ module.exports = {
       if (doomCh) await doomCh.send(`📖 Act advanced: **${newAct.name}**`);
 
       // Auto-move all investigators if the act specifies a forced location
-      const forcedLocation = newAct.move_investigators_to;
-      if (forcedLocation) {
+      if (newAct.move_investigators_to) {
         const campaign = getCampaign();
         const players = getPlayers(campaign.id).filter(p => !p.is_eliminated);
         const db = getDb();
         const locRow = db.prepare('SELECT * FROM locations WHERE session_id = ? AND code = ?')
-          .get(session.id, forcedLocation);
+          .get(session.id, newAct.move_investigators_to);
 
-        // Reveal the location if still hidden
         if (locRow && locRow.status === 'hidden') {
           await revealLocation(interaction.guild, session, locRow, players);
         }
 
-        // Move every investigator there
         for (const p of players) {
-          updatePlayer(p.id, { location_code: forcedLocation });
+          updatePlayer(p.id, { location_code: newAct.move_investigators_to });
         }
 
-        const locName = locRow?.name || forcedLocation;
-        if (doomCh) {
-          await doomCh.send(
-            `📍 All investigators have been moved to **${locName}** as required by the act.`
-          );
-        }
-
-        await interaction.reply(
-          `✅ Act advanced to **${newAct.name}**. All investigators moved to **${locName}**.`
-        );
-      } else {
-        await interaction.reply(`✅ Act advanced to **${newAct.name}**.`);
+        const locName = locRow?.name || newAct.move_investigators_to;
+        if (doomCh) await doomCh.send(`📍 All investigators moved to **${locName}** as required by the act.`);
+        return interaction.editReply(`✅ Act advanced to **${newAct.name}**. All investigators moved to **${locName}**.`);
       }
+
+      return interaction.editReply(`✅ Act advanced to **${newAct.name}**.`);
     }
 
-    else if (type === 'agenda') {
+    if (type === 'agenda') {
       const nextIndex = session.agenda_index + 1;
       if (nextIndex >= scenario.agendas.length) {
-        return interaction.reply({ content: '💀 Final agenda reached — scenario defeat!' });
+        return interaction.editReply('💀 Final agenda reached — scenario defeat!');
       }
 
       const newAgenda = scenario.agendas[nextIndex];
@@ -126,7 +115,7 @@ module.exports = {
 
       const doomCh = interaction.guild.channels.cache.get(session.doom_channel_id);
       if (doomCh) await doomCh.send(`⚠️ Agenda advanced: **${newAgenda.name}** — doom reset to 0/${newThreshold}`);
-      await interaction.reply(`✅ Agenda advanced to **${newAgenda.name}**. Doom reset to 0/${newThreshold}.`);
+      return interaction.editReply(`✅ Agenda advanced to **${newAgenda.name}**. Doom reset to 0/${newThreshold}.`);
     }
   },
 };

@@ -1,0 +1,70 @@
+{
+  "code": "07_the_depths_of_yoth",
+  "name": "The Depths of Yoth",
+  "pack": "forgotten_age",
+  "acts": [
+    { "index": 0, "name": "Journey to the Nexus", "card_code": "04285", "doom_threshold": null }
+  ],
+  "agendas": [
+    { "index": 0, "name": "The Descent Begins",          "card_code": "04278", "doom_threshold": 3 },
+    { "index": 1, "name": "Horrific Descent",            "card_code": "04279", "doom_threshold": 3 },
+    { "index": 2, "name": "Endless Caverns",             "card_code": "04280", "doom_threshold": 3 },
+    { "index": 3, "name": "City of Blood",               "card_code": "04281", "doom_threshold": 3 },
+    { "index": 4, "name": "Fury That Shakes the Earth", "card_code": "04282", "doom_threshold": 3 },
+    { "index": 5, "name": "The Red Depths",              "card_code": "04283", "doom_threshold": 3 },
+    { "index": 6, "name": "VENGEANCE",                   "card_code": "04284", "doom_threshold": 999 }
+  ],
+  "locations": [
+    {
+      "code": "steps_of_yoth",
+      "name": "Steps of Yoth",
+      "card_code": "04286",
+      "act_index": 0,
+      "shroud": 3,
+      "clues_per_investigator": 0,
+      "start_revealed": true,
+      "starting_location": true
+    },
+    {
+      "code": "city_of_the_serpents",
+      "name": "City of the Serpents",
+      "card_code": "04287",
+      "act_index": 0,
+      "shroud": 4,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    },
+    {
+      "code": "hall_of_heresy",
+      "name": "Hall of Heresy",
+      "card_code": "04288",
+      "act_index": 0,
+      "shroud": 5,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    }
+  ],
+  "encounter_sets": [
+    "the_depths_of_yoth",
+    "agents_of_yig",
+    "yig_serpents",
+    "vengeance"
+  ],
+  "intro_text": [
+    "Deeper than K'n-yan, beyond the passages the Eztli mapped, lies Yoth — a realm of blood-red stone ruled by serpent-things that predate humanity.",
+    "The Vengeance mechanic looms over this scenario. Every enemy that escaped or was left behind in earlier scenarios has been hunting you. Their count is tallied here as Vengeance tokens, added directly to the agenda.",
+    "There is only one act: reach the Nexus at the bottom of Yoth. But the doom clock has seven stages — each one more terrible than the last. Every agenda advance brings Yig's fury closer."
+  ],
+  "setup_instructions": [
+    "Count the total Vengeance tokens accumulated across all prior scenarios. Place that many doom tokens on the first agenda at the start of the game.",
+    "Place the Steps of Yoth (start revealed). The remaining locations are revealed as investigators push deeper.",
+    "Every enemy that escapes (moves past investigators without being defeated) adds 1 doom to the agenda — this is the Vengeance rule.",
+    "Investigators begin at the Steps of Yoth with whatever resources and cards survived the prior scenarios.",
+    "The scenario ends when investigators reach the Nexus (advance the single act) or doom reaches the VENGEANCE threshold."
+  ],
+  "resolutions": {
+    "R1": "You reach the Nexus and confront what lies at Yoth's heart. Record in the campaign log: *The investigators reached the Nexus.* Each investigator earns 5 experience.",
+    "R2": "You survive but cannot reach the Nexus. Record: *The investigators escaped Yoth.* Each investigator earns 2 experience.",
+    "defeat": "Yig's children consume you. Each investigator is killed. The campaign ends here in defeat."
+  }
+}

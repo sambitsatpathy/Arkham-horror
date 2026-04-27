@@ -1,28 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { requireSession, requireHost, getCampaign, getPlayers, getSession, updateSession, updatePlayer, addCampaignLog } = require('../../engine/gameState');
-const path = require('path');
-const fs = require('fs');
-
-const CAMPAIGNS = {
-  night_of_zealot: 'night_of_zealot',
-  dunwich_legacy:  'dunwich_legacy',
-  path_to_carcosa: 'path_to_carcosa',
-  forgotten_age:   'forgotten_age',
-  circle_undone:   'circle_undone',
-  dream_eaters:    'dream_eaters',
-  innsmouth:       'innsmouth',
-  edge_of_earth:   'edge_of_earth',
-  scarlet_keys:    'scarlet_keys',
-  feast_hemlock:   'feast_hemlock',
-  drowned_city:    'drowned_city',
-};
-
-function loadScenario(session) {
-  const dir = session.campaign_dir || 'night_of_zealot';
-  const filePath = path.join(__dirname, '../../data/scenarios', dir, session.scenario_code + '.json');
-  if (!fs.existsSync(filePath)) return null;
-  return JSON.parse(fs.readFileSync(filePath, 'utf8'));
-}
+const { loadScenario } = require('../../engine/scenarioLoader');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -58,7 +36,10 @@ module.exports = {
   async execute(interaction) {
     const session = requireSession(interaction);
     if (!session) return;
-    requireHost(interaction);
+    const host = requireHost(interaction);
+    if (!host) return;
+
+    await interaction.deferReply();
 
     const result = interaction.options.getString('result');
     const resolutionKey = interaction.options.getString('resolution');
@@ -68,8 +49,9 @@ module.exports = {
 
     const scenario = loadScenario(session);
 
-    // Post resolution narration first if provided
     const pregame = interaction.guild.channels.cache.find(c => c.name === 'pregame');
+
+    // Post resolution narration first if provided
     if (resolutionKey && scenario?.resolutions?.[resolutionKey]) {
       const res = scenario.resolutions[resolutionKey];
       const resLines = [
@@ -130,6 +112,6 @@ module.exports = {
     ];
 
     if (pregame) await pregame.send(lines.join('\n'));
-    await interaction.reply(`✅ Scenario ended (${result}). Summary posted in #pregame.`);
+    await interaction.editReply(`✅ Scenario ended (${result}). Summary posted in #pregame.`);
   },
 };

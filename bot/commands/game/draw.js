@@ -27,8 +27,6 @@ module.exports = {
       return interaction.editReply('Your deck and discard are both empty — no cards to draw.');
     }
 
-    // Post drawn cards to hand channel
-    const { getDb } = require('../../db/database');
     const handChannelId = await findHandChannel(interaction.guild, player.discord_name);
 
     if (handChannelId) {

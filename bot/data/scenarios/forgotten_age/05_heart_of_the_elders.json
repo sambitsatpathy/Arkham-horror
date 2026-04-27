@@ -1,0 +1,125 @@
+{
+  "code": "05_heart_of_the_elders",
+  "name": "Heart of the Elders",
+  "pack": "forgotten_age",
+  "acts": [
+    { "index": 0, "name": "Search for the Pattern",  "card_code": "04209", "doom_threshold": null },
+    { "index": 1, "name": "Opening the Maw",         "card_code": "04210", "doom_threshold": null },
+    { "index": 2, "name": "Cavern of the Forgotten Age", "card_code": "04213", "doom_threshold": null },
+    { "index": 3, "name": "Descent into Dark",       "card_code": "04214", "doom_threshold": null }
+  ],
+  "agendas": [
+    { "index": 0, "name": "The Jungle's Heart", "card_code": "04207", "doom_threshold": 5 },
+    { "index": 1, "name": "Setting Sun",         "card_code": "04208", "doom_threshold": 4 },
+    { "index": 2, "name": "The Lonely Caverns",  "card_code": "04211", "doom_threshold": 4 },
+    { "index": 3, "name": "Eyes in the Dark",    "card_code": "04212", "doom_threshold": 999 }
+  ],
+  "locations": [
+    {
+      "code": "mouth_of_knyan",
+      "name": "Mouth of K'n-yan",
+      "card_code": "04206",
+      "act_index": 0,
+      "shroud": 3,
+      "clues_per_investigator": 0,
+      "start_revealed": true,
+      "starting_location": true
+    },
+    {
+      "code": "time_wracked_woods",
+      "name": "Time-Wracked Woods",
+      "card_code": "04217",
+      "act_index": 0,
+      "shroud": 4,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    },
+    {
+      "code": "stone_altar",
+      "name": "Stone Altar",
+      "card_code": "04218",
+      "act_index": 0,
+      "shroud": 4,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    },
+    {
+      "code": "vast_passages",
+      "name": "Vast Passages",
+      "card_code": "04222",
+      "act_index": 2,
+      "shroud": 3,
+      "clues_per_investigator": 1,
+      "start_revealed": false
+    },
+    {
+      "code": "hall_of_idolatry",
+      "name": "Hall of Idolatry",
+      "card_code": "04223",
+      "act_index": 2,
+      "shroud": 4,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    },
+    {
+      "code": "dark_hollow",
+      "name": "Dark Hollow",
+      "card_code": "04224",
+      "act_index": 2,
+      "shroud": 3,
+      "clues_per_investigator": 1,
+      "start_revealed": false
+    },
+    {
+      "code": "perilous_gulch",
+      "name": "Perilous Gulch",
+      "card_code": "04225",
+      "act_index": 2,
+      "shroud": 4,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    },
+    {
+      "code": "crystal_pillars",
+      "name": "Crystal Pillars",
+      "card_code": "04226",
+      "act_index": 2,
+      "shroud": 5,
+      "clues_per_investigator": 2,
+      "start_revealed": false
+    },
+    {
+      "code": "descent_to_yoth",
+      "name": "Descent to Yoth",
+      "card_code": "04227",
+      "act_index": 3,
+      "shroud": 4,
+      "clues_per_investigator": 0,
+      "start_revealed": false
+    }
+  ],
+  "encounter_sets": [
+    "heart_of_the_elders",
+    "knyan",
+    "pillars_of_judgment",
+    "agents_of_yig",
+    "dark_cult"
+  ],
+  "intro_text": [
+    "Deep in the jungle you find what the Eztli called the Mouth of K'n-yan — a vast cave opening descending into the earth. The air rising from below smells of stone and something older than time.",
+    "This scenario is played in two parts. In Part 1, you must find the pattern that opens the Mouth. In Part 2, you descend into the subterranean realm of K'n-yan itself.",
+    "The creatures below are not of this age. The deeper you go, the less the normal rules seem to apply."
+  ],
+  "setup_instructions": [
+    "Part 1: Place the Mouth of K'n-yan (start revealed) plus Time-Wracked Woods and Stone Altar face-down.",
+    "Investigators begin at the Mouth of K'n-yan. Discover clues to advance Act 1 and open the entrance.",
+    "Part 2 begins when Act 2 advances. Place all K'n-yan underground locations. The aboveground locations are no longer accessible.",
+    "The subterranean locations have their own rules: torches provide shroud reduction, and the darkness trait applies special penalties.",
+    "Investigators must reach Descent to Yoth to complete the scenario."
+  ],
+  "resolutions": {
+    "R1": "You descend to Yoth and find what lies beneath. Record in the campaign log: *The investigators descended into K'n-yan.* Each investigator earns 3 experience.",
+    "R2": "You escape K'n-yan but cannot reach Yoth. Record: *The investigators escaped K'n-yan without descending further.* Each investigator earns 1 experience.",
+    "defeat": "K'n-yan closes around you. Each investigator suffers 2 physical trauma."
+  }
+}

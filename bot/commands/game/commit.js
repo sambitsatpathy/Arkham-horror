@@ -1,6 +1,6 @@
 const { SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
 const { requireSession, requirePlayer, getPlayer } = require('../../engine/gameState');
-const { commitCard } = require('../../engine/deck');
+const { commitCards } = require('../../engine/deck');
 const { findCardByCode } = require('../../engine/cardLookup');
 
 function makeCardOption(opt, num) {
@@ -28,7 +28,6 @@ module.exports = {
     const focused = interaction.options.getFocused(true);
     const query = focused.value.toLowerCase();
 
-    // Exclude cards already chosen in other slots
     const chosen = new Set(
       ['card1', 'card2', 'card3', 'card4']
         .filter(n => n !== focused.name)
@@ -62,37 +61,21 @@ module.exports = {
       .filter(Boolean);
 
     const hand = JSON.parse(player.hand || '[]');
-    const committed = [];
-    const notInHand = [];
-
-    for (const code of codes) {
-      if (!hand.includes(code)) {
-        const r = findCardByCode(code);
-        notInHand.push(r?.card.name || code);
-      } else {
-        committed.push(code);
-      }
-    }
-
+    const notInHand = codes.filter(c => !hand.includes(c)).map(c => findCardByCode(c)?.card.name || c);
     if (notInHand.length > 0) {
-      return interaction.reply({
-        content: `These cards are not in your hand: **${notInHand.join(', ')}**`,
-        flags: 64,
-      });
+      return interaction.reply({ content: `These cards are not in your hand: **${notInHand.join(', ')}**`, flags: 64 });
     }
 
     await interaction.deferReply({ flags: 64 });
 
-    // Post to chaos-bag channel so the table can see what's committed
+    // Single DB write for all committed cards
+    commitCards(player, codes);
+
     const chaosCh = interaction.guild.channels.cache.get(session.chaos_channel_id);
     const target = chaosCh || interaction.channel;
 
     const names = [];
-    for (const code of committed) {
-      // Fetch fresh player state each time since commitCard mutates it
-      const fresh = getPlayer(interaction.user.id);
-      commitCard(fresh, code);
-
+    for (const code of codes) {
       const result = findCardByCode(code);
       const name = result?.card.name || code;
       names.push(name);

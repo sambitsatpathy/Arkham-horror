@@ -1,7 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { requireSession, getCampaign, getPlayers, getPlayer } = require('../../engine/gameState');
-const { findCardByCode } = require('../../engine/cardLookup');
-const investigators = require('../../data/investigators/core2.json');
+const { requireSession, getCampaign, getPlayers } = require('../../engine/gameState');
+const allInvestigators = require('../../data/investigators/investigators.json');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -32,7 +31,7 @@ module.exports = {
     }
 
     const lines = targets.map(p => {
-      const invData = investigators.find(i => i.code === p.investigator_code);
+      const invData = allInvestigators.find(i => i.code === p.investigator_code);
       const skills = invData?.skills || {};
       const hand = JSON.parse(p.hand || '[]').length;
       const deck = JSON.parse(p.deck || '[]').length;

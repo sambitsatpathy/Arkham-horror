@@ -118,7 +118,7 @@ function discardAsset(player, assetCode) {
   return true;
 }
 
-// Commit skill/card from hand to a test — moves to discard immediately
+// Commit one card from hand to a test — moves to discard
 function commitCard(player, cardCode) {
   let hand = JSON.parse(player.hand);
   const idx = hand.indexOf(cardCode);
@@ -130,4 +130,23 @@ function commitCard(player, cardCode) {
   return true;
 }
 
-module.exports = { drawCards, playCard, discardCard, playAsset, useCharge, discardAsset, commitCard, initDeck, reshuffleDeck, shuffle };
+// Commit multiple cards from hand to a test in a single DB write.
+// Returns array of codes that were actually in hand (silently skips missing ones).
+function commitCards(player, cardCodes) {
+  let hand = JSON.parse(player.hand);
+  let discard = JSON.parse(player.discard);
+  const committed = [];
+  for (const code of cardCodes) {
+    const idx = hand.indexOf(code);
+    if (idx === -1) continue;
+    hand.splice(idx, 1);
+    discard.push(code);
+    committed.push(code);
+  }
+  if (committed.length > 0) {
+    updatePlayer(player.id, { hand: JSON.stringify(hand), discard: JSON.stringify(discard) });
+  }
+  return committed;
+}
+
+module.exports = { drawCards, playCard, discardCard, playAsset, useCharge, discardAsset, commitCard, commitCards, initDeck, reshuffleDeck, shuffle };

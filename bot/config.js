@@ -11,6 +11,25 @@ module.exports = {
 
   maxPlayers: 4,
 
+  campaigns: {
+    night_of_zealot: { name: 'The Night of the Zealot', dir: 'night_of_zealot' },
+    dunwich_legacy:  { name: 'The Dunwich Legacy',       dir: 'dunwich_legacy'  },
+    path_to_carcosa: { name: 'The Path to Carcosa',      dir: 'path_to_carcosa' },
+    forgotten_age:   { name: 'The Forgotten Age',        dir: 'forgotten_age'   },
+    circle_undone:   { name: 'The Circle Undone',        dir: 'circle_undone'   },
+    dream_eaters:    { name: 'The Dream-Eaters',         dir: 'dream_eaters'    },
+    innsmouth:       { name: 'The Innsmouth Conspiracy', dir: 'innsmouth'       },
+    edge_of_earth:   { name: 'Edge of the Earth',        dir: 'edge_of_earth'   },
+    scarlet_keys:    { name: 'The Scarlet Keys',         dir: 'scarlet_keys'    },
+    feast_hemlock:   { name: 'Feast of Hemlock Vale',    dir: 'feast_hemlock'   },
+    drowned_city:    { name: 'The Drowned City',         dir: 'drowned_city'    },
+  },
+
+  // Returns the Discord channel name for an investigator's private hand channel.
+  handChannelName(investigatorName) {
+    return investigatorName.toLowerCase().replace(/[^a-z0-9]/g, '-') + '-hand';
+  },
+
   tokenDisplay: {
     '+1': '+1', '+2': '+2', '0': '0',
     '-1': '-1', '-2': '-2', '-3': '-3', '-4': '-4',
