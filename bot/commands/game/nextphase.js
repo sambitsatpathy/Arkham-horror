@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
-const { requireSession, requireHost, getSession, getPlayer, getCampaign, getPlayers, updateSession, updatePlayer } = require('../../engine/gameState');
+const { requireSession, requireHost, getSession, getPlayer, getPlayerById, getCampaign, getPlayers, updateSession, updatePlayer } = require('../../engine/gameState');
 const { drawCards } = require('../../engine/deck');
 const { runMythosEncounters } = require('../../engine/encounterEngine');
 const { findCardByCode } = require('../../engine/cardLookup');
@@ -51,7 +51,7 @@ module.exports = {
         const steps = [];
 
         // 1. Ready exhausted assets — fetch fresh, write assets, then re-fetch for next step
-        const p1 = getPlayer(player.id);
+        const p1 = getPlayerById(player.id);
         const assets = JSON.parse(p1.assets || '[]');
         if (assets.some(a => a.exhausted)) {
           assets.forEach(a => { a.exhausted = false; });
@@ -60,12 +60,12 @@ module.exports = {
         }
 
         // 2. Gain 1 resource — fetch fresh after asset write
-        const p2 = getPlayer(player.id);
+        const p2 = getPlayerById(player.id);
         updatePlayer(p2.id, { resources: p2.resources + 1 });
         steps.push(`💰 gained 1 resource (now ${p2.resources + 1})`);
 
         // 3. Draw 1 card — fetch fresh after resource write
-        const p3 = getPlayer(player.id);
+        const p3 = getPlayerById(player.id);
         const drawn = drawCards(p3, 1);
         if (drawn.length > 0) {
           const ch = interaction.guild.channels.cache.find(c => c.name === handChannelName(p3.investigator_name));

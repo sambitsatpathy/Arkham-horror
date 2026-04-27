@@ -57,13 +57,18 @@ async function buildGameServer(guild, scenario, investigators, botUserId) {
     }
   };
 
-  // GAME INFO category
+  // GAME INFO category — all channels here are bot-only writes; players read only
+  const readOnly = [
+    { id: everyone.id, deny: [PermissionFlagsBits.SendMessages] },
+    { id: botUserId,   allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ManageMessages] },
+  ];
+
   const gameInfoCat = await step('create GAME INFO category', () => ensureCategory(guild, '📋 GAME INFO'));
-  const doomCh     = await step('create doom-track',    () => ensureChannel(guild, 'doom-track',    gameInfoCat));
-  const agendaCh   = await step('create agenda',        () => ensureChannel(guild, 'agenda',        gameInfoCat));
-  const actCh      = await step('create act',           () => ensureChannel(guild, 'act',           gameInfoCat));
-  const chaosCh    = await step('create chaos-bag',     () => ensureChannel(guild, 'chaos-bag',     gameInfoCat));
-  const encounterCh = await step('create encounter-deck', () => ensureChannel(guild, 'encounter-deck', gameInfoCat));
+  const doomCh      = await step('create doom-track',     () => ensureChannel(guild, 'doom-track',     gameInfoCat, readOnly));
+  const agendaCh    = await step('create agenda',         () => ensureChannel(guild, 'agenda',         gameInfoCat, readOnly));
+  const actCh       = await step('create act',            () => ensureChannel(guild, 'act',            gameInfoCat, readOnly));
+  const chaosCh     = await step('create chaos-bag',      () => ensureChannel(guild, 'chaos-bag',      gameInfoCat, readOnly));
+  const encounterCh = await step('create encounter-deck', () => ensureChannel(guild, 'encounter-deck', gameInfoCat, readOnly));
 
   const channelIds = {
     doom: doomCh.id, agenda: agendaCh.id, act: actCh.id,
