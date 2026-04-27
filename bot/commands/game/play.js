@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
-const { requireSession, requirePlayer, getPlayer, updatePlayer } = require('../../engine/gameState');
+const { requireSession, requirePlayer, getPlayerById, updatePlayer } = require('../../engine/gameState');
 const { discardCard, playAsset } = require('../../engine/deck');
 const { findCardByCode, getCardCharges } = require('../../engine/cardLookup');
 const { handChannelName } = require('../../config');
@@ -82,7 +82,7 @@ module.exports = {
       playAsset(player, cardCode, name, charges);
       // Single write: merge resource deduction with the asset update
       if (cost > 0) {
-        const fresh = getPlayer(player.id);
+        const fresh = getPlayerById(player.id);
         updatePlayer(player.id, { resources: fresh.resources - cost });
       }
 
@@ -103,7 +103,7 @@ module.exports = {
     // Event / everything else — play and discard, deduct resources in one write
     discardCard(player, cardCode);
     if (cost > 0) {
-      const fresh = getPlayer(player.id);
+      const fresh = getPlayerById(player.id);
       updatePlayer(player.id, { resources: fresh.resources - cost });
     }
 
