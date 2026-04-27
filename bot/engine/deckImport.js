@@ -28,7 +28,9 @@ async function importDeck(input, investigatorCode) {
 
   const data = await fetchDeckFromArkhamDB(deckId);
 
-  if (data.investigator_code !== investigatorCode) {
+  // Treat original and revised core set codes as equivalent (010xx ↔ 015xx)
+  const normalize = code => code.startsWith('010') ? '015' + code.slice(3) : code;
+  if (normalize(data.investigator_code) !== normalize(investigatorCode)) {
     throw new Error(
       `Deck belongs to investigator ${data.investigator_code}, but you chose ${investigatorCode}.`
     );
