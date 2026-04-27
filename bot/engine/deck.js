@@ -107,6 +107,16 @@ function useCharge(player, assetCode) {
   return asset.charges;
 }
 
+// Add charges to an in-play asset. Returns new charge count, or -1 if not found.
+function addCharges(player, assetCode, count = 1) {
+  const assets = JSON.parse(player.assets || '[]');
+  const asset = assets.find(a => a.code === assetCode);
+  if (!asset) return -1;
+  asset.charges = (asset.charges || 0) + count;
+  updatePlayer(player.id, { assets: JSON.stringify(assets) });
+  return asset.charges;
+}
+
 // Discard an asset from play directly
 function discardAsset(player, assetCode) {
   const assets = JSON.parse(player.assets || '[]');
@@ -149,4 +159,4 @@ function commitCards(player, cardCodes) {
   return committed;
 }
 
-module.exports = { drawCards, playCard, discardCard, playAsset, useCharge, discardAsset, commitCard, commitCards, initDeck, reshuffleDeck, shuffle };
+module.exports = { drawCards, playCard, discardCard, playAsset, useCharge, addCharges, discardAsset, commitCard, commitCards, initDeck, reshuffleDeck, shuffle };

@@ -3,6 +3,12 @@ const { requireSession, requirePlayer, getPlayer, getPlayers, getCampaign, updat
 const { findCardByCode } = require('../../engine/cardLookup');
 const { handChannelName } = require('../../config');
 
+// scry_buffer stores: { cards: string[], source: 'deck' | assetCode, targetPlayerId: number }
+
+function getBuffer(player) {
+  try { return JSON.parse(player.scry_buffer || 'null') || null; } catch { return null; }
+}
+
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('scry')
@@ -17,8 +23,8 @@ module.exports = {
             .setMaxValue(10)
             .setRequired(false))
         .addStringOption(opt =>
-          opt.setName('target')
-            .setDescription('Whose deck to scry (default: yours)')
+          opt.setName('source')
+            .setDescription('Which deck to scry: your deck, another player\'s deck, or a tome in play (default: your deck)')
             .setRequired(false)
             .setAutocomplete(true)))
     .addSubcommand(sub =>
@@ -52,22 +58,39 @@ module.exports = {
     const sub = interaction.options.getSubcommand();
     const focused = interaction.options.getFocused(true);
 
-    if (sub === 'reveal' && focused.name === 'target') {
-      const campaign = getCampaign();
-      if (!campaign) return interaction.respond([]);
+    if (sub === 'reveal' && focused.name === 'source') {
       const query = focused.value.toLowerCase();
-      const players = getPlayers(campaign.id).filter(p => p.id !== player.id && p.investigator_name);
-      return interaction.respond(
-        players
-          .filter(p => !query || p.investigator_name.toLowerCase().includes(query))
-          .map(p => ({ name: p.investigator_name, value: String(p.id) }))
-          .slice(0, 25)
-      );
+      const options = [];
+
+      // Other players' decks
+      const campaign = getCampaign();
+      if (campaign) {
+        const players = getPlayers(campaign.id).filter(p => p.id !== player.id && p.investigator_name);
+        for (const p of players) {
+          const label = `${p.investigator_name}'s deck`;
+          if (!query || label.toLowerCase().includes(query)) {
+            options.push({ name: label, value: `player:${p.id}` });
+          }
+        }
+      }
+
+      // In-play assets with a subdeck
+      const assets = JSON.parse(player.assets || '[]');
+      for (const a of assets) {
+        if (Array.isArray(a.subdeck) && a.subdeck.length > 0) {
+          const label = `${a.name} (tome deck, ${a.subdeck.length} cards)`;
+          if (!query || label.toLowerCase().includes(query)) {
+            options.push({ name: label, value: `asset:${a.code}` });
+          }
+        }
+      }
+
+      return interaction.respond(options.slice(0, 25));
     }
 
     if (sub === 'place') {
-      const buffer = JSON.parse(player.scry_buffer || '[]');
-      if (!buffer.length) return interaction.respond([]);
+      const buf = getBuffer(player);
+      if (!buf || !buf.cards.length) return interaction.respond([]);
 
       const query = focused.value.toLowerCase();
       const slotNames = ['card1','card2','card3','card4','card5','card6','card7','card8','card9','card10'];
@@ -77,7 +100,7 @@ module.exports = {
       );
 
       return interaction.respond(
-        buffer
+        buf.cards
           .filter(code => !chosen.has(code))
           .flatMap(code => {
             const result = findCardByCode(code);
@@ -103,30 +126,54 @@ module.exports = {
     // ── REVEAL ──────────────────────────────────────────────────────────────
     if (sub === 'reveal') {
       const count = interaction.options.getInteger('count') ?? 3;
-      const targetId = interaction.options.getString('target');
+      const sourceOpt = interaction.options.getString('source'); // 'player:ID', 'asset:CODE', or null
 
-      let targetPlayer = player;
-      if (targetId) {
+      let deck;
+      let sourceLabel;
+      let bufSource = 'deck'; // what to write back into scry_buffer.source
+      let targetPlayerId = player.id;
+
+      if (!sourceOpt || sourceOpt === 'deck') {
+        // Own main deck
+        deck = JSON.parse(player.deck || '[]');
+        sourceLabel = 'your';
+      } else if (sourceOpt.startsWith('player:')) {
+        // Another player's deck
+        const targetId = parseInt(sourceOpt.slice(7), 10);
         const campaign = getCampaign();
         const others = getPlayers(campaign.id);
-        targetPlayer = others.find(p => String(p.id) === targetId);
+        const targetPlayer = others.find(p => p.id === targetId);
         if (!targetPlayer) return interaction.reply({ content: '❌ Target player not found.', flags: 64 });
+        deck = JSON.parse(targetPlayer.deck || '[]');
+        sourceLabel = `**${targetPlayer.investigator_name}**'s`;
+        bufSource = sourceOpt;
+        targetPlayerId = targetPlayer.id;
+      } else if (sourceOpt.startsWith('asset:')) {
+        // Tome/asset subdeck
+        const assetCode = sourceOpt.slice(6);
+        const assets = JSON.parse(player.assets || '[]');
+        const asset = assets.find(a => a.code === assetCode);
+        if (!asset || !Array.isArray(asset.subdeck)) {
+          return interaction.reply({ content: '❌ That asset has no subdeck.', flags: 64 });
+        }
+        deck = asset.subdeck;
+        sourceLabel = `**${asset.name}**'s`;
+        bufSource = sourceOpt;
+      } else {
+        return interaction.reply({ content: '❌ Unknown source.', flags: 64 });
       }
 
-      const deck = JSON.parse(targetPlayer.deck || '[]');
       if (deck.length === 0) {
-        return interaction.reply({ content: `❌ **${targetPlayer.investigator_name}**'s deck is empty.`, flags: 64 });
+        return interaction.reply({ content: `❌ ${sourceLabel} deck is empty.`, flags: 64 });
       }
 
       const revealed = deck.slice(0, Math.min(count, deck.length));
-
-      // Store in the acting player's scry buffer
-      updatePlayer(player.id, { scry_buffer: JSON.stringify(revealed) });
+      const buf = { cards: revealed, source: bufSource, targetPlayerId };
+      updatePlayer(player.id, { scry_buffer: JSON.stringify(buf) });
 
       await interaction.deferReply({ flags: 64 });
 
-      const targetLabel = targetId ? `**${targetPlayer.investigator_name}**'s` : 'your';
-      const lines = [`## 🔮 Scry — top ${revealed.length} card${revealed.length !== 1 ? 's' : ''} of ${targetLabel} deck`, ''];
+      const lines = [`## 🔮 Scry — top ${revealed.length} card${revealed.length !== 1 ? 's' : ''} of ${sourceLabel} deck`, ''];
       const files = [];
 
       for (let i = 0; i < revealed.length; i++) {
@@ -139,10 +186,9 @@ module.exports = {
 
       lines.push('', `Use \`/scry place\` to put them back in a new order. Any omitted cards go to the bottom.`);
 
-      // Post images to hand channel, text reply stays ephemeral
       const handCh = interaction.guild.channels.cache.find(c => c.name === handChannelName(player.investigator_name));
       if (handCh && files.length) {
-        await handCh.send({ content: `🔮 **Scrying** ${targetLabel} deck — top ${revealed.length} cards:`, files });
+        await handCh.send({ content: `🔮 **Scrying** ${sourceLabel} deck — top ${revealed.length} cards:`, files });
       }
 
       return interaction.editReply({ content: lines.join('\n') });
@@ -150,33 +196,51 @@ module.exports = {
 
     // ── PLACE ────────────────────────────────────────────────────────────────
     if (sub === 'place') {
-      const buffer = JSON.parse(player.scry_buffer || '[]');
-      if (!buffer.length) {
+      const buf = getBuffer(player);
+      if (!buf || !buf.cards.length) {
         return interaction.reply({ content: '❌ No scry in progress. Use `/scry reveal` first.', flags: 64 });
       }
 
       const slotNames = ['card1','card2','card3','card4','card5','card6','card7','card8','card9','card10'];
       const ordered = slotNames.map(n => interaction.options.getString(n)).filter(Boolean);
 
-      // Validate: all specified codes must be from the buffer
-      const invalid = ordered.filter(c => !buffer.includes(c));
+      const invalid = ordered.filter(c => !buf.cards.includes(c));
       if (invalid.length) {
         return interaction.reply({ content: `❌ These cards are not in your scry buffer: ${invalid.join(', ')}`, flags: 64 });
       }
 
-      // Cards not placed go to the bottom
-      const bottomCards = buffer.filter(c => !ordered.includes(c));
+      const bottomCards = buf.cards.filter(c => !ordered.includes(c));
 
-      // Rebuild deck: ordered on top, then rest of deck (minus the buffer cards), then bottom cards
-      // The scried cards were the top N of the target deck — we need to find whose deck to update.
-      // We store the buffer on the acting player but need to know the target.
-      // For simplicity, treat scry as always acting on your own deck here.
-      // (Cross-player scry reorder would need a target stored in buffer too — future enhancement.)
-      const deck = JSON.parse(player.deck || '[]');
-      const deckWithoutBuffer = deck.filter(c => !buffer.includes(c));
-      const newDeck = [...ordered, ...deckWithoutBuffer, ...bottomCards];
+      if (!buf.source || buf.source === 'deck') {
+        // Own main deck
+        const deck = JSON.parse(player.deck || '[]');
+        const deckWithoutBuffer = deck.filter(c => !buf.cards.includes(c));
+        const newDeck = [...ordered, ...deckWithoutBuffer, ...bottomCards];
+        updatePlayer(player.id, { deck: JSON.stringify(newDeck), scry_buffer: 'null' });
 
-      updatePlayer(player.id, { deck: JSON.stringify(newDeck), scry_buffer: '[]' });
+      } else if (buf.source.startsWith('player:')) {
+        // Another player's deck
+        const targetId = buf.targetPlayerId;
+        const campaign = getCampaign();
+        const others = getPlayers(campaign.id);
+        const targetPlayer = others.find(p => p.id === targetId);
+        if (!targetPlayer) return interaction.reply({ content: '❌ Target player no longer found.', flags: 64 });
+        const deck = JSON.parse(targetPlayer.deck || '[]');
+        const deckWithoutBuffer = deck.filter(c => !buf.cards.includes(c));
+        const newDeck = [...ordered, ...deckWithoutBuffer, ...bottomCards];
+        updatePlayer(targetPlayer.id, { deck: JSON.stringify(newDeck) });
+        updatePlayer(player.id, { scry_buffer: 'null' });
+
+      } else if (buf.source.startsWith('asset:')) {
+        // Tome/asset subdeck
+        const assetCode = buf.source.slice(6);
+        const assets = JSON.parse(player.assets || '[]');
+        const asset = assets.find(a => a.code === assetCode);
+        if (!asset) return interaction.reply({ content: '❌ Asset no longer in play.', flags: 64 });
+        const subdeckWithoutBuffer = (asset.subdeck || []).filter(c => !buf.cards.includes(c));
+        asset.subdeck = [...ordered, ...subdeckWithoutBuffer, ...bottomCards];
+        updatePlayer(player.id, { assets: JSON.stringify(assets), scry_buffer: 'null' });
+      }
 
       const lines = [`## 🔮 Scry Complete`];
       if (ordered.length) {
