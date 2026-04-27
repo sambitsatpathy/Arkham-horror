@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
-const { getCampaign, getPlayers, requirePlayer, updatePlayer } = require('../../engine/gameState');
+const { getCampaign, getSession, getPlayers, requirePlayer, updatePlayer } = require('../../engine/gameState');
 const { findInvestigator, findCardByCode } = require('../../engine/cardLookup');
 const { importDeck, buildStarterDeck } = require('../../engine/deckImport');
 const { initDeck } = require('../../engine/deck');
@@ -46,10 +46,13 @@ module.exports = {
     const player = requirePlayer(interaction);
     if (!player) return;
 
-    if (player.investigator_code) {
-      return interaction.reply({ content: `You already chose **${player.investigator_name}**.`, flags: 64 });
+    // Block changes once the game has started
+    const session = getSession();
+    if (session && session.phase !== 'pregame') {
+      return interaction.reply({ content: `The game has already started — investigator cannot be changed.`, flags: 64 });
     }
 
+    const isReselect = !!player.investigator_code;
     const code = interaction.options.getString('name');
     const deckUrl = interaction.options.getString('deck_url');
 
@@ -118,7 +121,8 @@ module.exports = {
     const faction = FACTION_LABEL[invData.faction] || invData.faction;
     const { willpower, intellect, combat, agility } = invData.skills;
     const skillStr = `WIL:${willpower} INT:${intellect} COM:${combat} AGI:${agility}`;
-    const content = `🔍 **${interaction.user.username}** chose **${invData.name}** — *${invData.subname}* (${faction})\nHP: ${invData.health} | SAN: ${invData.sanity} | ${skillStr}\n🃏 ${deckSummary}`;
+    const action = isReselect ? `changed investigator to` : `chose`;
+    const content = `🔍 **${interaction.user.username}** ${action} **${invData.name}** — *${invData.subname}* (${faction})\nHP: ${invData.health} | SAN: ${invData.sanity} | ${skillStr}\n🃏 ${deckSummary}`;
 
     const pregameCh = interaction.guild.channels.cache.find(c => c.name === 'pregame');
     const target = pregameCh || interaction.channel;
@@ -128,7 +132,7 @@ module.exports = {
       await target.send(content);
     }
 
-    const replyLines = [`✅ **${invData.name}** locked in. ${deckSummary}.`];
+    const replyLines = [isReselect ? `✅ Switched to **${invData.name}**. ${deckSummary}.` : `✅ **${invData.name}** locked in. ${deckSummary}.`];
     if (warnings.length) replyLines.push(...warnings);
     await interaction.editReply(replyLines.join('\n'));
   },
