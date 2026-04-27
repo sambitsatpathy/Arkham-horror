@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, ChannelType } = require('discord.js');
-const { requireHost } = require('../../engine/gameState');
+const { requireHost, resetDb } = require('../../engine/gameState');
 const { teardownGameChannels } = require('../../engine/serverBuilder');
 
 const SYSTEM_CHANNELS = ['pregame', 'bot-log'];
@@ -55,7 +55,14 @@ module.exports = {
       // 1. Tear down all game channels (categories, locations, hand channels)
       await teardownGameChannels(interaction.guild);
 
-      // 2. Clear system channels
+      // 2. Wipe all DB tables
+      resetDb();
+
+      // 3. Remove host role
+      const hostRole = interaction.guild.roles.cache.find(r => r.name === '🎲 Game Host');
+      if (hostRole) await hostRole.delete().catch(() => {});
+
+      // 4. Clear system channels
       for (const name of SYSTEM_CHANNELS) {
         await cloneAndClear(interaction.guild, name);
       }

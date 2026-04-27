@@ -1,6 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { getDb } = require('../../db/database');
-const { requireHost } = require('../../engine/gameState');
+const { requireHost, resetDb } = require('../../engine/gameState');
 const { teardownGameChannels } = require('../../engine/serverBuilder');
 
 module.exports = {
@@ -16,14 +15,7 @@ module.exports = {
     await teardownGameChannels(interaction.guild);
 
     // Wipe DB
-    const db = getDb();
-    db.prepare('DELETE FROM enemies').run();
-    db.prepare('DELETE FROM locations').run();
-    db.prepare('DELETE FROM game_session').run();
-    db.prepare('DELETE FROM deck_upgrades').run();
-    db.prepare('DELETE FROM campaign_log').run();
-    db.prepare('DELETE FROM players').run();
-    db.prepare('DELETE FROM campaign').run();
+    resetDb();
 
     // Remove host role
     const hostRole = interaction.guild.roles.cache.find(r => r.name === '🎲 Game Host');

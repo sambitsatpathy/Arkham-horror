@@ -101,10 +101,22 @@ function requireHost(interaction) {
   return player;
 }
 
+function resetDb() {
+  const db = getDb();
+  db.prepare('DELETE FROM enemies').run();
+  db.prepare('DELETE FROM locations').run();
+  db.prepare('DELETE FROM game_session').run();
+  db.prepare('DELETE FROM deck_upgrades').run();
+  db.prepare('DELETE FROM campaign_log').run();
+  db.prepare('DELETE FROM players').run();
+  db.prepare('DELETE FROM campaign').run();
+}
+
 module.exports = {
   getCampaign, getSession, getPlayers, getPlayer, getPlayerById,
   getLocations, getLocation, getEnemies, getEnemiesAt, getEnemy,
   updateSession, updatePlayer, updateLocation, updateEnemy,
   addCampaignLog, getCampaignLog,
   requireSession, requirePlayer, requireHost,
+  resetDb,
 };
