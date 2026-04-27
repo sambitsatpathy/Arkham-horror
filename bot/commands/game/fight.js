@@ -36,6 +36,11 @@ module.exports = {
       opt.setName('damage')
         .setDescription('Damage to deal on success (default: 1)')
         .setMinValue(1))
+    .addIntegerOption(opt =>
+      opt.setName('bonus_damage')
+        .setDescription('Extra damage on success from an asset ability')
+        .setMinValue(1)
+        .setRequired(false))
     .addStringOption(opt =>
       opt.setName('stat')
         .setDescription('Stat to use (default: Combat)')
@@ -169,17 +174,20 @@ module.exports = {
     lines.push(`**Token:** ${tokenLabel}${specialNote}`, `**Result:** ${mathLine}`, '');
 
     if (success) {
-      const dmg = interaction.options.getInteger('damage') ?? 1;
+      const baseDmg = interaction.options.getInteger('damage') ?? 1;
+      const bonusDmg = interaction.options.getInteger('bonus_damage') ?? 0;
+      const dmg = baseDmg + bonusDmg;
+      const bonusNote = bonusDmg > 0 ? ` *(${baseDmg} + ${bonusDmg} from asset)*` : '';
       const newHp = damageEnemy(enemy, dmg);
       if (newHp === 0) {
         defeatEnemy(enemyId);
         const loc = getLocation(session.id, enemy.location_code);
         if (loc) await updateLocationStatus(interaction.guild, session, loc);
-        lines.push(`✅ **Hit!** Dealt ${dmg} damage — **${enemy.name}** is defeated! 💀`);
+        lines.push(`✅ **Hit!** Dealt ${dmg} damage${bonusNote} — **${enemy.name}** is defeated! 💀`);
       } else {
         const loc = getLocation(session.id, enemy.location_code);
         if (loc) await updateLocationStatus(interaction.guild, session, loc);
-        lines.push(`✅ **Hit!** Dealt ${dmg} damage — ${enemy.name} HP: **${newHp}/${enemy.max_hp}**`);
+        lines.push(`✅ **Hit!** Dealt ${dmg} damage${bonusNote} — ${enemy.name} HP: **${newHp}/${enemy.max_hp}**`);
       }
     } else {
       lines.push(`❌ **Miss!** The attack fails.`);

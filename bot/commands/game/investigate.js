@@ -31,6 +31,11 @@ module.exports = {
         .setDescription('Stat to use (default: Intellect)')
         .setRequired(false)
         .setAutocomplete(true))
+    .addIntegerOption(opt =>
+      opt.setName('bonus_clues')
+        .setDescription('Extra clues collected on success (from an asset ability)')
+        .setMinValue(1)
+        .setRequired(false))
     .addStringOption(opt => makeCardOption(opt, 1))
     .addStringOption(opt => makeCardOption(opt, 2))
     .addStringOption(opt => makeCardOption(opt, 3))
@@ -99,6 +104,7 @@ module.exports = {
     }
 
     const statName = interaction.options.getString('stat') || 'intellect';
+    const bonusClues = interaction.options.getInteger('bonus_clues') ?? 0;
     const codes = ['card1', 'card2', 'card3', 'card4'].map(n => interaction.options.getString(n)).filter(Boolean);
 
     const hand = JSON.parse(player.hand || '[]');
@@ -160,12 +166,14 @@ module.exports = {
     let clueNote = '';
     if (success) {
       const freshPlayer = getPlayer(interaction.user.id);
-      const newLocClues = loc.clues - 1;
+      const cluesCollected = Math.min(1 + bonusClues, loc.clues);
+      const newLocClues = loc.clues - cluesCollected;
       updateLocation(loc.id, { clues: newLocClues });
-      updatePlayer(freshPlayer.id, { clues: freshPlayer.clues + 1 });
+      updatePlayer(freshPlayer.id, { clues: freshPlayer.clues + cluesCollected });
       const refreshed = getLocation(session.id, loc.code);
       await updateLocationStatus(interaction.guild, session, refreshed);
-      clueNote = `🔎 Clue collected! You now have **${freshPlayer.clues + 1}** clue(s). **${loc.name}** has **${newLocClues}** remaining.`;
+      const bonusNote = bonusClues > 0 ? ` *(+${bonusClues} from asset)*` : '';
+      clueNote = `🔎 **${cluesCollected} clue${cluesCollected !== 1 ? 's' : ''} collected**${bonusNote}! You now have **${freshPlayer.clues + cluesCollected}**. **${loc.name}** has **${newLocClues}** remaining.`;
     }
 
     const statLabel = statName !== 'intellect' ? ` *(using ${statName} via asset ability)*` : '';
