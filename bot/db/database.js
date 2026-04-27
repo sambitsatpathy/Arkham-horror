@@ -141,6 +141,9 @@ function init() {
   if (!playerCols.includes('assets')) {
     db.exec("ALTER TABLE players ADD COLUMN assets TEXT DEFAULT '[]'");
   }
+  if (!playerCols.includes('scry_buffer')) {
+    db.exec("ALTER TABLE players ADD COLUMN scry_buffer TEXT DEFAULT '[]'");
+  }
 
   const sessionCols = db.prepare("PRAGMA table_info(game_session)").all().map(c => c.name);
   if (!sessionCols.includes('campaign_dir')) {
