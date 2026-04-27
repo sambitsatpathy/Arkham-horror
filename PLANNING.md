@@ -1120,32 +1120,47 @@ Bot needs these Discord permissions:
 19. `commands/game/doom.js`
 20. `commands/game/clue.js`
 
-### Phase 4 — Combat & Chaos
+### Phase 4 — Combat & Chaos ✅ Complete
 21. `engine/chaosBag.js`
 22. `commands/game/pull.js`
 23. `engine/enemyEngine.js`
-24. `engine/combatEngine.js`
-25. `commands/game/enemy.js`
-26. `commands/game/damage.js`, `horror.js`, `heal.js`
+24. `commands/game/enemy.js`
+25. `commands/game/fight.js` — Combat skill test vs enemy Fight rating, with damage and defeat
+26. `commands/game/evade.js` — Agility skill test vs enemy Evade rating, exhausts enemy on success
+27. `commands/game/damage.js`, `horror.js`, `heal.js`
 
-### Phase 5 — Mythos & Encounter
-27. `engine/encounterEngine.js`
-28. `commands/game/mythos.js`
-29. `commands/game/resolved.js`
-30. `commands/game/advance.js`
+### Phase 5 — Mythos & Encounter ✅ Complete
+28. `engine/encounterEngine.js`
+29. `commands/game/mythos.js`
+30. `commands/game/resolved.js`
+31. `commands/game/advance.js`
 
-### Phase 6 — Campaign
-31. `commands/campaign/endscenario.js`
-32. `commands/campaign/upgrade.js`
-33. `commands/campaign/campaignlog.js`
+### Phase 6 — Campaign ✅ Complete
+32. `commands/campaign/endscenario.js`
+33. `commands/campaign/upgrade.js`
+34. `commands/campaign/campaignlog.js`
 
-### Phase 7 — Scenario Data
-34. `data/scenarios/night_of_zealot/campaign.json`
-35. `data/scenarios/night_of_zealot/01_the_gathering.json`
-36. `data/scenarios/night_of_zealot/02_the_midnight_masks.json`
-37. `data/scenarios/night_of_zealot/03_the_devourer_below.json`
-38. `data/chaos_bags.json`
-39. `data/investigators/core2.json`
+### Phase 7 — Scenario Data ✅ Complete
+35. `data/scenarios/night_of_zealot/` (3 scenarios)
+36. `data/scenarios/dunwich_legacy/` (8 scenarios)
+37. `data/scenarios/path_to_carcosa/` (8 scenarios)
+38. `data/scenarios/forgotten_age/` (8 scenarios)
+39. `data/chaos_bags.json`
+40. `data/investigators/investigators.json` (all investigators across all cycles)
+
+### Phase 8 — Additional Commands ✅ Complete
+41. `commands/game/exhaust.js` — toggle asset exhausted/ready state
+42. `commands/game/test.js` — generic skill test (stat autocomplete, chaos token, card commits) for treacheries and parley
+43. `/discard` — added autocomplete handler with hand card lookup
+44. `/commit`, `/hand`, `/dashboard`, `/use` — asset/card utility commands
+
+### Phase 9 — Polish & Bug Fixes ✅ Complete
+45. `engine/serverBuilder.js` — game-info channels (doom-track, agenda, act, chaos-bag, encounter-deck) set read-only for @everyone on creation
+46. `commands/game/investigate.js` — fixed `getPlayer(player.id)` → `getPlayer(interaction.user.id)`
+47. `commands/game/nextphase.js` — fixed upkeep loop using `getPlayer(row id)` → `getPlayerById(row id)`
+48. `engine/deckImport.js` — fixed `buildStarterDeck` to handle both field name formats (core vs Dunwich starter decks)
+49. `CHEATSHEET.md` — full player reference for all 37 commands
+50. `README.md` — project overview, setup, and command reference
 
 ---
 
@@ -1318,15 +1333,26 @@ Each scenario JSON should carry its full narrative so the bot can narrate at the
 |------|--------|-------|
 | Campaign + scenario autocomplete in `/startgame` | ✅ Done | Phase 1 |
 | Investigator autocomplete in `/investigator` | ✅ Done | Phase 2 |
-| Expand `investigators.json` (all 70 investigators) | ✅ Done | Phase 2 |
+| Expand `investigators.json` (all investigators) | ✅ Done | Phase 2 |
 | Dunwich Legacy scenario JSONs (8 scenarios) | ✅ Done | Phase 3 |
 | Dunwich Legacy starter decks (5 investigators) | ✅ Done | Phase 4 |
-| Narrative text fields in scenario JSONs | ✅ Done | Phase 5 (parallel with 3) |
+| Narrative text fields in scenario JSONs | ✅ Done | Phase 5 |
 | `/startgame` intro narration | ✅ Done | Phase 5 |
 | `/endscenario` resolution narration | ✅ Done | Phase 5 |
 | Path to Carcosa scenario JSONs (8 scenarios) | ✅ Done | Phase 3 |
 | Path to Carcosa starter decks (6 investigators) | ✅ Done | Phase 4 |
 | Forgotten Age scenario JSONs (8 scenarios) | ✅ Done | Phase 3 |
+| `/fight` command (Combat skill test) | ✅ Done | Phase 8 |
+| `/evade` command (Agility skill test) | ✅ Done | Phase 8 |
+| `/exhaust` command (toggle asset exhausted) | ✅ Done | Phase 8 |
+| `/test` command (generic stat test w/ autocomplete) | ✅ Done | Phase 8 |
+| `/discard` autocomplete | ✅ Done | Phase 8 |
+| Read-only game-info channels in serverBuilder | ✅ Done | Phase 9 |
+| Bug fix: investigate.js getPlayer discord id | ✅ Done | Phase 9 |
+| Bug fix: nextphase.js upkeep getPlayerById | ✅ Done | Phase 9 |
+| Bug fix: deckImport.js starter deck field names | ✅ Done | Phase 9 |
+| CHEATSHEET.md (full player reference) | ✅ Done | Phase 9 |
+| README.md | ✅ Done | Phase 9 |
 | Forgotten Age starter decks (5 investigators) | Pending | Phase 4 |
 | Circle Undone scenario JSONs (8 scenarios) | Pending | Phase 3 |
 | Dream-Eaters scenario JSONs (8 scenarios) | Pending | Phase 3 |
