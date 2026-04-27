@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
-const { requireSession, requirePlayer, getPlayerById, updatePlayer } = require('../../engine/gameState');
+const { requireSession, requirePlayer, getPlayer, getPlayerById, updatePlayer } = require('../../engine/gameState');
 const { discardCard, playAsset } = require('../../engine/deck');
 const { findCardByCode, getCardCharges } = require('../../engine/cardLookup');
 const { handChannelName } = require('../../config');
