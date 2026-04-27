@@ -1353,7 +1353,16 @@ Each scenario JSON should carry its full narrative so the bot can narrate at the
 | Bug fix: deckImport.js starter deck field names | ✅ Done | Phase 9 |
 | CHEATSHEET.md (full player reference) | ✅ Done | Phase 9 |
 | README.md | ✅ Done | Phase 9 |
-| Forgotten Age starter decks (5 investigators) | Pending | Phase 4 |
+| Forgotten Age starter decks — Leo Anderson, Ursula Downs, Finn Edwards, Father Mateo, Calvin Wright | Pending | Phase 4 |
+| Circle Undone starter decks — Carolyn Fern, Joe Diamond, Preston Fairmont, Diana Stanley, Rita Young, Marie Lambeau | Pending | Phase 4 |
+| Dream-Eaters starter decks — Tommy Muldoon, Mandy Thompson, Tony Morgan, Luke Robinson, Patrice Hathaway | Pending | Phase 4 |
+| Innsmouth starter decks — Sister Mary, Amanda Sharpe, Trish Scarborough, Dexter Drake, Silas Marsh | Pending | Phase 4 |
+| Edge of Earth starter decks — Daniela Reyes, Norman Withers, Monterey Jack, Lily Chen, Bob Jenkins | Pending | Phase 4 |
+| Scarlet Keys starter decks — Carson Sinclair, Vincent Lee, Kymani Jones, Amina Zidane, Darrell Simmons, Charlie Kane | Pending | Phase 4 |
+| Feast of Hemlock Vale starter decks — Wilson Richards, Kate Winthrop, Alessandra Zorzi, Kōhaku Narukami, Hank Samson | Pending | Phase 4 |
+| Drowned City starter decks — Marion Tavares, Lucius Galloway, Agatha Crane, Michael McGlen, Gloria Goldberg, George Barnaby | Pending | Phase 4 |
+| Standalone starter decks — Nathaniel Cho, Harvey Walters, Winifred Habbamock, Jacqueline Fine, Stella Clark | Pending | Phase 4 |
+| Fix Zoey Samaras starter deck — illegal Mystic/Seeker cards (Shrivelling, Laboratory Assistant, Strange Solution, Shortcut) | Pending | Phase 4 |
 | Circle Undone scenario JSONs (8 scenarios) | Pending | Phase 3 |
 | Dream-Eaters scenario JSONs (8 scenarios) | Pending | Phase 3 |
 | Innsmouth Conspiracy scenario JSONs (8 scenarios) | Pending | Phase 3 |
@@ -1361,4 +1370,3 @@ Each scenario JSON should carry its full narrative so the bot can narrate at the
 | Scarlet Keys scenario JSONs (8 scenarios) | Pending | Phase 3 |
 | Feast of Hemlock Vale scenario JSONs (8 scenarios) | Pending | Phase 3 |
 | Drowned City scenario JSONs (8 scenarios) | Pending | Phase 3 |
-| Starter decks for remaining cycles | Pending | Phase 4 |

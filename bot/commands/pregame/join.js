@@ -36,12 +36,14 @@ module.exports = {
       VALUES (?, ?, ?, ?)
     `).run(campaign.id, interaction.user.id, interaction.user.username, isHost);
 
+    await interaction.deferReply();
+
     if (isHost) {
       const role = await ensureRole(interaction.guild, '🎲 Game Host', 0xe74c3c);
       await interaction.member.roles.add(role);
     }
 
     const label = isHost ? ' You are the **Host**.' : '';
-    await interaction.reply(`✅ **${interaction.user.username}** has joined the game.${label} (${players.length + 1}/${maxPlayers} players)`);
+    await interaction.editReply(`✅ **${interaction.user.username}** has joined the game.${label} (${players.length + 1}/${maxPlayers} players)`);
   },
 };
