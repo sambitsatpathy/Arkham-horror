@@ -1,35 +1,64 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, ChannelType } = require('discord.js');
 const { requireHost } = require('../../engine/gameState');
+const { teardownGameChannels } = require('../../engine/serverBuilder');
+
+const SYSTEM_CHANNELS = ['pregame', 'bot-log'];
+
+async function cloneAndClear(guild, channelName) {
+  const ch = guild.channels.cache.find(c => c.name === channelName);
+  if (!ch) return;
+  const position = ch.position;
+  const parent = ch.parentId;
+  const clone = await ch.clone({ reason: '/clear command' });
+  await clone.setPosition(position);
+  if (parent) await clone.setParent(parent, { lockPermissions: false });
+  await ch.delete();
+  await clone.send(`🧹 Channel cleared.`);
+}
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('clear')
-    .setDescription('Clear all messages in a channel. Host only.')
+    .setDescription('Clear messages or wipe the entire server. Host only.')
     .addStringOption(opt =>
-      opt.setName('channel')
-        .setDescription('Which channel to clear')
+      opt.setName('scope')
+        .setDescription('What to clear')
         .setRequired(true)
         .addChoices(
-          { name: '#pregame', value: 'pregame' },
-          { name: '#bot-log', value: 'bot-log' },
+          { name: '#pregame only',   value: 'pregame'  },
+          { name: '#bot-log only',   value: 'bot-log'  },
+          { name: 'System channels (pregame + bot-log)', value: 'system' },
+          { name: 'Everything (all game + system channels)', value: 'all' },
         )),
 
   async execute(interaction) {
     const host = requireHost(interaction);
     if (!host) return;
 
-    const target = interaction.options.getString('channel');
-    const ch = interaction.guild.channels.cache.find(c => c.name === target);
-    if (!ch) return interaction.reply({ content: `Channel #${target} not found.`, flags: 64 });
+    const scope = interaction.options.getString('scope');
 
-    // Acknowledge immediately — must happen before we delete the channel
-    // (deleting the channel the interaction came from invalidates the token)
-    await interaction.reply({ content: `🧹 Clearing **#${target}**…`, flags: 64 });
+    await interaction.reply({ content: `🧹 Clearing **${scope}**…`, flags: 64 });
 
-    const position = ch.position;
-    const clone = await ch.clone({ reason: '/clear command' });
-    await clone.setPosition(position);
-    await ch.delete();
-    await clone.send(`🧹 Channel cleared by **${interaction.user.username}**.`);
+    if (scope === 'pregame' || scope === 'bot-log') {
+      await cloneAndClear(interaction.guild, scope);
+      return;
+    }
+
+    if (scope === 'system') {
+      for (const name of SYSTEM_CHANNELS) {
+        await cloneAndClear(interaction.guild, name);
+      }
+      return;
+    }
+
+    if (scope === 'all') {
+      // 1. Tear down all game channels (categories, locations, hand channels)
+      await teardownGameChannels(interaction.guild);
+
+      // 2. Clear system channels
+      for (const name of SYSTEM_CHANNELS) {
+        await cloneAndClear(interaction.guild, name);
+      }
+    }
   },
 };
