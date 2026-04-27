@@ -1,7 +1,10 @@
 const { SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
 const { getCampaign, getPlayers, requirePlayer, updatePlayer } = require('../../engine/gameState');
 const { findInvestigator, findCardByCode } = require('../../engine/cardLookup');
+const { importDeck, buildStarterDeck } = require('../../engine/deckImport');
+const { initDeck } = require('../../engine/deck');
 const allInvestigators = require('../../data/investigators/investigators.json');
+const starterDecks = require('../../data/investigators/starter_decks.json');
 
 const FACTION_LABEL = {
   guardian: 'Guardian', seeker: 'Seeker', rogue: 'Rogue',
@@ -11,12 +14,16 @@ const FACTION_LABEL = {
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('investigator')
-    .setDescription('Choose your investigator.')
+    .setDescription('Choose your investigator and load your deck.')
     .addStringOption(opt =>
       opt.setName('name')
         .setDescription('Type a name to search')
         .setRequired(true)
-        .setAutocomplete(true)),
+        .setAutocomplete(true))
+    .addStringOption(opt =>
+      opt.setName('deck_url')
+        .setDescription('ArkhamDB deck URL or ID (leave blank to use the starter deck)')
+        .setRequired(false)),
 
   async autocomplete(interaction) {
     const focused = interaction.options.getFocused().toLowerCase();
@@ -43,21 +50,12 @@ module.exports = {
       return interaction.reply({ content: `You already chose **${player.investigator_name}**.`, flags: 64 });
     }
 
-    // Value is now the card code directly from autocomplete
     const code = interaction.options.getString('name');
+    const deckUrl = interaction.options.getString('deck_url');
+
     const invData = allInvestigators.find(i => i.code === code);
     if (!invData) {
-      return interaction.reply({ content: `Unknown investigator code. Please select from the dropdown.`, flags: 64 });
-    }
-
-    const result = findInvestigator(invData.name);
-    const exactResult = findCardByCode(code) || result;
-
-    const card = exactResult?.card || result?.card;
-    const imagePath = exactResult?.imagePath || result?.imagePath;
-
-    if (!card) {
-      return interaction.reply({ content: `Could not find card data for **${invData.name}**.`, flags: 64 });
+      return interaction.reply({ content: `Unknown investigator. Please select from the dropdown.`, flags: 64 });
     }
 
     // Check not already taken
@@ -68,6 +66,9 @@ module.exports = {
       return interaction.reply({ content: `**${invData.name}** is already taken by @${taken.discord_name}.`, flags: 64 });
     }
 
+    await interaction.deferReply({ flags: 64 });
+
+    // Save investigator
     updatePlayer(player.id, {
       investigator_code: code,
       investigator_name: invData.name,
@@ -77,20 +78,58 @@ module.exports = {
       max_sanity: invData.sanity,
     });
 
-    const pregameChannel = interaction.guild.channels.cache.find(c => c.name === 'pregame');
-    const target = pregameChannel || interaction.channel;
+    // Load deck — import if URL provided, otherwise starter deck
+    let deckSummary;
+    const warnings = [];
+
+    if (deckUrl) {
+      try {
+        const result = await importDeck(deckUrl, code);
+        initDeck(player, result.codes);
+        updatePlayer(player.id, {
+          deck_ready: 1,
+          arkhamdb_deck_id: result.deckId,
+          deck_name: result.deckName,
+        });
+        if (result.unknown.length > 0) {
+          warnings.push(`⚠️ ${result.unknown.length} card(s) not found locally: \`${result.unknown.join(', ')}\``);
+        }
+        deckSummary = `**${result.deckName}** imported — ${result.codes.length} cards`;
+      } catch (err) {
+        deckSummary = `⚠️ Deck import failed (${err.message}) — starter deck loaded instead`;
+        const { deckName, codes } = buildStarterDeck(code, starterDecks);
+        initDeck(player, codes);
+        updatePlayer(player.id, { deck_ready: 1, deck_name: deckName });
+      }
+    } else {
+      try {
+        const { deckName, codes } = buildStarterDeck(code, starterDecks);
+        initDeck(player, codes);
+        updatePlayer(player.id, { deck_ready: 1, deck_name: deckName });
+        deckSummary = `**${deckName}** loaded — ${codes.length} cards`;
+      } catch (err) {
+        deckSummary = `⚠️ No starter deck available (${err.message})`;
+      }
+    }
+
+    // Post to #pregame
+    const exactResult = findCardByCode(code) || findInvestigator(invData.name);
+    const imagePath = exactResult?.imagePath;
     const faction = FACTION_LABEL[invData.faction] || invData.faction;
-    const skills = invData.skills;
-    const skillStr = `WIL:${skills.willpower} INT:${skills.intellect} COM:${skills.combat} AGI:${skills.agility}`;
+    const { willpower, intellect, combat, agility } = invData.skills;
+    const skillStr = `WIL:${willpower} INT:${intellect} COM:${combat} AGI:${agility}`;
+    const content = `🔍 **${interaction.user.username}** chose **${invData.name}** — *${invData.subname}* (${faction})\nHP: ${invData.health} | SAN: ${invData.sanity} | ${skillStr}\n🃏 ${deckSummary}`;
 
-    const content = `🔍 **${interaction.user.username}** chose **${invData.name}** — *${invData.subname}* (${faction})\nHP: ${invData.health} | SAN: ${invData.sanity} | ${skillStr}`;
-
+    const pregameCh = interaction.guild.channels.cache.find(c => c.name === 'pregame');
+    const target = pregameCh || interaction.channel;
     if (imagePath) {
       await target.send({ content, files: [new AttachmentBuilder(imagePath, { name: 'investigator.png' })] });
     } else {
       await target.send(content);
     }
 
-    await interaction.reply({ content: `✅ Investigator locked in: **${invData.name}**`, flags: 64 });
+    const replyLines = [`✅ **${invData.name}** locked in. ${deckSummary}.`];
+    if (warnings.length) replyLines.push(...warnings);
+    await interaction.editReply(replyLines.join('\n'));
   },
 };
