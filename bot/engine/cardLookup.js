@@ -162,9 +162,16 @@ function getCardSkills(cardCode) {
   };
 }
 
+// Returns { hp, sanity } soak values for a card (ally/equipment with health boxes).
+function getCardSoak(cardCode) {
+  const card = loadFullCards().get(cardCode);
+  if (!card) return { hp: 0, sanity: 0 };
+  return { hp: card.health || 0, sanity: card.sanity || 0 };
+}
+
 function invalidateCache() {
   _allCards = null;
   _fullCards = null;
 }
 
-module.exports = { findCard, findCardByCode, findInvestigator, loadAllCards, invalidateCache, fetchLocationBackImage, getCardCharges, getCardSkills };
+module.exports = { findCard, findCardByCode, findInvestigator, loadAllCards, invalidateCache, fetchLocationBackImage, getCardCharges, getCardSkills, getCardSoak };

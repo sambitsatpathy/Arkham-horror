@@ -74,15 +74,18 @@ function reshuffleDeck(player) {
   });
 }
 
-// Move card from hand to in-play assets area with optional starting charges
-function playAsset(player, cardCode, cardName, charges = 0) {
+// Move card from hand to in-play assets area with optional starting charges and soak.
+function playAsset(player, cardCode, cardName, charges = 0, hp = 0, sanity = 0) {
   let hand = JSON.parse(player.hand);
   const idx = hand.indexOf(cardCode);
   if (idx === -1) return false;
   hand.splice(idx, 1);
 
   const assets = JSON.parse(player.assets || '[]');
-  assets.push({ code: cardCode, name: cardName, charges, exhausted: false });
+  const entry = { code: cardCode, name: cardName, charges, exhausted: false };
+  if (hp > 0) { entry.hp = hp; entry.max_hp = hp; }
+  if (sanity > 0) { entry.sanity = sanity; entry.max_sanity = sanity; }
+  assets.push(entry);
 
   updatePlayer(player.id, { hand: JSON.stringify(hand), assets: JSON.stringify(assets) });
   return true;
@@ -115,6 +118,41 @@ function addCharges(player, assetCode, count = 1) {
   asset.charges = (asset.charges || 0) + count;
   updatePlayer(player.id, { assets: JSON.stringify(assets) });
   return asset.charges;
+}
+
+// Deal damage to an in-play asset's hp. Returns new hp, or -1 if not found / no hp.
+// When hp reaches 0 the asset is discarded automatically.
+function damageAsset(player, assetCode, amount) {
+  const assets = JSON.parse(player.assets || '[]');
+  const asset = assets.find(a => a.code === assetCode);
+  if (!asset || asset.hp == null) return -1;
+  asset.hp = Math.max(0, asset.hp - amount);
+  if (asset.hp === 0) {
+    const filtered = assets.filter(a => a.code !== assetCode);
+    const discard = JSON.parse(player.discard);
+    discard.push(assetCode);
+    updatePlayer(player.id, { assets: JSON.stringify(filtered), discard: JSON.stringify(discard) });
+  } else {
+    updatePlayer(player.id, { assets: JSON.stringify(assets) });
+  }
+  return asset.hp;
+}
+
+// Deal horror to an in-play asset's sanity. Returns new sanity, or -1 if not found / no sanity.
+function horrorAsset(player, assetCode, amount) {
+  const assets = JSON.parse(player.assets || '[]');
+  const asset = assets.find(a => a.code === assetCode);
+  if (!asset || asset.sanity == null) return -1;
+  asset.sanity = Math.max(0, asset.sanity - amount);
+  if (asset.sanity === 0) {
+    const filtered = assets.filter(a => a.code !== assetCode);
+    const discard = JSON.parse(player.discard);
+    discard.push(assetCode);
+    updatePlayer(player.id, { assets: JSON.stringify(filtered), discard: JSON.stringify(discard) });
+  } else {
+    updatePlayer(player.id, { assets: JSON.stringify(assets) });
+  }
+  return asset.sanity;
 }
 
 // Discard an asset from play directly
@@ -159,4 +197,4 @@ function commitCards(player, cardCodes) {
   return committed;
 }
 
-module.exports = { drawCards, playCard, discardCard, playAsset, useCharge, addCharges, discardAsset, commitCard, commitCards, initDeck, reshuffleDeck, shuffle };
+module.exports = { drawCards, playCard, discardCard, playAsset, useCharge, addCharges, damageAsset, horrorAsset, discardAsset, commitCard, commitCards, initDeck, reshuffleDeck, shuffle };

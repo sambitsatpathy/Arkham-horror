@@ -1,12 +1,31 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { requireSession, requirePlayer, updatePlayer, addCampaignLog, getCampaign, getSession } = require('../../engine/gameState');
+const { requireSession, requirePlayer, getPlayer, updatePlayer, addCampaignLog, getCampaign } = require('../../engine/gameState');
+const { damageAsset } = require('../../engine/deck');
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('damage')
-    .setDescription('Take physical damage.')
+    .setDescription('Take physical damage — to yourself or redirect to an in-play asset.')
     .addIntegerOption(opt =>
-      opt.setName('amount').setDescription('Damage amount').setRequired(true).setMinValue(1)),
+      opt.setName('amount').setDescription('Damage amount').setRequired(true).setMinValue(1))
+    .addStringOption(opt =>
+      opt.setName('asset')
+        .setDescription('Redirect damage to an in-play asset with HP (e.g. Bulletproof Vest, ally)')
+        .setRequired(false)
+        .setAutocomplete(true)),
+
+  async autocomplete(interaction) {
+    const player = getPlayer(interaction.user.id);
+    if (!player) return interaction.respond([]);
+    const query = interaction.options.getFocused().toLowerCase();
+    const assets = JSON.parse(player.assets || '[]');
+    return interaction.respond(
+      assets
+        .filter(a => a.hp > 0 && (!query || a.name.toLowerCase().includes(query)))
+        .map(a => ({ name: `${a.name} (${a.hp}/${a.max_hp} HP)`, value: a.code }))
+        .slice(0, 25)
+    );
+  },
 
   async execute(interaction) {
     const session = requireSession(interaction);
@@ -15,6 +34,24 @@ module.exports = {
     if (!player) return;
 
     const amount = interaction.options.getInteger('amount');
+    const assetCode = interaction.options.getString('asset');
+
+    if (assetCode) {
+      const assets = JSON.parse(player.assets || '[]');
+      const asset = assets.find(a => a.code === assetCode);
+      if (!asset) return interaction.reply({ content: '❌ That asset is not in play.', flags: 64 });
+      if (asset.hp == null || asset.hp <= 0) {
+        return interaction.reply({ content: `❌ **${asset.name}** has no HP to absorb damage.`, flags: 64 });
+      }
+
+      const newHp = damageAsset(player, assetCode, amount);
+      if (newHp === 0) {
+        return interaction.reply(`🩸 **${asset.name}** absorbed ${amount} damage and was **destroyed** (discarded).`);
+      }
+      return interaction.reply(`🩸 **${asset.name}** absorbed ${amount} damage. HP: **${newHp}/${asset.max_hp}**`);
+    }
+
+    // Damage investigator directly
     const newHp = Math.max(0, player.hp - amount);
     updatePlayer(player.id, { hp: newHp });
 
