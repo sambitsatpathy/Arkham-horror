@@ -18,9 +18,10 @@
 |---------|-------------|
 | `/join` | Join the campaign. First player becomes **Host**. |
 | `/investigator name:<search>` | Pick your investigator. Autocomplete searches all investigators. |
-| `/deck default` | Load the starter deck for your investigator. |
-| `/deck import url:<arkhamdb url>` | Import a custom deck from ArkhamDB. |
+| `/investigator name:<search> deck_url:<arkhamdb url>` | Pick investigator and import a custom deck from ArkhamDB in one step. |
 | `/startgame campaign:<c> scenario:<s> difficulty:<d>` | **Host only.** Build Discord channels, deal opening hands, seed the encounter deck. |
+
+> You can re-run `/investigator` to change your choice until the game starts.
 
 ---
 
@@ -39,7 +40,7 @@ Move to a connected location. If the location is hidden, it is automatically rev
 /draw
 /draw count:<1-10>
 ```
-Draw cards from your deck. If your deck is empty, your discard pile is reshuffled automatically.
+Draw cards from your deck. If your deck is empty, your discard pile is reshuffled automatically. Your pinned hand display in your private channel updates automatically.
 
 ### Gain a Resource
 ```
@@ -50,34 +51,46 @@ Gain 1 resource token.
 ### Investigate *(Intellect vs Shroud)*
 ```
 /investigate
+/investigate stat:<skill>
 /investigate card1:<skill card> card2:<skill card> ...
+/investigate bonus_clues:<n>
 ```
-Test your **Intellect** against the current location's **Shroud** value. Optionally commit up to 4 skill cards — their **Intellect** and **Wild** icons each add +1.
+Test your **Intellect** (or another stat via `stat`) against the current location's **Shroud** value. Optionally commit up to 4 skill cards — their matching and Wild icons each add +1.
 
-- **Success** (total ≥ shroud): collect 1 clue from the location.
+- **Success** (total ≥ shroud): collect 1 clue (+ `bonus_clues` if an asset grants extra).
 - **Fail**: nothing happens.
 - The chaos token is drawn automatically. Auto-fail always fails; Elder Sign always adds +1.
 
 ### Fight *(Combat vs Enemy Fight)*
 ```
 /fight enemy_id:<id>
-/fight enemy_id:<id> damage:<n> card1:<skill card> ...
+/fight enemy_id:<id> stat:<skill> damage:<n> bonus_damage:<n> card1:<skill card> ...
 ```
-Attack an enemy. Test **Combat** against the enemy's **Fight** rating. Commit cards with **Combat** or **Wild** icons.
+Attack an enemy. Test **Combat** (or another stat) against the enemy's **Fight** rating.
 
-- **Success**: deal damage (`damage` option, default 1). Enemy is defeated at 0 HP.
+- **Success**: deal damage (default 1, or `damage` + `bonus_damage` from an asset ability). Enemy defeated at 0 HP.
 - **Fail**: attack misses.
 - Find enemy IDs with `/enemy list`.
 
 ### Evade *(Agility vs Enemy Evade)*
 ```
 /evade enemy_id:<id>
-/evade enemy_id:<id> card1:<skill card> ...
+/evade enemy_id:<id> stat:<skill> card1:<skill card> ...
 ```
-Slip past an enemy. Test **Agility** against the enemy's **Evade** rating. Commit cards with **Agility** or **Wild** icons.
+Slip past an enemy. Test **Agility** (or another stat) against the enemy's **Evade** rating.
 
 - **Success**: enemy becomes **exhausted** and disengaged. It will not attack this round.
 - **Fail**: nothing happens, enemy stays engaged.
+
+### Generic Skill Test *(Treachery, Parley, etc.)*
+```
+/test stat:<skill> difficulty:<n>
+/test stat:<skill> difficulty:<n> card1:<skill card> ...
+```
+Run any skill test against a fixed difficulty number — use this for treachery cards, parley attempts, or any non-standard test.
+
+- Draws a chaos token and applies the modifier automatically.
+- Commit up to 4 skill cards to boost the total.
 
 ### Play a Card
 ```
@@ -85,15 +98,32 @@ Slip past an enemy. Test **Agility** against the enemy's **Evade** rating. Commi
 ```
 Play an asset, event, or skill from your hand. Pays the resource cost automatically.
 
-- **Assets** enter play in your area and show in `/dashboard`.
+- **Assets** enter play in your area and show in `/dashboard`. Allies and equipment track HP/sanity for soak.
 - **Events** resolve immediately and go to discard.
 - **Skills** — use `/commit` instead (during a skill test).
 
 ### Use an Asset's Ability
 ```
-/use asset:<name>
+/use asset:<name>              — spend 1 charge
+/use asset:<name> add:<n>      — add n charges (e.g. after a recharge effect)
 ```
-Spend 1 charge from an in-play asset. Asset is discarded automatically when charges reach 0.
+Manage charges on an in-play asset. Asset is discarded automatically when charges reach 0.
+
+### Scry *(look at top of deck, reorder)*
+```
+/scry reveal [count:<1-10>] [source:<deck or tome>]
+/scry place card1:<card> card2:<card> ...
+```
+Look at the top N cards of a deck (your own, another player's, or a tome's subdeck). Then use `/scry place` to put them back in any order — omitted cards go to the bottom.
+
+### Tome / Asset Subdeck
+```
+/subdeck init asset:<name> card1:<card> ... [shuffle:true/false]
+/subdeck add  asset:<name> card:<card> [bottom:true/false]
+/subdeck view asset:<name>
+/subdeck clear asset:<name>
+```
+Attach and manage a mini-deck on an in-play asset (e.g. Daisy's Necronomicon). Once initialized, use `/scry reveal source:<tome name>` to look at and reorder its cards.
 
 ### Other Actions (free-form)
 Parley, special actions, and card abilities that don't have a dedicated command: resolve them manually and track the effects with `/damage`, `/clue`, `/resource`, etc.
@@ -102,19 +132,21 @@ Parley, special actions, and card abilities that don't have a dedicated command:
 
 ## Skill Tests (reference)
 
-| Test Type | Skill Used | Committed Icon |
-|-----------|-----------|----------------|
+| Test Type | Default Skill | Committed Icon |
+|-----------|--------------|----------------|
 | Investigate | Intellect (🔎) | Intellect or Wild |
 | Fight | Combat (⚔️) | Combat or Wild |
 | Evade | Agility (💨) | Agility or Wild |
-| Willpower test | Willpower (🕯️) | Willpower or Wild |
+| Generic test | Any (you choose) | Matching stat or Wild |
+
+> All four commands accept an optional `stat` override. Autocomplete shows your investigator's current value for each skill.
 
 **Formula:** Skill + Committed icons + Chaos token modifier ≥ Difficulty → **Success**
 
 Special tokens:
 - **Auto-fail (❌):** Always fails, regardless of total.
 - **Elder Sign (✨):** +1 to total, plus resolve your investigator's special elder sign ability.
-- **Skull/Cultist/Tablet/Elder Thing:** Pull token modifier, then resolve the scenario-specific effect manually.
+- **Skull/Cultist/Tablet/Elder Thing:** Apply token modifier, then resolve the scenario-specific effect manually.
 
 ---
 
@@ -122,14 +154,17 @@ Special tokens:
 
 | Command | What it does |
 |---------|-------------|
-| `/hand` | Show your current hand (images posted to your private hand channel). |
-| `/draw [count]` | Draw 1–10 cards. |
+| `/hand` | Refresh the pinned hand display in your private channel. |
+| `/draw [count]` | Draw 1–10 cards. Pinned hand updates automatically. |
 | `/play card:<name>` | Play an asset, event, or skill (costs resources). |
 | `/commit card1 ... card4` | Commit skill cards to the current test. Up to 4 cards. |
 | `/discard card:<name>` | Discard a card from your hand to the discard pile. |
-| `/use asset:<name>` | Spend a charge on an in-play asset. |
+| `/use asset:<name> [add:<n>]` | Spend a charge or add charges to an in-play asset. |
 | `/exhaust asset:<name>` | Toggle an asset between exhausted and ready. |
 | `/card name:<search>` | Look up any card's image (not hand-restricted). |
+| `/scry reveal [count] [source]` | Peek at the top N cards of a deck. |
+| `/scry place card1 ...` | Put scried cards back in a new order. |
+| `/subdeck init/add/view/clear` | Manage a tome or ally's attached card deck. |
 
 ---
 
@@ -137,11 +172,15 @@ Special tokens:
 
 | Command | What it does |
 |---------|-------------|
-| `/damage amount:<n>` | Take `n` physical damage. Eliminated at 0 HP. |
+| `/damage amount:<n>` | Take `n` physical damage (to your HP). Eliminated at 0 HP. |
+| `/damage amount:<n> asset:<name>` | Redirect damage to an in-play asset (ally, Bulletproof Vest, etc.). Asset discarded at 0 HP. |
 | `/horror amount:<n>` | Take `n` sanity damage. Eliminated at 0 Sanity. |
+| `/horror amount:<n> asset:<name>` | Redirect horror to an in-play asset with sanity soak. Asset discarded at 0. |
 | `/heal type:<damage\|horror> amount:<n>` | Heal HP or Sanity (capped at max). |
 | `/stats` | Show your current HP, Sanity, Resources, Clues, and skill values. |
 | `/dashboard` | Post your full investigator status to your private hand channel. |
+
+> Assets with HP or sanity (allies, equipment) show their current/max values in the autocomplete list.
 
 ---
 
@@ -151,7 +190,7 @@ Special tokens:
 |---------|-------------|
 | `/enemy list` | List all active enemies with their IDs, locations, and stats. |
 | `/enemy spawn name:<n> location:<l>` | **Host.** Spawn an enemy. Stats auto-loaded from card data if found. |
-| `/fight enemy_id:<id> [damage:<n>]` | Attack an enemy (skill test). |
+| `/fight enemy_id:<id> [damage:<n>] [bonus_damage:<n>]` | Attack an enemy (skill test). |
 | `/evade enemy_id:<id>` | Evade an enemy (skill test). |
 | `/enemy damage id:<id> amount:<n>` | Deal direct damage to an enemy (no skill test). |
 | `/enemy defeat id:<id>` | **Host.** Instantly defeat an enemy. |
@@ -197,7 +236,7 @@ Special tokens:
 | Command | What it does |
 |---------|-------------|
 | `/pull` | Draw a chaos token and post the result to `#chaos-bag`. Use for standalone skill tests. |
-| `/investigate`, `/fight`, `/evade` | Automatically draw a token and apply the modifier. |
+| `/investigate`, `/fight`, `/evade`, `/test` | Automatically draw a token and apply the modifier. |
 
 **Token values by difficulty (standard):**
 ```
@@ -224,7 +263,10 @@ Harder difficulties replace positive modifiers with larger negatives.
 
 | Command | What it does |
 |---------|-------------|
-| `/clear` | Delete all messages in the current channel. |
+| `/clear scope:pregame` | Clear the `#pregame` channel only. |
+| `/clear scope:bot-log` | Clear the `#bot-log` channel only. |
+| `/clear scope:system` | Clear both `#pregame` and `#bot-log`. |
+| `/clear scope:all` | **Destructive.** Tear down all game channels and wipe the database. |
 | `/newgame` | **Destructive.** Wipe all game channels and reset the database entirely. |
 
 ---
@@ -236,11 +278,12 @@ Harder difficulties replace positive modifiers with larger negatives.
 1. **Action 1 — Move**
    `/move location:factory`
 
-2. **Action 2 — Fight** (enemy is here)
-   `/fight enemy_id:3 damage:2 card1:Vicious Blow`
-   → Token drawn, Combat + 1 (icon) vs Fight 4 → Hit! Enemy takes 2 damage.
+2. **Action 2 — Fight** (enemy is here, using a .45 Automatic asset for +1 damage)
+   `/fight enemy_id:3 damage:2 bonus_damage:1 card1:Vicious Blow`
+   → Token drawn, Combat + 1 (icon) vs Fight 4 → Hit! Enemy takes 3 damage.
 
-3. **Action 3 — Investigate**
+3. **Action 3 — Investigate** (redirecting 1 incoming damage to Bulletproof Vest first)
+   `/damage amount:1 asset:Bulletproof Vest`
    `/investigate card1:Deduction`
    → Token drawn, Intellect 3 + 1 (INT icon) vs Shroud 3 → Success! Clue collected.
 
@@ -250,13 +293,13 @@ Harder difficulties replace positive modifiers with larger negatives.
 
 ## Quick Reference — What Skill for What Test?
 
-| Situation | Command | Key Skill |
-|-----------|---------|-----------|
-| Gather a clue | `/investigate` | Intellect |
-| Hit an enemy | `/fight` | Combat |
-| Slip past an enemy | `/evade` | Agility |
-| Treachery card test | Resolve manually, `/pull` for token | Willpower or other |
-| Parley | Resolve manually, `/pull` for token | Varies |
+| Situation | Command | Default Skill | Stat Override? |
+|-----------|---------|--------------|---------------|
+| Gather a clue | `/investigate` | Intellect | ✅ yes |
+| Hit an enemy | `/fight` | Combat | ✅ yes |
+| Slip past an enemy | `/evade` | Agility | ✅ yes |
+| Treachery / parley / other | `/test` | You choose | — |
+| Standalone token pull | `/pull` | — | — |
 
 ---
 
@@ -270,4 +313,4 @@ Harder difficulties replace positive modifiers with larger negatives.
 | `#chaos-bag` | All chaos token pulls and skill test results |
 | `#encounter-deck` | Encounter cards drawn during Mythos phase |
 | `revealed-<location>` / `🔍・<location>` | Location status, enemies, clues pinned here |
-| `<investigator>-hand` | Your private hand, dashboard, and drawn cards |
+| `<investigator>-hand` | Your private channel — pinned hand display, dashboard, card images |
