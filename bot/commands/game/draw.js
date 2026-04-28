@@ -1,7 +1,8 @@
 const { SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
-const { requireSession, requirePlayer, getCampaign } = require('../../engine/gameState');
+const { requireSession, requirePlayer } = require('../../engine/gameState');
 const { drawCards } = require('../../engine/deck');
 const { findCardByCode } = require('../../engine/cardLookup');
+const { handChannelName } = require('../../config');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -27,29 +28,24 @@ module.exports = {
       return interaction.editReply('Your deck and discard are both empty — no cards to draw.');
     }
 
-    const handChannelId = await findHandChannel(interaction.guild, player.discord_name);
+    const handCh = interaction.guild.channels.cache.find(c => c.name === handChannelName(player.investigator_name));
+    const lines = [`🃏 Drew **${drawn.length}** card${drawn.length !== 1 ? 's' : ''}:`];
 
-    if (handChannelId) {
-      const handCh = interaction.guild.channels.cache.get(handChannelId);
+    for (const code of drawn) {
+      const result = findCardByCode(code);
+      const name = result?.card.name || code;
+      lines.push(`  • ${name}`);
+
       if (handCh) {
-        for (const code of drawn) {
-          const result = findCardByCode(code);
-          if (result?.imagePath) {
-            const att = new AttachmentBuilder(result.imagePath, { name: 'card.png' });
-            await handCh.send({ content: `🃏 Drew: **${result.card.name}**`, files: [att] });
-          } else {
-            await handCh.send(`🃏 Drew: \`${code}\``);
-          }
+        if (result?.imagePath) {
+          const att = new AttachmentBuilder(result.imagePath, { name: 'card.png' });
+          await handCh.send({ content: `🃏 **${player.investigator_name}** drew **${name}**`, files: [att] });
+        } else {
+          await handCh.send(`🃏 **${player.investigator_name}** drew **${name}**`);
         }
       }
     }
 
-    await interaction.editReply(`✅ Drew ${drawn.length} card(s).`);
+    return interaction.editReply(lines.join('\n'));
   },
 };
-
-async function findHandChannel(guild, investigatorName) {
-  const safeName = investigatorName.toLowerCase().replace(/[^a-z0-9]/g, '-') + '-hand';
-  const ch = guild.channels.cache.find(c => c.name === safeName);
-  return ch?.id || null;
-}
