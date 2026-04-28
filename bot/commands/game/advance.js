@@ -29,17 +29,17 @@ module.exports = {
     const type = interaction.options.getString('type');
 
     if (type === 'act') {
+      const nextActIndex = session.act_index + 1;
       const result = await advanceAct(interaction.guild, session, scenario);
       if (result === 'no_more') return interaction.editReply('No more acts to advance.');
-      const newAct = scenario.acts[session.act_index + 1];
-      return interaction.editReply(`✅ Act advanced to **${newAct.name}**.`);
+      return interaction.editReply(`✅ Act advanced to **${scenario.acts[nextActIndex].name}**.`);
     }
 
     if (type === 'agenda') {
+      const nextAgendaIndex = session.agenda_index + 1;
       const result = await advanceAgenda(interaction.guild, session, scenario);
       if (result === 'defeat') return interaction.editReply('💀 Final agenda reached — scenario defeat!');
-      const newAgenda = scenario.agendas[session.agenda_index + 1];
-      return interaction.editReply(`✅ Agenda advanced to **${newAgenda.name}**. Doom reset to 0/${newAgenda.doom_threshold}.`);
+      return interaction.editReply(`✅ Agenda advanced to **${scenario.agendas[nextAgendaIndex].name}**. Doom reset to 0/${scenario.agendas[nextAgendaIndex].doom_threshold}.`);
     }
   },
 };
