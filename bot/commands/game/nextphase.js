@@ -5,6 +5,7 @@ const { runMythosEncounters } = require('../../engine/encounterEngine');
 const { findCardByCode } = require('../../engine/cardLookup');
 const { updateDoomTrack } = require('../../engine/doomTrack');
 const { handChannelName } = require('../../config');
+const { refreshHandDisplay } = require('../../engine/handDisplay');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -68,17 +69,7 @@ module.exports = {
         const p3 = getPlayerById(player.id);
         const drawn = drawCards(p3, 1);
         if (drawn.length > 0) {
-          const ch = interaction.guild.channels.cache.find(c => c.name === handChannelName(p3.investigator_name));
-          if (ch) {
-            for (const code of drawn) {
-              const result = findCardByCode(code);
-              if (result?.imagePath) {
-                await ch.send({ content: `🃏 Upkeep draw: **${result.card.name}**`, files: [new AttachmentBuilder(result.imagePath, { name: 'card.png' })] });
-              } else {
-                await ch.send(`🃏 Upkeep draw: \`${code}\``);
-              }
-            }
-          }
+          await refreshHandDisplay(interaction.guild, p3);
           steps.push('🃏 drew 1 card');
         } else {
           steps.push('🃏 no cards to draw');

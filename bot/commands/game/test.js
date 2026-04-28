@@ -3,6 +3,7 @@ const { requireSession, requirePlayer, getPlayer } = require('../../engine/gameS
 const { drawToken, displayToken } = require('../../engine/chaosBag');
 const { findCardByCode, getCardSkills } = require('../../engine/cardLookup');
 const { commitCards } = require('../../engine/deck');
+const { refreshHandDisplay } = require('../../engine/handDisplay');
 const allInvestigators = require('../../data/investigators/investigators.json');
 
 const STATS = ['willpower', 'intellect', 'combat', 'agility'];
@@ -141,7 +142,7 @@ module.exports = {
       commitLines.push(`  • **${name}** ${icons.length ? `[${icons.join(' ')}] +${contribution}` : '(no matching icons)'}`);
     }
 
-    if (codes.length > 0) commitCards(player, codes);
+    if (codes.length > 0) { commitCards(player, codes); await refreshHandDisplay(interaction.guild, player); }
 
     // Post committed card images to chaos channel
     if (codes.length > 0) {

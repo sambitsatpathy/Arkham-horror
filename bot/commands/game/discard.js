@@ -3,6 +3,7 @@ const { requireSession, requirePlayer, getPlayer } = require('../../engine/gameS
 const { discardCard } = require('../../engine/deck');
 const { findCardByCode } = require('../../engine/cardLookup');
 const { handChannelName } = require('../../config');
+const { refreshHandDisplay } = require('../../engine/handDisplay');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -53,8 +54,7 @@ module.exports = {
     const result = findCardByCode(cardCode);
     const name = result?.card.name || cardCode;
 
-    const handCh = interaction.guild.channels.cache.find(c => c.name === handChannelName(player.investigator_name));
-    if (handCh) await handCh.send(`🗑️ Discarded: **${name}**`);
+    await refreshHandDisplay(interaction.guild, player);
 
     await interaction.reply({ content: `✅ Discarded **${name}**.`, flags: 64 });
   },

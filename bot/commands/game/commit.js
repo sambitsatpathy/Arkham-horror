@@ -2,6 +2,7 @@ const { SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
 const { requireSession, requirePlayer, getPlayer } = require('../../engine/gameState');
 const { commitCards } = require('../../engine/deck');
 const { findCardByCode } = require('../../engine/cardLookup');
+const { refreshHandDisplay } = require('../../engine/handDisplay');
 
 function makeCardOption(opt, num) {
   return opt
@@ -88,6 +89,7 @@ module.exports = {
       }
     }
 
+    await refreshHandDisplay(interaction.guild, player);
     await interaction.editReply(`✅ Committed ${names.map(n => `**${n}**`).join(', ')} to the skill test — moved to discard.`);
   },
 };

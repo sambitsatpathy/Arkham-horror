@@ -3,6 +3,7 @@ const { requireSession, requirePlayer, getPlayer, getEnemy, updateEnemy } = requ
 const { drawToken, displayToken } = require('../../engine/chaosBag');
 const { findCardByCode, getCardSkills } = require('../../engine/cardLookup');
 const { commitCards } = require('../../engine/deck');
+const { refreshHandDisplay } = require('../../engine/handDisplay');
 const { updateLocationStatus } = require('../../engine/locationManager');
 const { getLocation } = require('../../engine/gameState');
 const allInvestigators = require('../../data/investigators/investigators.json');
@@ -120,7 +121,7 @@ module.exports = {
       commitLines.push(`  • **${name}** ${icons.length ? `[${icons.join(' ')}] +${contribution}` : '(no matching icons)'}`);
     }
 
-    if (codes.length > 0) commitCards(player, codes);
+    if (codes.length > 0) { commitCards(player, codes); await refreshHandDisplay(interaction.guild, player); }
 
     if (codes.length > 0) {
       const chaosCh = interaction.guild.channels.cache.get(session.chaos_channel_id);

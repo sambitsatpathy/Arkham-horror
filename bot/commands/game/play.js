@@ -3,6 +3,7 @@ const { requireSession, requirePlayer, getPlayer, getPlayerById, updatePlayer } 
 const { discardCard, playAsset } = require('../../engine/deck');
 const { findCardByCode, getCardCharges } = require('../../engine/cardLookup');
 const { handChannelName } = require('../../config');
+const { refreshHandDisplay } = require('../../engine/handDisplay');
 
 const TYPE_LABEL = {
   asset: 'Asset',
@@ -97,6 +98,7 @@ module.exports = {
           await handCh.send(msg);
         }
       }
+      await refreshHandDisplay(interaction.guild, player);
       return interaction.reply({ content: `✅ **${name}** is now in play${chargesNote}.${costNote}`, flags: 64 });
     }
 
@@ -116,6 +118,7 @@ module.exports = {
         await handCh.send(msg);
       }
     }
+    await refreshHandDisplay(interaction.guild, player);
     await interaction.reply({ content: `✅ Played **${name}**.${costNote}`, flags: 64 });
   },
 };
