@@ -69,7 +69,7 @@ module.exports = {
 
     // Try to find and edit an existing pinned dashboard message from the bot
     try {
-      const pinned = await handCh.messages.fetchPinned();
+      const pinned = await handCh.messages.fetchPins();
       const existing = pinned.find(m => m.author.id === interaction.client.user.id && m.content.startsWith('# 🔍'));
       if (existing) {
         await existing.edit(content);

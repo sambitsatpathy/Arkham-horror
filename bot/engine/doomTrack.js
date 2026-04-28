@@ -23,7 +23,7 @@ async function updateDoomTrack(channel, doom, doomThreshold, round, phase, playe
   const text = buildDoomTrackText(doom, doomThreshold, round, phase, players);
 
   try {
-    const pins = await channel.messages.fetchPinned();
+    const pins = await channel.messages.fetchPins();
     const existing = pins.find(m => m.author.bot && m.content.includes(SENTINEL));
     if (existing) { await existing.edit(text); return; }
   } catch (_) {}
