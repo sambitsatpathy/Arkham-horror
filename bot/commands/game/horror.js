@@ -21,8 +21,11 @@ module.exports = {
     const assets = JSON.parse(player.assets || '[]');
     return interaction.respond(
       assets
-        .filter(a => a.sanity > 0 && (!query || a.name.toLowerCase().includes(query)))
-        .map(a => ({ name: `${a.name} (${a.sanity}/${a.max_sanity} SAN)`, value: a.code }))
+        .filter(a => !query || a.name.toLowerCase().includes(query))
+        .map(a => {
+          const sanStr = a.max_sanity ? ` [${a.sanity}/${a.max_sanity} SAN]` : '';
+          return { name: `${a.name}${sanStr}`, value: a.code };
+        })
         .slice(0, 25)
     );
   },
@@ -40,8 +43,11 @@ module.exports = {
       const assets = JSON.parse(player.assets || '[]');
       const asset = assets.find(a => a.code === assetCode);
       if (!asset) return interaction.reply({ content: '❌ That asset is not in play.', flags: 64 });
-      if (asset.sanity == null || asset.sanity <= 0) {
-        return interaction.reply({ content: `❌ **${asset.name}** has no sanity to absorb horror.`, flags: 64 });
+      if (asset.sanity == null) {
+        return interaction.reply({ content: `❌ **${asset.name}** has no sanity tracking. Re-play the card to initialize it, or apply horror directly to yourself.`, flags: 64 });
+      }
+      if (asset.sanity <= 0) {
+        return interaction.reply({ content: `❌ **${asset.name}** already has 0 sanity.`, flags: 64 });
       }
 
       const newSan = horrorAsset(player, assetCode, amount);

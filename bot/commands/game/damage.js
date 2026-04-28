@@ -21,8 +21,11 @@ module.exports = {
     const assets = JSON.parse(player.assets || '[]');
     return interaction.respond(
       assets
-        .filter(a => a.hp > 0 && (!query || a.name.toLowerCase().includes(query)))
-        .map(a => ({ name: `${a.name} (${a.hp}/${a.max_hp} HP)`, value: a.code }))
+        .filter(a => !query || a.name.toLowerCase().includes(query))
+        .map(a => {
+          const hpStr = a.max_hp ? ` [${a.hp}/${a.max_hp} HP]` : '';
+          return { name: `${a.name}${hpStr}`, value: a.code };
+        })
         .slice(0, 25)
     );
   },
@@ -40,8 +43,11 @@ module.exports = {
       const assets = JSON.parse(player.assets || '[]');
       const asset = assets.find(a => a.code === assetCode);
       if (!asset) return interaction.reply({ content: '❌ That asset is not in play.', flags: 64 });
-      if (asset.hp == null || asset.hp <= 0) {
-        return interaction.reply({ content: `❌ **${asset.name}** has no HP to absorb damage.`, flags: 64 });
+      if (asset.hp == null) {
+        return interaction.reply({ content: `❌ **${asset.name}** has no HP tracking. Re-play the card to initialize its HP, or apply damage directly to yourself.`, flags: 64 });
+      }
+      if (asset.hp <= 0) {
+        return interaction.reply({ content: `❌ **${asset.name}** already has 0 HP.`, flags: 64 });
       }
 
       const newHp = damageAsset(player, assetCode, amount);
