@@ -149,6 +149,11 @@ function init() {
   if (!sessionCols.includes('campaign_dir')) {
     db.exec("ALTER TABLE game_session ADD COLUMN campaign_dir TEXT DEFAULT 'night_of_zealot'");
   }
+
+  const enemyCols = db.prepare("PRAGMA table_info(enemies)").all().map(c => c.name);
+  if (!enemyCols.includes('is_hunter')) {
+    db.exec("ALTER TABLE enemies ADD COLUMN is_hunter INTEGER DEFAULT 0");
+  }
 }
 
 module.exports = { getDb };
