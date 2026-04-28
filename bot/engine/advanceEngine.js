@@ -1,5 +1,5 @@
 const { AttachmentBuilder, ChannelType } = require('discord.js');
-const { updateSession, updatePlayer, getCampaign, getPlayers, getLocation } = require('./gameState');
+const { updateSession, updatePlayer, getCampaign, getPlayers } = require('./gameState');
 const { findCardByCode } = require('./cardLookup');
 const { revealLocation } = require('./locationManager');
 const { getDb } = require('../db/database');
