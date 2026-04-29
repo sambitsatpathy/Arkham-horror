@@ -5,7 +5,7 @@
 ```
 1. MYTHOS PHASE  → Host runs /mythos (places doom, draws encounter cards)
 2. INVESTIGATION → Each investigator takes 3 actions
-3. ENEMY PHASE   → Host runs /nextphase  (enemies move & attack)
+3. ENEMY PHASE   → Host runs /enemyphase (enemies move & attack), then /nextphase
 4. UPKEEP        → Host runs /nextphase  (ready cards, gain 1 resource, draw 1 card)
 5. REPEAT from 1
 ```
@@ -20,12 +20,16 @@
 | `/investigator name:<search>` | Pick your investigator. Autocomplete searches all investigators. |
 | `/investigator name:<search> deck_url:<arkhamdb url>` | Pick investigator and import a custom deck from ArkhamDB in one step. |
 | `/startgame campaign:<c> scenario:<s> difficulty:<d>` | **Host only.** Build Discord channels, deal opening hands, seed the encounter deck. |
+| `/mulligan` | After `/startgame` deals hands, swap unwanted cards. Interactive select. Round 1 only. |
 
 > You can re-run `/investigator` to change your choice until the game starts.
 
 ---
 
 ## Your 3 Actions Per Round
+
+> **Players:** Use `/action` to take all actions via an interactive guided menu.
+> The individual commands below are available to the **Host/admin** as an escape hatch.
 
 Every investigator gets **3 actions** each investigation phase. Each slash command below costs **1 action** unless noted.
 
@@ -190,14 +194,15 @@ Special tokens:
 |---------|-------------|
 | `/enemy list` | List all active enemies with their IDs, locations, and stats. |
 | `/enemy spawn name:<n> location:<l>` | **Host.** Spawn an enemy. Stats auto-loaded from card data if found. |
-| `/fight enemy_id:<id> [damage:<n>] [bonus_damage:<n>]` | Attack an enemy (skill test). |
-| `/evade enemy_id:<id>` | Evade an enemy (skill test). |
+| `/fight enemy_id:<id> [damage:<n>] [bonus_damage:<n>]` | **Host/admin.** Attack an enemy (skill test). Players use `/action`. |
+| `/evade enemy_id:<id>` | **Host/admin.** Evade an enemy (skill test). Players use `/action`. |
+| `/engage enemy_id:<id>` | Engage an **Aloof** enemy at your location (costs 1 action). |
 | `/enemy damage id:<id> amount:<n>` | Deal direct damage to an enemy (no skill test). |
 | `/enemy defeat id:<id>` | **Host.** Instantly defeat an enemy. |
 
 **Enemy keywords (resolve manually):**
 - **Hunter:** Moves toward the nearest investigator during the Enemy Phase.
-- **Aloof:** Doesn't engage automatically; must be engaged with a Fight or Engage action.
+- **Aloof:** Does not activate until engaged with `/engage`.
 - **Retaliate:** Deals damage/horror to the attacker on a miss.
 
 ---
@@ -224,7 +229,8 @@ Special tokens:
 | Command | What it does |
 |---------|-------------|
 | `/mythos` | Run the Mythos Phase: place doom, draw encounter cards for all players. |
-| `/nextphase` | Advance to the next phase: Investigation → Enemy → Upkeep → (loop). |
+| `/enemyphase` | **Host.** Activate all enemies: hunters move, engaged enemies attack. |
+| `/nextphase` | Advance phase: Investigation → Enemy → Upkeep → (loop). Run **after** `/enemyphase`. |
 | `/advance type:<act\|agenda>` | Advance the act or agenda. Posts new card image. Unlocks next act category. |
 | `/doom action:<add\|remove> count:<n>` | Manually adjust the doom counter. |
 | `/resolved` | Confirm your encounter card has been resolved (removes it from the queue). |
@@ -274,20 +280,20 @@ Harder difficulties replace positive modifiers with larger negatives.
 ## Typical Turn Example
 
 > **Investigation Phase — Roland Banks's turn**
+> Players use `/action` → choose action from the interactive menu.
 
 1. **Action 1 — Move**
-   `/move location:factory`
+   `/action` → **Move** → select *Factory* → moved
 
-2. **Action 2 — Fight** (enemy is here, using a .45 Automatic asset for +1 damage)
-   `/fight enemy_id:3 damage:2 bonus_damage:1 card1:Vicious Blow`
-   → Token drawn, Combat + 1 (icon) vs Fight 4 → Hit! Enemy takes 3 damage.
+2. **Action 2 — Fight** (enemy is here)
+   `/action` → **Fight** → select enemy → select commit card (*Vicious Blow*) → No commit if skipping
+   → Token drawn, Combat vs Fight 4 → Hit! Enemy takes 1 damage.
 
-3. **Action 3 — Investigate** (redirecting 1 incoming damage to Bulletproof Vest first)
-   `/damage amount:1 asset:Bulletproof Vest`
-   `/investigate card1:Deduction`
+3. **Action 3 — Investigate**
+   `/action` → **Investigate** → select commit card (*Deduction*) or skip
    → Token drawn, Intellect 3 + 1 (INT icon) vs Shroud 3 → Success! Clue collected.
 
-> **Then call `/nextphase` when all investigators are done.**
+> **Host: `/nextphase` when all investigators are done. Then `/enemyphase` to activate enemies.**
 
 ---
 
