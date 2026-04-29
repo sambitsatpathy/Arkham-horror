@@ -1,11 +1,12 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const { requireSession, requirePlayer, getSession } = require('../../engine/gameState');
 const { drawToken, formatPull } = require('../../engine/chaosBag');
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('pull')
-    .setDescription('Draw a chaos token for a skill test.'),
+    .setDescription('Draw a chaos token for a skill test.')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
   async execute(interaction) {
     const session = requireSession(interaction);

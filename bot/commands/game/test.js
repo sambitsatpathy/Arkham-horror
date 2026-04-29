@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
+const { SlashCommandBuilder, AttachmentBuilder, PermissionFlagsBits } = require('discord.js');
 const { requireSession, requirePlayer, getPlayer } = require('../../engine/gameState');
 const { drawToken, displayToken } = require('../../engine/chaosBag');
 const { findCardByCode, getCardSkills } = require('../../engine/cardLookup');
@@ -30,6 +30,7 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('test')
     .setDescription('Run a generic skill test (treachery, parley, etc.) against a set difficulty.')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addStringOption(opt =>
       opt.setName('stat')
         .setDescription('Skill to test')

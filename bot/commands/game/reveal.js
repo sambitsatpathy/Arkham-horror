@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const { requireSession, requireHost, getCampaign, getPlayers, getLocations } = require('../../engine/gameState');
 const { revealLocation } = require('../../engine/locationManager');
 
@@ -6,6 +6,7 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('reveal')
     .setDescription('Force-reveal a location. Host only.')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addStringOption(opt =>
       opt.setName('location')
         .setDescription('Location name or code')

@@ -1,10 +1,11 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const { requireSession, requirePlayer } = require('../../engine/gameState');
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('resolved')
-    .setDescription('Confirm that your encounter card has been resolved.'),
+    .setDescription('Confirm that your encounter card has been resolved.')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
   async execute(interaction) {
     const session = requireSession(interaction);

@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
+const { SlashCommandBuilder, AttachmentBuilder, PermissionFlagsBits } = require('discord.js');
 const { requireSession, requirePlayer, getPlayer } = require('../../engine/gameState');
 const { useCharge, addCharges } = require('../../engine/deck');
 const { findCardByCode } = require('../../engine/cardLookup');
@@ -8,6 +8,7 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('use')
     .setDescription('Spend or add charges on an in-play asset.')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addStringOption(opt =>
       opt.setName('asset')
         .setDescription('Asset to target')

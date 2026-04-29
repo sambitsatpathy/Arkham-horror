@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
+const { SlashCommandBuilder, AttachmentBuilder, PermissionFlagsBits } = require('discord.js');
 const { requireSession, requirePlayer, getPlayer, getEnemy } = require('../../engine/gameState');
 const { drawToken, displayToken } = require('../../engine/chaosBag');
 const { damageEnemy, defeatEnemy } = require('../../engine/enemyEngine');
@@ -29,6 +29,7 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('fight')
     .setDescription('Fight an enemy. Tests Combat vs enemy Fight rating.')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addIntegerOption(opt =>
       opt.setName('enemy_id')
         .setDescription('Enemy ID (from /enemy list)')

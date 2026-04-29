@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
+const { SlashCommandBuilder, AttachmentBuilder, PermissionFlagsBits } = require('discord.js');
 const { requireSession, requirePlayer, getPlayer, getPlayerById, updatePlayer } = require('../../engine/gameState');
 const { discardCard, playAsset } = require('../../engine/deck');
 const { findCardByCode, getCardCharges, getCardSoak } = require('../../engine/cardLookup');
@@ -16,6 +16,7 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('play')
     .setDescription('Play a card from your hand.')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addStringOption(opt =>
       opt.setName('card')
         .setDescription('Card to play')

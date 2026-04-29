@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const { requireSession, requirePlayer, getPlayer, updatePlayer, addCampaignLog, getCampaign } = require('../../engine/gameState');
 const { horrorAsset } = require('../../engine/deck');
 
@@ -6,6 +6,7 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('horror')
     .setDescription('Take sanity damage (horror) — to yourself or redirect to an in-play asset.')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addIntegerOption(opt =>
       opt.setName('amount').setDescription('Horror amount').setRequired(true).setMinValue(1))
     .addStringOption(opt =>

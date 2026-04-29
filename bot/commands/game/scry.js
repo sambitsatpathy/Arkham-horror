@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
+const { SlashCommandBuilder, AttachmentBuilder, PermissionFlagsBits } = require('discord.js');
 const { requireSession, requirePlayer, getPlayer, getPlayers, getCampaign, updatePlayer } = require('../../engine/gameState');
 const { findCardByCode } = require('../../engine/cardLookup');
 const { handChannelName } = require('../../config');
@@ -13,6 +13,7 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('scry')
     .setDescription('Look at the top cards of a deck, then put them back in any order.')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addSubcommand(sub =>
       sub.setName('reveal')
         .setDescription('Look at the top N cards of a deck.')

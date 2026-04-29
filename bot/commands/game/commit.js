@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
+const { SlashCommandBuilder, AttachmentBuilder, PermissionFlagsBits } = require('discord.js');
 const { requireSession, requirePlayer, getPlayer } = require('../../engine/gameState');
 const { commitCards } = require('../../engine/deck');
 const { findCardByCode } = require('../../engine/cardLookup');
@@ -16,6 +16,7 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('commit')
     .setDescription('Commit cards from your hand to a skill test (they go to discard after).')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addStringOption(opt => makeCardOption(opt, 1))
     .addStringOption(opt => makeCardOption(opt, 2))
     .addStringOption(opt => makeCardOption(opt, 3))

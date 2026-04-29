@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
+const { SlashCommandBuilder, AttachmentBuilder, PermissionFlagsBits } = require('discord.js');
 const { requireSession, requireHost, getSession, getPlayer, getPlayerById, getCampaign, getPlayers, updateSession, updatePlayer } = require('../../engine/gameState');
 const { drawCards } = require('../../engine/deck');
 const { runMythosEncounters } = require('../../engine/encounterEngine');
@@ -12,7 +12,8 @@ const { loadScenario } = require('../../engine/scenarioLoader');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('nextphase')
-    .setDescription('Advance to the next phase of the round. Host only.'),
+    .setDescription('Advance to the next phase of the round. Host only.')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
   async execute(interaction) {
     const session = requireSession(interaction);

@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const { requireSession, requireHost, getSession, updateSession, getCampaign, getPlayers } = require('../../engine/gameState');
 const { runMythosEncounters } = require('../../engine/encounterEngine');
 const { advanceAgenda } = require('../../engine/advanceEngine');
@@ -7,7 +7,8 @@ const { loadScenario } = require('../../engine/scenarioLoader');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('mythos')
-    .setDescription('Trigger the Mythos phase. Host only.'),
+    .setDescription('Trigger the Mythos phase. Host only.')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
   async execute(interaction) {
     const session = requireSession(interaction);

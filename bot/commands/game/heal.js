@@ -1,10 +1,11 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const { requireSession, requirePlayer, updatePlayer } = require('../../engine/gameState');
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('heal')
     .setDescription('Heal damage or horror.')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addStringOption(opt =>
       opt.setName('type')
         .setDescription('What to heal')

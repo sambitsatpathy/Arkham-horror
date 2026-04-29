@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
+const { SlashCommandBuilder, AttachmentBuilder, PermissionFlagsBits } = require('discord.js');
 const { requireSession, requireHost, requirePlayer, getEnemy, getEnemies, getLocation, getLocations, getCampaign, getPlayers } = require('../../engine/gameState');
 const { spawnEnemy, spawnEnemyManual, damageEnemy, defeatEnemy } = require('../../engine/enemyEngine');
 const { updateLocationStatus } = require('../../engine/locationManager');
@@ -8,6 +8,7 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('enemy')
     .setDescription('Manage enemies.')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addSubcommand(sub =>
       sub.setName('spawn')
         .setDescription('Spawn an enemy at a location. Host only.')

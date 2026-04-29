@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
+const { SlashCommandBuilder, AttachmentBuilder, PermissionFlagsBits } = require('discord.js');
 const { requireSession, requirePlayer, getPlayer, getLocation, updateLocation, updatePlayer } = require('../../engine/gameState');
 const { drawToken, displayToken } = require('../../engine/chaosBag');
 const { updateLocationStatus } = require('../../engine/locationManager');
@@ -27,6 +27,7 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('investigate')
     .setDescription('Investigate your current location.')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addStringOption(opt =>
       opt.setName('stat')
         .setDescription('Stat to use (default: Intellect)')

@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const { requireSession, requireHost, getSession, getCampaign, getPlayers } = require('../../engine/gameState');
 const { activateEnemies } = require('../../engine/enemyEngine');
 const { updateDoomTrack } = require('../../engine/doomTrack');
@@ -6,7 +6,8 @@ const { updateDoomTrack } = require('../../engine/doomTrack');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('enemyphase')
-    .setDescription('Trigger enemy activation. Hunter enemies move and attack. Host only.'),
+    .setDescription('Trigger enemy activation. Hunter enemies move and attack. Host only.')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
   async execute(interaction) {
     const session = requireSession(interaction);

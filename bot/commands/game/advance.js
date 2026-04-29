@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const { requireSession, requireHost } = require('../../engine/gameState');
 const { advanceAgenda, advanceAct } = require('../../engine/advanceEngine');
 const { loadScenario } = require('../../engine/scenarioLoader');
@@ -7,6 +7,7 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('advance')
     .setDescription('Advance the act or agenda. Host only.')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addStringOption(opt =>
       opt.setName('type')
         .setDescription('What to advance')

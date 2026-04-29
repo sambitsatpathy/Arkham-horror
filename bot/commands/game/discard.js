@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const { requireSession, requirePlayer, getPlayer } = require('../../engine/gameState');
 const { discardCard } = require('../../engine/deck');
 const { findCardByCode } = require('../../engine/cardLookup');
@@ -9,6 +9,7 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('discard')
     .setDescription('Discard a card from your hand.')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addStringOption(opt =>
       opt.setName('card')
         .setDescription('Card to discard')

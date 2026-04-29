@@ -1,10 +1,11 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const { requireSession, requirePlayer, getPlayer, updatePlayer } = require('../../engine/gameState');
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('exhaust')
     .setDescription('Exhaust or ready an in-play asset.')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addStringOption(opt =>
       opt.setName('asset')
         .setDescription('Asset to exhaust or ready')

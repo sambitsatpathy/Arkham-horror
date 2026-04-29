@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const { requireSession, requirePlayer, getLocation, getLocations, updateLocation } = require('../../engine/gameState');
 const { updateLocationStatus } = require('../../engine/locationManager');
 
@@ -6,6 +6,7 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('clue')
     .setDescription('Add or remove clues on a location.')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addStringOption(opt =>
       opt.setName('action')
         .setDescription('add or remove')

@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const { requireSession, requirePlayer, getSession, getPlayer, getCampaign, getPlayers, getLocation, getLocations, updatePlayer } = require('../../engine/gameState');
 const { revealLocation, updateLocationStatus } = require('../../engine/locationManager');
 
@@ -12,6 +12,7 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('move')
     .setDescription('Move to a location.')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addStringOption(opt =>
       opt.setName('location')
         .setDescription('Location to move to')

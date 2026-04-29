@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const { requireSession, requirePlayer, getPlayer, updatePlayer } = require('../../engine/gameState');
 const { findCardByCode, loadAllCards } = require('../../engine/cardLookup');
 
@@ -21,6 +21,7 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('subdeck')
     .setDescription('Manage the card deck attached to an in-play tome or asset.')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addSubcommand(sub =>
       sub.setName('init')
         .setDescription('Set up a subdeck on an asset with specific cards (replaces existing).')

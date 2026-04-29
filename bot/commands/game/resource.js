@@ -1,10 +1,11 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const { requireSession, requirePlayer, updatePlayer } = require('../../engine/gameState');
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('resource')
-    .setDescription('Gain 1 resource.'),
+    .setDescription('Gain 1 resource.')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
   async execute(interaction) {
     const session = requireSession(interaction);

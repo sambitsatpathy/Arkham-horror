@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const { requireSession, requirePlayer } = require('../../engine/gameState');
 const { drawCards } = require('../../engine/deck');
 const { refreshHandDisplay } = require('../../engine/handDisplay');
@@ -7,6 +7,7 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('draw')
     .setDescription('Draw cards from your deck.')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addIntegerOption(opt =>
       opt.setName('count')
         .setDescription('Number of cards to draw (default 1)')
