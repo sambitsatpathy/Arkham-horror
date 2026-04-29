@@ -6,6 +6,8 @@ const { findCardByCode } = require('../../engine/cardLookup');
 const { updateDoomTrack } = require('../../engine/doomTrack');
 const { handChannelName } = require('../../config');
 const { refreshHandDisplay } = require('../../engine/handDisplay');
+const { advanceAgenda } = require('../../engine/advanceEngine');
+const { loadScenario } = require('../../engine/scenarioLoader');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -97,14 +99,21 @@ module.exports = {
 
       const afterSession = getSession();
       if (afterSession.doom >= afterSession.doom_threshold) {
-        if (doomCh) await doomCh.send('⚠️ **Doom threshold reached! Use `/advance agenda`.**');
+        const scenario = loadScenario(afterSession);
+        if (scenario) {
+          if (doomCh) await doomCh.send('☠️ **Doom threshold reached — agenda advancing automatically...**');
+          await advanceAgenda(interaction.guild, afterSession, scenario);
+        } else {
+          if (doomCh) await doomCh.send('⚠️ **Doom threshold reached! Use `/advance agenda`.**');
+        }
       }
 
       updateSession(session.id, { phase: 'investigation' });
-      await updateDoomTrack(doomCh, newDoom, session.doom_threshold, newRound, 'Investigation', players);
+      const finalSession = getSession();
+      await updateDoomTrack(doomCh, finalSession.doom, finalSession.doom_threshold, newRound, 'Investigation', players);
 
       return interaction.editReply(
-        `✅ **Round ${newRound}** begins. Doom is now ${newDoom}/${session.doom_threshold}. Check ${encounterCh || '#encounter-deck'} to resolve encounter cards.`
+        `✅ **Round ${newRound}** begins. Doom is now ${finalSession.doom}/${finalSession.doom_threshold}. Check ${encounterCh || '#encounter-deck'} to resolve encounter cards.`
       );
     }
 

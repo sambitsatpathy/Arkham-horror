@@ -17,7 +17,8 @@ module.exports = {
         .addIntegerOption(o => o.setName('fight').setDescription('Fight value').setMinValue(1))
         .addIntegerOption(o => o.setName('evade').setDescription('Evade value').setMinValue(1))
         .addIntegerOption(o => o.setName('damage').setDescription('Damage').setMinValue(0))
-        .addIntegerOption(o => o.setName('horror').setDescription('Horror').setMinValue(0)))
+        .addIntegerOption(o => o.setName('horror').setDescription('Horror').setMinValue(0))
+        .addBooleanOption(o => o.setName('hunter').setDescription('Is this enemy a Hunter (moves toward investigators?)')))
     .addSubcommand(sub =>
       sub.setName('damage')
         .setDescription('Deal damage to an enemy.')
@@ -61,6 +62,7 @@ module.exports = {
           enemy_evade: interaction.options.getInteger('evade') || fullCard.enemy_evade || c.enemy_evade || 1,
           enemy_damage: interaction.options.getInteger('damage') ?? fullCard.enemy_damage ?? c.enemy_damage ?? 1,
           enemy_horror: interaction.options.getInteger('horror') ?? fullCard.enemy_horror ?? c.enemy_horror ?? 1,
+          is_hunter: interaction.options.getBoolean('hunter') ? 1 : 0,
         });
 
         if (cardResult.imagePath) {
@@ -78,6 +80,7 @@ module.exports = {
           interaction.options.getInteger('evade') || 1,
           interaction.options.getInteger('damage') ?? 1,
           interaction.options.getInteger('horror') ?? 1,
+          interaction.options.getBoolean('hunter') ? 1 : 0,
         );
         const locCh = interaction.guild.channels.cache.get(loc.channel_id);
         if (locCh) await locCh.send(`👹 **${nameQuery}** spawns in **${loc.name}**!`);
