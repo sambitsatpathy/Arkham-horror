@@ -53,6 +53,40 @@ client.on('interactionCreate', async interaction => {
     return;
   }
 
+  // Component interaction routing
+  if (interaction.isButton() || interaction.isStringSelectMenu() || interaction.isModalSubmit()) {
+    const customId = interaction.customId;
+
+    if (customId.startsWith('mull:')) {
+      const mulligan = client.commands.get('mulligan');
+      if (!mulligan) return;
+      try {
+        if (interaction.isStringSelectMenu()) return await mulligan.handleSelect(interaction);
+        if (interaction.isButton()) return await mulligan.handleButton(interaction);
+      } catch (e) {
+        console.error('Mulligan interaction error:', e);
+        await interaction.reply({ content: `❌ Error: ${e.message}`, flags: 64 }).catch(() => {});
+      }
+      return;
+    }
+
+    if (customId.startsWith('ah:')) {
+      const action = client.commands.get('action');
+      if (!action) return;
+      try {
+        if (interaction.isButton()) return await action.handleButton(interaction);
+        if (interaction.isStringSelectMenu()) return await action.handleSelect(interaction);
+        if (interaction.isModalSubmit()) return await action.handleModal(interaction);
+      } catch (e) {
+        console.error('Action hub interaction error:', e);
+        await interaction.reply({ content: `❌ Error: ${e.message}`, flags: 64 }).catch(() => {});
+      }
+      return;
+    }
+
+    return;
+  }
+
   if (!interaction.isChatInputCommand()) return;
 
   const command = client.commands.get(interaction.commandName);
