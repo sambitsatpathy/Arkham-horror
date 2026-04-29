@@ -196,3 +196,126 @@ module.exports = {
     await interaction.editReply(lines.join('\n'));
   },
 };
+
+async function executeInvestigateAction(interaction, player, session, commitCodes = []) {
+  const { getLocation, updateLocation, updatePlayer, getPlayerById } = require('../../engine/gameState');
+  const { drawToken, displayToken } = require('../../engine/chaosBag');
+  const { updateLocationStatus } = require('../../engine/locationManager');
+  const { findCardByCode, getCardSkills } = require('../../engine/cardLookup');
+  const { commitCards } = require('../../engine/deck');
+  const { refreshHandDisplay } = require('../../engine/handDisplay');
+  const { AttachmentBuilder } = require('discord.js');
+  const allInvestigators = require('../../data/investigators/investigators.json');
+
+  const SPECIAL_TOKENS = new Set(['skull', 'cultist', 'tablet', 'elder_thing', 'auto_fail', 'elder_sign']);
+  const STAT_SHORT = { intellect: 'INT', willpower: 'WIL', combat: 'CMB', agility: 'AGI' };
+  const STAT_ICON = { intellect: '🔎', willpower: '🕯️', combat: '⚔️', agility: '💨' };
+
+  const statName = 'intellect';
+  const codes = commitCodes;
+
+  const loc = getLocation(session.id, player.location_code);
+  if (!loc || loc.status === 'hidden') {
+    const msg = { content: '❌ Your current location is hidden or invalid.', flags: 64 };
+    return interaction.replied || interaction.deferred ? interaction.editReply(msg) : interaction.update(msg);
+  }
+
+  const freshPlayer = getPlayerById(player.id);
+  const hand = JSON.parse(freshPlayer.hand || '[]');
+  const notInHand = codes.filter(c => !hand.includes(c));
+  if (notInHand.length) {
+    const msg = { content: `❌ Not in your hand: ${notInHand.join(', ')}`, flags: 64 };
+    return interaction.update ? interaction.update(msg) : interaction.reply(msg);
+  }
+
+  const inv = allInvestigators.find(i => i.code === freshPlayer.investigator_code);
+  const statValue = inv?.skills?.[statName] ?? 0;
+  const short = STAT_SHORT[statName];
+  const icon = STAT_ICON[statName];
+
+  let commitBonus = 0;
+  const commitLines = [];
+  for (const code of codes) {
+    const skills = getCardSkills(code) || {};
+    const contribution = (skills[statName] || 0) + (skills.wild || 0);
+    commitBonus += contribution;
+    const result = findCardByCode(code);
+    const name = result?.card.name || code;
+    const icons = [];
+    if (skills[statName]) icons.push(`${short}×${skills[statName]}`);
+    if (skills.wild) icons.push(`WILD×${skills.wild}`);
+    commitLines.push(`  • **${name}** [${icons.join(' ')}] +${contribution}`);
+  }
+
+  if (codes.length > 0) {
+    commitCards(freshPlayer, codes);
+    await refreshHandDisplay(interaction.guild, freshPlayer);
+    const chaosCh = interaction.guild.channels.cache.get(session.chaos_channel_id);
+    if (chaosCh) {
+      for (const code of codes) {
+        const result = findCardByCode(code);
+        if (result?.imagePath) {
+          const att = new AttachmentBuilder(result.imagePath, { name: 'card.png' });
+          await chaosCh.send({ content: `${icon} **${freshPlayer.investigator_name}** commits **${result.card.name}** to Investigate`, files: [att] });
+        }
+      }
+    }
+  }
+
+  const shroud = loc.shroud;
+  const token = drawToken(session.difficulty);
+
+  function tokenModifier(t) {
+    if (t === 'auto_fail') return -Infinity;
+    if (t === 'elder_sign') return 1;
+    const n = parseInt(t, 10);
+    return isNaN(n) ? 0 : n;
+  }
+
+  const mod = tokenModifier(token);
+  const isAutoFail = token === 'auto_fail';
+  const isElderSign = token === 'elder_sign';
+  const total = isAutoFail ? -Infinity : statValue + commitBonus + mod;
+  const success = !isAutoFail && total >= shroud;
+
+  const tokenLabel = displayToken(token);
+  const specialNote = SPECIAL_TOKENS.has(token) && !isElderSign ? ' *(resolve scenario effect manually)*'
+    : isElderSign ? ' *(apply your elder sign ability)*' : '';
+
+  const parts = [`${statValue} (${short})`];
+  if (commitBonus > 0) parts.push(`+${commitBonus} (commit)`);
+  if (!isAutoFail) parts.push(`${mod >= 0 ? '+' : ''}${mod} (token)`);
+  const mathLine = isAutoFail ? 'Auto-fail — investigation fails'
+    : `${parts.join(' ')} = **${total}** vs Shroud **${shroud}**`;
+
+  const lines = [
+    `## 🔎 Investigate — ${loc.name}`,
+    `**${freshPlayer.investigator_name}** | ${short}: ${statValue} | Shroud: ${shroud}`,
+  ];
+  if (commitLines.length) { lines.push('**Committed:**'); lines.push(...commitLines); }
+  lines.push(`**Token:** ${tokenLabel}${specialNote}`, `**Result:** ${mathLine}`, '');
+
+  let cluesGained = 0;
+  if (success) {
+    cluesGained = 1;
+    const newClues = loc.clues - 1;
+    updateLocation(loc.id, { clues: Math.max(0, newClues) });
+    updatePlayer(freshPlayer.id, { clues: freshPlayer.clues + cluesGained });
+    const updatedLoc = { ...loc, clues: Math.max(0, newClues) };
+    await updateLocationStatus(interaction.guild, session, updatedLoc);
+    lines.push(`✅ **Success!** Collected ${cluesGained} clue. Location clues: ${Math.max(0, newClues)}`);
+  } else {
+    lines.push('❌ **Fail.** No clue collected.');
+  }
+
+  const chaosCh = interaction.guild.channels.cache.get(session.chaos_channel_id);
+  if (chaosCh) {
+    await chaosCh.send(`🔎 **${freshPlayer.investigator_name}** investigates **${loc.name}** — token: ${tokenLabel} — ${success ? '✅ Clue!' : '❌ Fail'}`);
+  }
+
+  const replyContent = { content: lines.join('\n'), components: [], flags: 64 };
+  if (interaction.update) return interaction.update(replyContent);
+  return interaction.editReply ? interaction.editReply(replyContent) : interaction.reply(replyContent);
+}
+
+module.exports.executeInvestigateAction = executeInvestigateAction;
