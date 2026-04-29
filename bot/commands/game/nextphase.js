@@ -109,10 +109,11 @@ module.exports = {
       }
 
       updateSession(session.id, { phase: 'investigation' });
-      await updateDoomTrack(doomCh, newDoom, session.doom_threshold, newRound, 'Investigation', players);
+      const finalSession = getSession();
+      await updateDoomTrack(doomCh, finalSession.doom, finalSession.doom_threshold, newRound, 'Investigation', players);
 
       return interaction.editReply(
-        `✅ **Round ${newRound}** begins. Doom is now ${newDoom}/${session.doom_threshold}. Check ${encounterCh || '#encounter-deck'} to resolve encounter cards.`
+        `✅ **Round ${newRound}** begins. Doom is now ${finalSession.doom}/${finalSession.doom_threshold}. Check ${encounterCh || '#encounter-deck'} to resolve encounter cards.`
       );
     }
 

@@ -109,6 +109,7 @@ function init() {
       horror          INTEGER NOT NULL,
       is_alerted      INTEGER DEFAULT 0,
       is_exhausted    INTEGER DEFAULT 0,
+      is_hunter       INTEGER DEFAULT 0,
       FOREIGN KEY (session_id) REFERENCES game_session(id)
     );
 

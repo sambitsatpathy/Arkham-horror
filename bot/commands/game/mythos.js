@@ -1,6 +1,8 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { requireSession, requireHost, getSession, updateSession, getCampaign, getPlayers } = require('../../engine/gameState');
 const { runMythosEncounters } = require('../../engine/encounterEngine');
+const { advanceAgenda } = require('../../engine/advanceEngine');
+const { loadScenario } = require('../../engine/scenarioLoader');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -31,7 +33,13 @@ module.exports = {
 
     const currentSession = getSession();
     if (currentSession.doom >= currentSession.doom_threshold) {
-      if (doomCh) await doomCh.send('⚠️ **Doom threshold reached! Use `/advance agenda`.**');
+      const scenario = loadScenario(currentSession);
+      if (scenario) {
+        if (doomCh) await doomCh.send('☠️ **Doom threshold reached — agenda advancing automatically...**');
+        await advanceAgenda(interaction.guild, currentSession, scenario);
+      } else {
+        if (doomCh) await doomCh.send('⚠️ **Doom threshold reached! Use `/advance agenda`.**');
+      }
     }
 
     updateSession(session.id, { phase: 'investigation' });

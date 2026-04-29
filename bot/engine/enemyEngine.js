@@ -65,10 +65,12 @@ async function activateEnemies(guild, session, players) {
     let target = engagedPlayer;
 
     if (!engagedPlayer && enemy.is_hunter) {
+      // Simplified: move to first active player's location.
+      // True "nearest" requires adjacency graph not yet modelled.
       const dest = activePlayers[0];
       if (!dest) continue;
 
-      db.prepare('UPDATE enemies SET location_code = ? WHERE id = ?').run(dest.location_code, enemy.id);
+      updateEnemy(enemy.id, { location_code: dest.location_code });
 
       const oldLoc = getLocation(session.id, enemy.location_code);
       const newLoc = getLocation(session.id, dest.location_code);
