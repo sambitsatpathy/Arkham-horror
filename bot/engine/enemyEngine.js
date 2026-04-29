@@ -6,8 +6,8 @@ const { findCardByCode } = require('./cardLookup');
 function spawnEnemy(sessionId, locationCode, cardData) {
   const db = getDb();
   const result = db.prepare(`
-    INSERT INTO enemies (session_id, location_code, card_code, name, hp, max_hp, fight, evade, damage, horror, is_hunter)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO enemies (session_id, location_code, card_code, name, hp, max_hp, fight, evade, damage, horror, is_hunter, is_aloof)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
     sessionId,
     locationCode,
@@ -20,16 +20,17 @@ function spawnEnemy(sessionId, locationCode, cardData) {
     cardData.enemy_damage || 1,
     cardData.enemy_horror || 1,
     cardData.is_hunter || 0,
+    cardData.is_aloof || 0,
   );
   return result.lastInsertRowid;
 }
 
-function spawnEnemyManual(sessionId, locationCode, name, hp, fight, evade, damage, horror, isHunter = 0) {
+function spawnEnemyManual(sessionId, locationCode, name, hp, fight, evade, damage, horror, isHunter = 0, isAloof = 0) {
   const db = getDb();
   const result = db.prepare(`
-    INSERT INTO enemies (session_id, location_code, card_code, name, hp, max_hp, fight, evade, damage, horror, is_hunter)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(sessionId, locationCode, 'manual', name, hp, hp, fight, evade, damage, horror, isHunter);
+    INSERT INTO enemies (session_id, location_code, card_code, name, hp, max_hp, fight, evade, damage, horror, is_hunter, is_aloof)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(sessionId, locationCode, 'manual', name, hp, hp, fight, evade, damage, horror, isHunter, isAloof);
   return result.lastInsertRowid;
 }
 
@@ -53,6 +54,12 @@ async function activateEnemies(guild, session, players) {
   for (const enemy of enemies) {
     if (enemy.is_exhausted) {
       results.push(`💤 **${enemy.name}** [${enemy.id}] is exhausted — skipped.`);
+      continue;
+    }
+
+    // Skip aloof enemies — they don't activate until engaged via /engage
+    if (enemy.is_aloof) {
+      results.push(`🛡️ **${enemy.name}** [${enemy.id}] is aloof — not activated (use /engage to engage it first)`);
       continue;
     }
 
