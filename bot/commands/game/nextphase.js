@@ -36,9 +36,9 @@ module.exports = {
         `## 👹 Enemy Phase — Round ${session.round}`,
         '',
         '**Steps:**',
-        '1. Each **ready, unengaged Hunter enemy** moves toward the nearest investigator.',
-        '2. Each **enemy engaged with an investigator** attacks them.',
-        '3. Use `/enemy` to track enemy state. When done, use `/nextphase` to continue.',
+        '1. Run `/enemyphase` to activate enemies (hunters move, engaged enemies attack).',
+        '2. Resolve manual effects: **Retaliate**, **Aloof** (use `/engage`), etc.',
+        '3. Use `/nextphase` to continue to Upkeep when done.',
       ].join('\n');
       if (doomCh) await doomCh.send(msg);
       await updateDoomTrack(doomCh, session.doom, session.doom_threshold, session.round, 'Enemy', players);
@@ -77,10 +77,23 @@ module.exports = {
           steps.push('🃏 no cards to draw');
         }
 
+        // 4. Hand size check
+        const p4 = getPlayerById(player.id);
+        const currentHand = JSON.parse(p4.hand || '[]');
+        if (currentHand.length > 8) {
+          const handCh = interaction.guild.channels.cache.find(c =>
+            c.name === handChannelName(p4.investigator_name)
+          );
+          if (handCh) {
+            await handCh.send(`⚠️ **${p4.investigator_name}** has **${currentHand.length}** cards in hand (limit 8). Use \`/discard\` to reduce to 8.`);
+          }
+          steps.push(`⚠️ hand has ${currentHand.length} cards — discard to 8`);
+        }
+
         summaryLines.push(`**${player.investigator_name}**: ${steps.join(', ')}`);
       }
 
-      summaryLines.push('', 'Use `/nextphase` to begin the Mythos phase.');
+      summaryLines.push('', '**Hand size warnings** (if any) sent to hand channels.', '', 'Host: use `/nextphase` to begin the Mythos phase.');
       if (doomCh) await doomCh.send(summaryLines.join('\n'));
       await updateDoomTrack(doomCh, session.doom, session.doom_threshold, session.round, 'Upkeep', players);
       return interaction.editReply('✅ **Upkeep Phase** complete. All players readied, drew 1 card, gained 1 resource.');
@@ -109,6 +122,12 @@ module.exports = {
       }
 
       updateSession(session.id, { phase: 'investigation' });
+      if (doomCh) await doomCh.send([
+        `## 🔍 Investigation Phase — Round ${newRound}`,
+        '',
+        'Each investigator gets **3 actions**. Use `/action` to take them.',
+        'Host: `/nextphase` when all investigators are done.',
+      ].join('\n'));
       const finalSession = getSession();
       await updateDoomTrack(doomCh, finalSession.doom, finalSession.doom_threshold, newRound, 'Investigation', players);
 
@@ -120,7 +139,12 @@ module.exports = {
     // ── MYTHOS → INVESTIGATION (manual fallback) ─────────────────────────
     if (current === 'mythos') {
       updateSession(session.id, { phase: 'investigation' });
-      if (doomCh) await doomCh.send(`## 🔍 Investigation Phase — Round ${session.round}`);
+      if (doomCh) await doomCh.send([
+        `## 🔍 Investigation Phase — Round ${session.round}`,
+        '',
+        'Each investigator gets **3 actions**. Use `/action` to take them.',
+        'Host: `/nextphase` when all investigators are done.',
+      ].join('\n'));
       await updateDoomTrack(doomCh, session.doom, session.doom_threshold, session.round, 'Investigation', players);
       return interaction.editReply('✅ **Investigation Phase** has begun. Each investigator takes up to 3 actions.');
     }
