@@ -155,6 +155,9 @@ function init() {
   if (!enemyCols.includes('is_hunter')) {
     db.exec("ALTER TABLE enemies ADD COLUMN is_hunter INTEGER DEFAULT 0");
   }
+  if (!enemyCols.includes('is_aloof')) {
+    db.exec("ALTER TABLE enemies ADD COLUMN is_aloof INTEGER DEFAULT 0");
+  }
 }
 
 module.exports = { getDb };
