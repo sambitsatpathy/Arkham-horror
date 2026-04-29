@@ -89,3 +89,32 @@ module.exports = {
     }
   },
 };
+
+async function executeMoveAction(interaction, player, session, locationCode) {
+  const { getLocations, updatePlayer, getPlayerById } = require('../../engine/gameState');
+  const { revealLocation } = require('../../engine/locationManager');
+
+  const locations = getLocations(session.id);
+  const loc = locations.find(l => l.code === locationCode);
+  if (!loc) {
+    const msg = { content: `❌ Location not found: ${locationCode}`, flags: 64 };
+    return interaction.update ? interaction.update(msg) : interaction.reply(msg);
+  }
+
+  updatePlayer(player.id, { location_code: loc.code });
+
+  if (loc.status === 'hidden') {
+    await revealLocation(interaction.guild, session, loc);
+  }
+
+  const locCh = interaction.guild.channels.cache.get(loc.channel_id);
+  if (locCh) {
+    const fresh = getPlayerById(player.id);
+    await locCh.send(`🚶 **${fresh.investigator_name}** moves to **${loc.name}**.`);
+  }
+
+  const replyContent = { content: `✅ Moved to **${loc.name}**.`, components: [], flags: 64 };
+  return interaction.update ? interaction.update(replyContent) : interaction.reply(replyContent);
+}
+
+module.exports.executeMoveAction = executeMoveAction;
