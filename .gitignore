@@ -4,6 +4,8 @@ bot/.env
 # Dependencies & generated files
 bot/node_modules/
 bot/db/arkham.db
+bot/db/arkham.db-shm
+bot/db/arkham.db-wal
 bot/data/location_backs/
 
 # Card image packs (~800 MB total, not committed to git)
