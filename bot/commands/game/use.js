@@ -80,3 +80,40 @@ module.exports = {
     }
   },
 };
+
+async function executeUseAsset(interaction, player, session, assetCode) {
+  const { getPlayerById } = require('../../engine/gameState');
+  const { useCharge, addCharges } = require('../../engine/deck');
+  const { handChannelName } = require('../../config');
+
+  const freshPlayer = getPlayerById(player.id);
+  const assets = JSON.parse(freshPlayer.assets || '[]');
+  const asset = assets.find(a => a.code === assetCode);
+
+  if (!asset) {
+    const msg = { content: '❌ That asset is not in play.', flags: 64 };
+    return interaction.update ? interaction.update(msg) : interaction.reply(msg);
+  }
+
+  if (asset.charges <= 0) {
+    const msg = { content: `❌ **${asset.name}** has no charges remaining.`, flags: 64 };
+    return interaction.update ? interaction.update(msg) : interaction.reply(msg);
+  }
+
+  const handCh = interaction.guild.channels.cache.find(c => c.name === handChannelName(freshPlayer.investigator_name));
+  const remaining = useCharge(freshPlayer, assetCode);
+
+  let replyText;
+  if (remaining === 0) {
+    replyText = `⚡ Used last charge on **${asset.name}** — it has been discarded.`;
+    if (handCh) await handCh.send(`⚡ Used last charge on **${asset.name}** — asset discarded.`);
+  } else {
+    replyText = `⚡ Used charge on **${asset.name}** — ${remaining} charge${remaining !== 1 ? 's' : ''} remaining.`;
+    if (handCh) await handCh.send(replyText);
+  }
+
+  const replyContent = { content: replyText, components: [], flags: 64 };
+  return interaction.update ? interaction.update(replyContent) : interaction.editReply(replyContent);
+}
+
+module.exports.executeUseAsset = executeUseAsset;

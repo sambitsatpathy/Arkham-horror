@@ -199,3 +199,79 @@ module.exports = {
     await interaction.editReply(lines.join('\n'));
   },
 };
+
+async function executeTestAction(interaction, player, session, stat, difficulty, commitCodes = []) {
+  const { getPlayerById } = require('../../engine/gameState');
+  const { drawToken, displayToken } = require('../../engine/chaosBag');
+  const { findCardByCode, getCardSkills } = require('../../engine/cardLookup');
+  const { commitCards } = require('../../engine/deck');
+  const { refreshHandDisplay } = require('../../engine/handDisplay');
+  const allInvestigators = require('../../data/investigators/investigators.json');
+
+  const SPECIAL_TOKENS = new Set(['skull', 'cultist', 'tablet', 'elder_thing', 'auto_fail', 'elder_sign']);
+  const STAT_SHORT = { combat: 'CMB', willpower: 'WIL', intellect: 'INT', agility: 'AGI' };
+  const STAT_ICON_MAP = { combat: '⚔️', willpower: '🕯️', intellect: '🔎', agility: '💨' };
+
+  const freshPlayer = getPlayerById(player.id);
+  const inv = allInvestigators.find(i => i.code === freshPlayer.investigator_code);
+  const statValue = inv?.skills?.[stat] ?? 0;
+  const short = STAT_SHORT[stat] || stat.toUpperCase();
+  const icon = STAT_ICON_MAP[stat] || '🎲';
+
+  let commitBonus = 0;
+  const commitLines = [];
+  for (const code of commitCodes) {
+    const skills = getCardSkills(code) || {};
+    const contribution = (skills[stat] || 0) + (skills.wild || 0);
+    commitBonus += contribution;
+    const result = findCardByCode(code);
+    const name = result?.card.name || code;
+    const icons = [];
+    if (skills[stat]) icons.push(`${short}×${skills[stat]}`);
+    if (skills.wild) icons.push(`WILD×${skills.wild}`);
+    commitLines.push(`  • **${name}** [${icons.join(' ')}] +${contribution}`);
+  }
+
+  if (commitCodes.length > 0) {
+    commitCards(freshPlayer, commitCodes);
+    await refreshHandDisplay(interaction.guild, freshPlayer);
+  }
+
+  const token = drawToken(session.difficulty);
+  function tokenModifier(t) {
+    if (t === 'auto_fail') return -Infinity;
+    if (t === 'elder_sign') return 1;
+    const n = parseInt(t, 10); return isNaN(n) ? 0 : n;
+  }
+  const mod = tokenModifier(token);
+  const isAutoFail = token === 'auto_fail';
+  const isElderSign = token === 'elder_sign';
+  const total = isAutoFail ? -Infinity : statValue + commitBonus + mod;
+  const success = !isAutoFail && total >= difficulty;
+  const tokenLabel = displayToken(token);
+  const specialNote = SPECIAL_TOKENS.has(token) && !isElderSign ? ' *(resolve scenario effect manually)*'
+    : isElderSign ? ' *(apply your elder sign ability)*' : '';
+
+  const parts = [`${statValue} (${short})`];
+  if (commitBonus > 0) parts.push(`+${commitBonus} (commit)`);
+  if (!isAutoFail) parts.push(`${mod >= 0 ? '+' : ''}${mod} (token)`);
+  const mathLine = isAutoFail ? 'Auto-fail' : `${parts.join(' ')} = **${total}** vs **${difficulty}**`;
+
+  const lines = [
+    `## 🎲 Skill Test — ${stat} vs ${difficulty}`,
+    `**${freshPlayer.investigator_name}** | ${short}: ${statValue}`,
+  ];
+  if (commitLines.length) { lines.push('**Committed:**'); lines.push(...commitLines); }
+  lines.push(`**Token:** ${tokenLabel}${specialNote}`, `**Result:** ${mathLine}`, '');
+  lines.push(success ? '✅ **Success!**' : '❌ **Fail.**');
+
+  const chaosCh = interaction.guild.channels.cache.get(session.chaos_channel_id);
+  if (chaosCh) await chaosCh.send(`🎲 **${freshPlayer.investigator_name}** tests ${stat} vs ${difficulty} — token: ${tokenLabel} — ${success ? '✅' : '❌'}`);
+
+  const replyContent = { content: lines.join('\n'), components: [], flags: 64 };
+  if (interaction.update) return interaction.update(replyContent);
+  if (interaction.deferred || interaction.replied) return interaction.editReply(replyContent);
+  return interaction.reply(replyContent);
+}
+
+module.exports.executeTestAction = executeTestAction;

@@ -50,3 +50,25 @@ module.exports = {
     await interaction.reply({ content: `**${asset.name}** is now ${state}.`, flags: 64 });
   },
 };
+
+async function executeExhaustAsset(interaction, player, session, assetCode) {
+  const { getPlayerById, updatePlayer } = require('../../engine/gameState');
+
+  const freshPlayer = getPlayerById(player.id);
+  const assets = JSON.parse(freshPlayer.assets || '[]');
+  const asset = assets.find(a => a.code === assetCode);
+
+  if (!asset) {
+    const msg = { content: '❌ That asset is not in play.', flags: 64 };
+    return interaction.update ? interaction.update(msg) : interaction.reply(msg);
+  }
+
+  asset.exhausted = !asset.exhausted;
+  updatePlayer(freshPlayer.id, { assets: JSON.stringify(assets) });
+
+  const state = asset.exhausted ? 'exhausted 😴' : 'readied ✅';
+  const replyContent = { content: `**${asset.name}** is now ${state}.`, components: [], flags: 64 };
+  return interaction.update ? interaction.update(replyContent) : interaction.editReply(replyContent);
+}
+
+module.exports.executeExhaustAsset = executeExhaustAsset;
