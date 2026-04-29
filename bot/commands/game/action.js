@@ -4,7 +4,7 @@ const {
 } = require('discord.js');
 const {
   requireSession, requirePlayer, getPlayer, getPlayerById,
-  getSession, getLocations, getEnemiesAt, getEnemy, updatePlayer,
+  getSession, getLocations, getEnemiesAt, getEnemy, updatePlayer, updateEnemy,
 } = require('../../engine/gameState');
 const { findCardByCode, getCardSkills } = require('../../engine/cardLookup');
 const { drawCards } = require('../../engine/deck');
@@ -41,7 +41,7 @@ function buildMainMenu(round) {
 
 function buildCommitSelect(hand, stat, customIdForSelect) {
   const options = hand.flatMap(code => {
-    const skills = getCardSkills(code);
+    const skills = getCardSkills(code) || {};
     const matching = (skills[stat] || 0) + (skills.wild || 0);
     if (matching === 0) return [];
     const result = findCardByCode(code);
@@ -121,7 +121,8 @@ module.exports = {
     if (customId === 'ah:btn:draw') {
       const freshPlayer = getPlayerById(player.id);
       const drawn = drawCards(freshPlayer, 1);
-      await refreshHandDisplay(interaction.guild, freshPlayer);
+      const afterDraw = getPlayerById(player.id);
+      await refreshHandDisplay(interaction.guild, afterDraw);
 
       if (drawn.length === 0) {
         return interaction.update({ content: '❌ No cards left to draw (deck and discard empty).', components: [new ActionRowBuilder().addComponents(backButton())], flags: 64 });
@@ -138,9 +139,10 @@ module.exports = {
 
     if (customId === 'ah:btn:resource') {
       const freshPlayer = getPlayerById(player.id);
-      updatePlayer(freshPlayer.id, { resources: freshPlayer.resources + 1 });
+      const newResources = freshPlayer.resources + 1;
+      updatePlayer(freshPlayer.id, { resources: newResources });
       return interaction.update({
-        content: `✅ **Gained 1 resource** — now at ${freshPlayer.resources + 1} resources.`,
+        content: `✅ **Gained 1 resource** — now at ${newResources} resources.`,
         components: [new ActionRowBuilder().addComponents(backButton())],
         flags: 64,
       });
@@ -424,7 +426,6 @@ module.exports = {
     }
 
     if (customId === 'ah:sel:engage') {
-      const { updateEnemy } = require('../../engine/gameState');
       const enemyId = parseInt(interaction.values[0], 10);
       const enemy = getEnemy(enemyId);
       updateEnemy(enemyId, { is_aloof: 0 });
