@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, ActionRowBuilder, StringSelectMenuBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { requireSession, requirePlayer, getPlayerById, updatePlayer } = require('../../engine/gameState');
+const { requireSession, requirePlayer, getPlayer, getSession, getPlayerById, updatePlayer } = require('../../engine/gameState');
 const { findCardByCode } = require('../../engine/cardLookup');
 const { drawCards, shuffle } = require('../../engine/deck');
 const { refreshHandDisplay } = require('../../engine/handDisplay');
@@ -44,24 +44,28 @@ function buildMulliganEmbed(player) {
 }
 
 async function handleMulliganSwap(interaction) {
-  const player = requirePlayer(interaction);
-  if (!player) return;
+  const player = getPlayer(interaction.user.id);
+  if (!player) return interaction.update({ content: '❌ You are not registered. Use `/join` first.', components: [], flags: 64 });
 
-  const session = requireSession(interaction);
-  if (!session) return;
+  const session = getSession();
+  if (!session || session.phase === 'pregame') return interaction.update({ content: '❌ No active game session.', components: [], flags: 64 });
 
   if (session.round !== 1 || session.phase !== 'investigation') {
     return interaction.update({ content: '❌ Mulligan only available round 1 investigation phase.', components: [], flags: 64 });
   }
 
   const selected = interaction.values;
-  const codesToDiscard = selected.map(v => v.split('__')[0]);
+  const toDiscard = selected.map(v => {
+    const parts = v.split('__');
+    return { code: parts[0], idx: parseInt(parts[1], 10) };
+  });
 
   let hand = JSON.parse(player.hand || '[]');
   let discard = JSON.parse(player.discard || '[]');
-  for (const code of codesToDiscard) {
-    const idx = hand.indexOf(code);
-    if (idx !== -1) {
+  // Sort descending by index so splicing doesn't shift later indices
+  toDiscard.sort((a, b) => b.idx - a.idx);
+  for (const { code, idx } of toDiscard) {
+    if (idx >= 0 && idx < hand.length && hand[idx] === code) {
       hand.splice(idx, 1);
       discard.push(code);
     }
@@ -69,7 +73,7 @@ async function handleMulliganSwap(interaction) {
   updatePlayer(player.id, { hand: JSON.stringify(hand), discard: JSON.stringify(discard) });
 
   const freshPlayer = getPlayerById(player.id);
-  drawCards(freshPlayer, codesToDiscard.length);
+  drawCards(freshPlayer, toDiscard.length);
 
   const finalPlayer = getPlayerById(player.id);
   await refreshHandDisplay(interaction.guild, finalPlayer);
@@ -79,8 +83,8 @@ async function handleMulliganSwap(interaction) {
 }
 
 async function handleMulliganDone(interaction) {
-  const player = requirePlayer(interaction);
-  if (!player) return;
+  const player = getPlayer(interaction.user.id);
+  if (!player) return interaction.update({ content: '❌ You are not registered.', components: [], flags: 64 });
 
   let deck = JSON.parse(player.deck || '[]');
   let discard = JSON.parse(player.discard || '[]');
