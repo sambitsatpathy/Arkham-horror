@@ -218,6 +218,17 @@ module.exports = {
       }
     }
 
+    if (success) {
+      const { fireTriggers } = require('../../engine/cardEffectResolver');
+      const { execEffect } = require('../../engine/effectExecutors');
+      const trigs = fireTriggers(player, 'after_successful_investigate');
+      for (const trig of trigs) {
+        for (const eff of trig.effects) {
+          lines.push(`↪ from **${trig.source_name}**: ` + (await execEffect(eff, { player, session, guild: interaction.guild })));
+        }
+      }
+    }
+
     await interaction.editReply(lines.join('\n'));
   },
 };
