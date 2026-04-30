@@ -81,13 +81,42 @@ module.exports = {
 
   async handleButton(interaction) {
     const customId = interaction.customId;
+
+    // Modal must be shown before any deferral — handle it first
+    if (customId === 'ah:btn:test') {
+      const player = getPlayer(interaction.user.id);
+      if (!player) return interaction.reply({ content: '❌ You are not in this game.', flags: 64 });
+      const modal = new ModalBuilder()
+        .setCustomId('ah:modal:test')
+        .setTitle('Skill Test');
+      const statInput = new TextInputBuilder()
+        .setCustomId('stat')
+        .setLabel('Stat (combat/intellect/agility/willpower)')
+        .setStyle(TextInputStyle.Short)
+        .setRequired(true)
+        .setPlaceholder('intellect');
+      const diffInput = new TextInputBuilder()
+        .setCustomId('difficulty')
+        .setLabel('Difficulty (number)')
+        .setStyle(TextInputStyle.Short)
+        .setRequired(true)
+        .setPlaceholder('3');
+      modal.addComponents(
+        new ActionRowBuilder().addComponents(statInput),
+        new ActionRowBuilder().addComponents(diffInput),
+      );
+      return interaction.showModal(modal);
+    }
+
+    await interaction.deferUpdate();
+
     const player = getPlayer(interaction.user.id);
-    if (!player) return interaction.reply({ content: '❌ You are not in this game.', flags: 64 });
+    if (!player) return interaction.editReply({ content: '❌ You are not in this game.', components: [] });
     const session = getSession();
-    if (!session) return interaction.reply({ content: '❌ No active session.', flags: 64 });
+    if (!session) return interaction.editReply({ content: '❌ No active session.', components: [] });
 
     if (customId === 'ah:btn:back') {
-      return interaction.update(buildMainMenu(session.round));
+      return interaction.editReply(buildMainMenu(session.round));
     }
 
     if (customId === 'ah:btn:move') {
@@ -96,7 +125,7 @@ module.exports = {
         .filter(l => l.code !== player.location_code);
 
       if (locations.length === 0) {
-        return interaction.update({ content: '❌ No locations available to move to.', components: [new ActionRowBuilder().addComponents(backButton())], flags: 64 });
+        return interaction.editReply({ content: '❌ No locations available to move to.', components: [new ActionRowBuilder().addComponents(backButton())], flags: 64 });
       }
 
       const STATUS_ICON = { hidden: '🌑', revealed: '🔍', cleared: '✅' };
@@ -111,7 +140,7 @@ module.exports = {
         .setPlaceholder('Choose a location…')
         .addOptions(options);
 
-      return interaction.update({
+      return interaction.editReply({
         content: `**Move** — Current location: ${player.location_code}\nWhere to?`,
         components: [new ActionRowBuilder().addComponents(select), new ActionRowBuilder().addComponents(backButton())],
         flags: 64,
@@ -125,12 +154,12 @@ module.exports = {
       await refreshHandDisplay(interaction.guild, afterDraw);
 
       if (drawn.length === 0) {
-        return interaction.update({ content: '❌ No cards left to draw (deck and discard empty).', components: [new ActionRowBuilder().addComponents(backButton())], flags: 64 });
+        return interaction.editReply({ content: '❌ No cards left to draw (deck and discard empty).', components: [new ActionRowBuilder().addComponents(backButton())], flags: 64 });
       }
 
       const result = findCardByCode(drawn[0]);
       const name = result?.card.name || drawn[0];
-      return interaction.update({
+      return interaction.editReply({
         content: `✅ **Drew:** ${name}. Hand updated in your private channel.`,
         components: [new ActionRowBuilder().addComponents(backButton())],
         flags: 64,
@@ -141,7 +170,7 @@ module.exports = {
       const freshPlayer = getPlayerById(player.id);
       const newResources = freshPlayer.resources + 1;
       updatePlayer(freshPlayer.id, { resources: newResources });
-      return interaction.update({
+      return interaction.editReply({
         content: `✅ **Gained 1 resource** — now at ${newResources} resources.`,
         components: [new ActionRowBuilder().addComponents(backButton())],
         flags: 64,
@@ -151,7 +180,7 @@ module.exports = {
     if (customId === 'ah:btn:fight') {
       const enemies = getEnemiesAt(session.id, player.location_code).filter(e => !e.is_aloof);
       if (enemies.length === 0) {
-        return interaction.update({ content: '❌ No enemies at your location.', components: [new ActionRowBuilder().addComponents(backButton())], flags: 64 });
+        return interaction.editReply({ content: '❌ No enemies at your location.', components: [new ActionRowBuilder().addComponents(backButton())], flags: 64 });
       }
       const options = enemies.map(e => ({
         label: `[${e.id}] ${e.name} (HP ${e.hp}/${e.max_hp}, Fight ${e.fight})`,
@@ -161,7 +190,7 @@ module.exports = {
         .setCustomId('ah:sel:fight:enemy')
         .setPlaceholder('Choose an enemy to fight…')
         .addOptions(options);
-      return interaction.update({
+      return interaction.editReply({
         content: '**Fight** — Choose an enemy:',
         components: [new ActionRowBuilder().addComponents(select), new ActionRowBuilder().addComponents(backButton())],
         flags: 64,
@@ -171,7 +200,7 @@ module.exports = {
     if (customId === 'ah:btn:evade') {
       const enemies = getEnemiesAt(session.id, player.location_code).filter(e => !e.is_aloof);
       if (enemies.length === 0) {
-        return interaction.update({ content: '❌ No enemies at your location.', components: [new ActionRowBuilder().addComponents(backButton())], flags: 64 });
+        return interaction.editReply({ content: '❌ No enemies at your location.', components: [new ActionRowBuilder().addComponents(backButton())], flags: 64 });
       }
       const options = enemies.map(e => ({
         label: `[${e.id}] ${e.name} (Evade ${e.evade})`,
@@ -181,7 +210,7 @@ module.exports = {
         .setCustomId('ah:sel:evade:enemy')
         .setPlaceholder('Choose an enemy to evade…')
         .addOptions(options);
-      return interaction.update({
+      return interaction.editReply({
         content: '**Evade** — Choose an enemy:',
         components: [new ActionRowBuilder().addComponents(select), new ActionRowBuilder().addComponents(backButton())],
         flags: 64,
@@ -191,14 +220,14 @@ module.exports = {
     if (customId === 'ah:btn:engage') {
       const enemies = getEnemiesAt(session.id, player.location_code).filter(e => e.is_aloof);
       if (enemies.length === 0) {
-        return interaction.update({ content: '❌ No aloof enemies at your location.', components: [new ActionRowBuilder().addComponents(backButton())], flags: 64 });
+        return interaction.editReply({ content: '❌ No aloof enemies at your location.', components: [new ActionRowBuilder().addComponents(backButton())], flags: 64 });
       }
       const options = enemies.map(e => ({ label: `[${e.id}] ${e.name}`, value: String(e.id) }));
       const select = new StringSelectMenuBuilder()
         .setCustomId('ah:sel:engage')
         .setPlaceholder('Choose an enemy to engage…')
         .addOptions(options);
-      return interaction.update({
+      return interaction.editReply({
         content: '**Engage** — Choose an aloof enemy:',
         components: [new ActionRowBuilder().addComponents(select), new ActionRowBuilder().addComponents(backButton())],
         flags: 64,
@@ -213,7 +242,7 @@ module.exports = {
       const components = [new ActionRowBuilder().addComponents(backButton(), skipBtn)];
       if (commitSelect) components.unshift(new ActionRowBuilder().addComponents(commitSelect));
 
-      return interaction.update({
+      return interaction.editReply({
         content: '**Investigate** — Commit intellect/wild cards (optional):',
         components,
         flags: 64,
@@ -239,14 +268,14 @@ module.exports = {
       }).slice(0, 25);
 
       if (options.length === 0) {
-        return interaction.update({ content: '❌ No playable cards in hand (check resource costs).', components: [new ActionRowBuilder().addComponents(backButton())], flags: 64 });
+        return interaction.editReply({ content: '❌ No playable cards in hand (check resource costs).', components: [new ActionRowBuilder().addComponents(backButton())], flags: 64 });
       }
 
       const select = new StringSelectMenuBuilder()
         .setCustomId('ah:sel:play')
         .setPlaceholder('Choose a card to play…')
         .addOptions(options);
-      return interaction.update({
+      return interaction.editReply({
         content: '**Play Card** — Choose:',
         components: [new ActionRowBuilder().addComponents(select), new ActionRowBuilder().addComponents(backButton())],
         flags: 64,
@@ -256,14 +285,14 @@ module.exports = {
     if (customId === 'ah:btn:use') {
       const assets = JSON.parse(player.assets || '[]').filter(a => a.charges > 0);
       if (assets.length === 0) {
-        return interaction.update({ content: '❌ No charged assets in play.', components: [new ActionRowBuilder().addComponents(backButton())], flags: 64 });
+        return interaction.editReply({ content: '❌ No charged assets in play.', components: [new ActionRowBuilder().addComponents(backButton())], flags: 64 });
       }
       const options = assets.map(a => ({ label: `${a.name} (${a.charges} charges)`, value: a.code }));
       const select = new StringSelectMenuBuilder()
         .setCustomId('ah:sel:use')
         .setPlaceholder('Choose an asset to use…')
         .addOptions(options);
-      return interaction.update({
+      return interaction.editReply({
         content: '**Use Asset** — Choose:',
         components: [new ActionRowBuilder().addComponents(select), new ActionRowBuilder().addComponents(backButton())],
         flags: 64,
@@ -273,7 +302,7 @@ module.exports = {
     if (customId === 'ah:btn:exhaust') {
       const assets = JSON.parse(player.assets || '[]');
       if (assets.length === 0) {
-        return interaction.update({ content: '❌ No assets in play.', components: [new ActionRowBuilder().addComponents(backButton())], flags: 64 });
+        return interaction.editReply({ content: '❌ No assets in play.', components: [new ActionRowBuilder().addComponents(backButton())], flags: 64 });
       }
       const options = assets.map(a => ({
         label: `${a.name}${a.exhausted ? ' (exhausted)' : ''}`,
@@ -283,34 +312,11 @@ module.exports = {
         .setCustomId('ah:sel:exhaust')
         .setPlaceholder('Choose an asset to toggle…')
         .addOptions(options);
-      return interaction.update({
+      return interaction.editReply({
         content: '**Exhaust/Ready** — Choose:',
         components: [new ActionRowBuilder().addComponents(select), new ActionRowBuilder().addComponents(backButton())],
         flags: 64,
       });
-    }
-
-    if (customId === 'ah:btn:test') {
-      const modal = new ModalBuilder()
-        .setCustomId('ah:modal:test')
-        .setTitle('Skill Test');
-      const statInput = new TextInputBuilder()
-        .setCustomId('stat')
-        .setLabel('Stat (combat/intellect/agility/willpower)')
-        .setStyle(TextInputStyle.Short)
-        .setRequired(true)
-        .setPlaceholder('intellect');
-      const diffInput = new TextInputBuilder()
-        .setCustomId('difficulty')
-        .setLabel('Difficulty (number)')
-        .setStyle(TextInputStyle.Short)
-        .setRequired(true)
-        .setPlaceholder('3');
-      modal.addComponents(
-        new ActionRowBuilder().addComponents(statInput),
-        new ActionRowBuilder().addComponents(diffInput),
-      );
-      return interaction.showModal(modal);
     }
 
     if (customId === 'ah:btn:commit') {
@@ -329,7 +335,7 @@ module.exports = {
       }).slice(0, 25);
 
       if (options.length === 0) {
-        return interaction.update({ content: '❌ No committable cards in hand.', components: [new ActionRowBuilder().addComponents(backButton())], flags: 64 });
+        return interaction.editReply({ content: '❌ No committable cards in hand.', components: [new ActionRowBuilder().addComponents(backButton())], flags: 64 });
       }
 
       const select = new StringSelectMenuBuilder()
@@ -338,7 +344,7 @@ module.exports = {
         .setMinValues(0)
         .setMaxValues(Math.min(options.length, 4))
         .addOptions(options);
-      return interaction.update({
+      return interaction.editReply({
         content: '**Commit Cards** — Select cards for the current test:',
         components: [new ActionRowBuilder().addComponents(select), new ActionRowBuilder().addComponents(backButton())],
         flags: 64,
@@ -364,11 +370,13 @@ module.exports = {
   },
 
   async handleSelect(interaction) {
+    await interaction.deferUpdate();
+
     const customId = interaction.customId;
     const player = getPlayer(interaction.user.id);
-    if (!player) return interaction.reply({ content: '❌ Not in game.', flags: 64 });
+    if (!player) return interaction.editReply({ content: '❌ Not in game.', components: [] });
     const session = getSession();
-    if (!session) return interaction.reply({ content: '❌ No active session.', flags: 64 });
+    if (!session) return interaction.editReply({ content: '❌ No active session.', components: [] });
 
     if (customId === 'ah:sel:move') {
       const { executeMoveAction } = require('./move');
@@ -388,7 +396,7 @@ module.exports = {
       const components = [new ActionRowBuilder().addComponents(backButton(), skipBtn)];
       if (commitSelect) components.unshift(new ActionRowBuilder().addComponents(commitSelect));
 
-      return interaction.update({
+      return interaction.editReply({
         content: `**Fight ${enemy.name}** (Fight ${enemy.fight}) — Commit combat/wild cards (optional):`,
         components,
         flags: 64,
@@ -413,7 +421,7 @@ module.exports = {
       const components = [new ActionRowBuilder().addComponents(backButton(), skipBtn)];
       if (commitSelect) components.unshift(new ActionRowBuilder().addComponents(commitSelect));
 
-      return interaction.update({
+      return interaction.editReply({
         content: `**Evade ${enemy.name}** (Evade ${enemy.evade}) — Commit agility/wild cards (optional):`,
         components,
         flags: 64,
@@ -429,7 +437,7 @@ module.exports = {
       const enemyId = parseInt(interaction.values[0], 10);
       const enemy = getEnemy(enemyId);
       updateEnemy(enemyId, { is_aloof: 0 });
-      return interaction.update({
+      return interaction.editReply({
         content: `✅ **Engaged ${enemy.name}**! It will now activate during the enemy phase.`,
         components: [new ActionRowBuilder().addComponents(backButton())],
         flags: 64,
@@ -461,7 +469,7 @@ module.exports = {
       commitCards(freshPlayer, interaction.values);
       await refreshHandDisplay(interaction.guild, freshPlayer);
       const names = interaction.values.map(c => findCardByCode(c)?.card.name || c).join(', ');
-      return interaction.update({
+      return interaction.editReply({
         content: `✅ Committed: **${names}**. Cards moved to discard.`,
         components: [new ActionRowBuilder().addComponents(backButton())],
         flags: 64,

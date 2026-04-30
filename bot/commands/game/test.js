@@ -270,9 +270,8 @@ async function executeTestAction(interaction, player, session, stat, difficulty,
   if (chaosCh) await chaosCh.send(`🎲 **${freshPlayer.investigator_name}** tests ${stat} vs ${difficulty} — token: ${tokenLabel} — ${success ? '✅' : '❌'}`);
 
   const replyContent = { content: lines.join('\n'), components: [], flags: 64 };
-  if (interaction.update) return interaction.update(replyContent);
   if (interaction.deferred || interaction.replied) return interaction.editReply(replyContent);
-  return interaction.reply(replyContent);
+  return interaction.update ? interaction.update(replyContent) : interaction.reply(replyContent);
 }
 
 module.exports.executeTestAction = executeTestAction;

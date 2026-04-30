@@ -196,7 +196,7 @@ async function executeEvadeAction(interaction, player, session, enemyId, commitC
   const enemy = getEnemy(enemyId);
   if (!enemy) {
     const msg = { content: `❌ No enemy with ID ${enemyId}.`, flags: 64 };
-    return interaction.update ? interaction.update(msg) : interaction.reply(msg);
+    return interaction.deferred || interaction.replied ? interaction.editReply(msg) : interaction.update(msg);
   }
 
   const statName = 'agility';
@@ -263,7 +263,7 @@ async function executeEvadeAction(interaction, player, session, enemyId, commitC
   if (chaosCh) await chaosCh.send(`💨 **${freshPlayer.investigator_name}** evades **${enemy.name}** — token: ${tokenLabel} — ${success ? '✅ Evaded!' : '❌ Fail'}`);
 
   const replyContent = { content: lines.join('\n'), components: [], flags: 64 };
-  return interaction.update ? interaction.update(replyContent) : interaction.editReply(replyContent);
+  return interaction.deferred || interaction.replied ? interaction.editReply(replyContent) : interaction.update(replyContent);
 }
 
 module.exports.executeEvadeAction = executeEvadeAction;

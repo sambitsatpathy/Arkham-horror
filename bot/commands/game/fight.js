@@ -220,7 +220,7 @@ async function executeFightAction(interaction, player, session, enemyId, commitC
   const enemy = getEnemy(enemyId);
   if (!enemy) {
     const msg = { content: `❌ No enemy with ID ${enemyId}.`, flags: 64 };
-    return interaction.update ? interaction.update(msg) : interaction.reply(msg);
+    return interaction.deferred || interaction.replied ? interaction.editReply(msg) : interaction.update(msg);
   }
 
   const statName = 'combat';
@@ -229,7 +229,7 @@ async function executeFightAction(interaction, player, session, enemyId, commitC
   const notInHand = commitCodes.filter(c => !hand.includes(c));
   if (notInHand.length) {
     const msg = { content: `❌ Not in hand: ${notInHand.join(', ')}`, flags: 64 };
-    return interaction.update ? interaction.update(msg) : interaction.reply(msg);
+    return interaction.deferred || interaction.replied ? interaction.editReply(msg) : interaction.update(msg);
   }
 
   const inv = allInvestigators.find(i => i.code === freshPlayer.investigator_code);
@@ -314,7 +314,7 @@ async function executeFightAction(interaction, player, session, enemyId, commitC
   if (chaosCh) await chaosCh.send(`⚔️ **${freshPlayer.investigator_name}** fights **${enemy.name}** — token: ${tokenLabel} — ${success ? '✅ Hit!' : '❌ Miss!'}`);
 
   const replyContent = { content: lines.join('\n'), components: [], flags: 64 };
-  return interaction.update ? interaction.update(replyContent) : interaction.editReply(replyContent);
+  return interaction.deferred || interaction.replied ? interaction.editReply(replyContent) : interaction.update(replyContent);
 }
 
 module.exports.executeFightAction = executeFightAction;

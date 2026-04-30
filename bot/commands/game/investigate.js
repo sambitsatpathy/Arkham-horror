@@ -218,7 +218,7 @@ async function executeInvestigateAction(interaction, player, session, commitCode
   const loc = getLocation(session.id, player.location_code);
   if (!loc || loc.status === 'hidden') {
     const msg = { content: '❌ Your current location is hidden or invalid.', flags: 64 };
-    return interaction.replied || interaction.deferred ? interaction.editReply(msg) : interaction.update(msg);
+    return interaction.deferred || interaction.replied ? interaction.editReply(msg) : interaction.update(msg);
   }
 
   const freshPlayer = getPlayerById(player.id);
@@ -226,7 +226,7 @@ async function executeInvestigateAction(interaction, player, session, commitCode
   const notInHand = codes.filter(c => !hand.includes(c));
   if (notInHand.length) {
     const msg = { content: `❌ Not in your hand: ${notInHand.join(', ')}`, flags: 64 };
-    return interaction.update ? interaction.update(msg) : interaction.reply(msg);
+    return interaction.deferred || interaction.replied ? interaction.editReply(msg) : interaction.update(msg);
   }
 
   const inv = allInvestigators.find(i => i.code === freshPlayer.investigator_code);
@@ -315,7 +315,7 @@ async function executeInvestigateAction(interaction, player, session, commitCode
   }
 
   const replyContent = { content: lines.join('\n'), components: [], flags: 64 };
-  if (interaction.update) return interaction.update(replyContent);
+  if (interaction.deferred || interaction.replied) return interaction.editReply(replyContent);
   return interaction.editReply ? interaction.editReply(replyContent) : interaction.reply(replyContent);
 }
 

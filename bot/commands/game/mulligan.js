@@ -44,14 +44,16 @@ function buildMulliganEmbed(player) {
 }
 
 async function handleMulliganSwap(interaction) {
+  await interaction.deferUpdate();
+
   const player = getPlayer(interaction.user.id);
-  if (!player) return interaction.update({ content: '❌ You are not registered. Use `/join` first.', components: [], flags: 64 });
+  if (!player) return interaction.editReply({ content: '❌ You are not registered. Use `/join` first.', components: [] });
 
   const session = getSession();
-  if (!session || session.phase === 'pregame') return interaction.update({ content: '❌ No active game session.', components: [], flags: 64 });
+  if (!session || session.phase === 'pregame') return interaction.editReply({ content: '❌ No active game session.', components: [] });
 
   if (session.round !== 1 || session.phase !== 'investigation') {
-    return interaction.update({ content: '❌ Mulligan only available round 1 investigation phase.', components: [], flags: 64 });
+    return interaction.editReply({ content: '❌ Mulligan only available round 1 investigation phase.', components: [] });
   }
 
   const selected = interaction.values;
@@ -79,19 +81,21 @@ async function handleMulliganSwap(interaction) {
   await refreshHandDisplay(interaction.guild, finalPlayer);
 
   const msg = buildMulliganEmbed(finalPlayer);
-  await interaction.update(msg);
+  await interaction.editReply(msg);
 }
 
 async function handleMulliganDone(interaction) {
+  await interaction.deferUpdate();
+
   const player = getPlayer(interaction.user.id);
-  if (!player) return interaction.update({ content: '❌ You are not registered.', components: [], flags: 64 });
+  if (!player) return interaction.editReply({ content: '❌ You are not registered.', components: [] });
 
   let deck = JSON.parse(player.deck || '[]');
   let discard = JSON.parse(player.discard || '[]');
   deck = shuffle([...deck, ...discard]);
   updatePlayer(player.id, { deck: JSON.stringify(deck), discard: JSON.stringify([]) });
 
-  await interaction.update({ content: '✅ Mulligan complete. Remaining cards shuffled back into deck.', components: [], flags: 64 });
+  await interaction.editReply({ content: '✅ Mulligan complete. Remaining cards shuffled back into deck.', components: [] });
 }
 
 module.exports = {

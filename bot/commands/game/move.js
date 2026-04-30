@@ -99,7 +99,7 @@ async function executeMoveAction(interaction, player, session, locationCode) {
   const loc = locations.find(l => l.code === locationCode);
   if (!loc) {
     const msg = { content: `❌ Location not found: ${locationCode}`, flags: 64 };
-    return interaction.update ? interaction.update(msg) : interaction.reply(msg);
+    return interaction.deferred || interaction.replied ? interaction.editReply(msg) : interaction.update(msg);
   }
 
   updatePlayer(player.id, { location_code: loc.code });
@@ -115,7 +115,7 @@ async function executeMoveAction(interaction, player, session, locationCode) {
   }
 
   const replyContent = { content: `✅ Moved to **${loc.name}**.`, components: [], flags: 64 };
-  return interaction.update ? interaction.update(replyContent) : interaction.reply(replyContent);
+  return interaction.deferred || interaction.replied ? interaction.editReply(replyContent) : interaction.update(replyContent);
 }
 
 module.exports.executeMoveAction = executeMoveAction;
