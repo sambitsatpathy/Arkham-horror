@@ -9048,10 +9048,15 @@
     "effects": [],
     "on_success": [],
     "passive": [],
-    "triggers": [],
+    "triggers": [
+      {
+        "event": "after_take_damage",
+        "effects": []
+      }
+    ],
     "revelation_effects": [],
     "discard_cost": null,
-    "unparsed_text": "If Ancient Relic [tdc_rune_s] would leave play, set it aside, out of play.\nForced - After you take 1 or more damage: Deal 1 damage to Ancient Relic [tdc_rune_s].\n[reaction] When you end the game with Ancient Relic [tdc_rune_s] under your control: Flip this card and resolve its text."
+    "unparsed_text": "If Ancient Relic [tdc_rune_s] would leave play, set it aside, out of play.\n\n[reaction] When you end the game with Ancient Relic [tdc_rune_s] under your control: Flip this card and resolve its text."
   },
   "11582": {
     "name": "Grisly \"Mask\"",
@@ -31246,12 +31251,7 @@
     "fast": false,
     "is_weakness": false,
     "conditions": [],
-    "effects": [
-      {
-        "type": "gain_resources",
-        "count": 1
-      }
-    ],
+    "effects": [],
     "on_success": [],
     "passive": [
       {
@@ -31261,10 +31261,20 @@
         "condition": null
       }
     ],
-    "triggers": [],
+    "triggers": [
+      {
+        "event": "after_successful_investigate",
+        "effects": [
+          {
+            "type": "gain_resources",
+            "count": 1
+          }
+        ]
+      }
+    ],
     "revelation_effects": [],
     "discard_cost": null,
-    "unparsed_text": "[reaction] After you successfully investigate:"
+    "unparsed_text": "."
   },
   "01034": {
     "name": "Hyperawareness",
@@ -32358,24 +32368,29 @@
     "fast": false,
     "is_weakness": true,
     "conditions": [],
-    "effects": [
-      {
-        "type": "deal_damage",
-        "count": 1,
-        "target": "self",
-        "direct": true
-      }
-    ],
+    "effects": [],
     "on_success": [],
     "passive": [],
-    "triggers": [],
+    "triggers": [
+      {
+        "event": "after_take_horror",
+        "effects": [
+          {
+            "type": "deal_damage",
+            "count": 1,
+            "target": "self",
+            "direct": true
+          }
+        ]
+      }
+    ],
     "revelation_effects": [
       {
         "type": "add_to_threat_area"
       }
     ],
     "discard_cost": 2,
-    "unparsed_text": "Forced - After you take 1 or more horror:"
+    "unparsed_text": ""
   },
   "01100": {
     "name": "Hypochondria",
@@ -32383,24 +32398,29 @@
     "fast": false,
     "is_weakness": true,
     "conditions": [],
-    "effects": [
-      {
-        "type": "deal_horror",
-        "count": 1,
-        "target": "self",
-        "direct": true
-      }
-    ],
+    "effects": [],
     "on_success": [],
     "passive": [],
-    "triggers": [],
+    "triggers": [
+      {
+        "event": "after_take_damage",
+        "effects": [
+          {
+            "type": "deal_horror",
+            "count": 1,
+            "target": "self",
+            "direct": true
+          }
+        ]
+      }
+    ],
     "revelation_effects": [
       {
         "type": "add_to_threat_area"
       }
     ],
     "discard_cost": 2,
-    "unparsed_text": "Forced - After you take 1 or more damage:"
+    "unparsed_text": ""
   },
   "01101": {
     "name": "Mob Enforcer",
@@ -34306,12 +34326,7 @@
     "fast": false,
     "is_weakness": false,
     "conditions": [],
-    "effects": [
-      {
-        "type": "gain_resources",
-        "count": 1
-      }
-    ],
+    "effects": [],
     "on_success": [],
     "passive": [
       {
@@ -34321,10 +34336,20 @@
         "condition": null
       }
     ],
-    "triggers": [],
+    "triggers": [
+      {
+        "event": "after_successful_investigate",
+        "effects": [
+          {
+            "type": "gain_resources",
+            "count": 1
+          }
+        ]
+      }
+    ],
     "revelation_effects": [],
     "discard_cost": null,
-    "unparsed_text": "[reaction] After you successfully investigate:"
+    "unparsed_text": "."
   },
   "01534": {
     "name": "Hyperawareness",
@@ -35418,24 +35443,29 @@
     "fast": false,
     "is_weakness": true,
     "conditions": [],
-    "effects": [
-      {
-        "type": "deal_damage",
-        "count": 1,
-        "target": "self",
-        "direct": true
-      }
-    ],
+    "effects": [],
     "on_success": [],
     "passive": [],
-    "triggers": [],
+    "triggers": [
+      {
+        "event": "after_take_horror",
+        "effects": [
+          {
+            "type": "deal_damage",
+            "count": 1,
+            "target": "self",
+            "direct": true
+          }
+        ]
+      }
+    ],
     "revelation_effects": [
       {
         "type": "add_to_threat_area"
       }
     ],
     "discard_cost": 2,
-    "unparsed_text": "Forced - After you take 1 or more horror:"
+    "unparsed_text": ""
   },
   "01600": {
     "name": "Hypochondria",
@@ -35443,24 +35473,29 @@
     "fast": false,
     "is_weakness": true,
     "conditions": [],
-    "effects": [
-      {
-        "type": "deal_horror",
-        "count": 1,
-        "target": "self",
-        "direct": true
-      }
-    ],
+    "effects": [],
     "on_success": [],
     "passive": [],
-    "triggers": [],
+    "triggers": [
+      {
+        "event": "after_take_damage",
+        "effects": [
+          {
+            "type": "deal_horror",
+            "count": 1,
+            "target": "self",
+            "direct": true
+          }
+        ]
+      }
+    ],
     "revelation_effects": [
       {
         "type": "add_to_threat_area"
       }
     ],
     "discard_cost": 2,
-    "unparsed_text": "Forced - After you take 1 or more damage:"
+    "unparsed_text": ""
   },
   "01601": {
     "name": "Mob Enforcer",
@@ -70107,10 +70142,15 @@
         "condition": null
       }
     ],
-    "triggers": [],
+    "triggers": [
+      {
+        "event": "after_successful_investigate",
+        "effects": []
+      }
+    ],
     "revelation_effects": [],
     "discard_cost": null,
-    "unparsed_text": "and +1 [combat].\n[reaction] After you successfully investigate: Place 1 resource (from the token pool) on Michael Leigh, as evidence (to a maximum of 3 evidence).\n[reaction] When you initiate an attack, exhaust Michael Leigh and spend 1 evidence: You deal +1 damage for this attack."
+    "unparsed_text": "and +1 [combat].\n\n[reaction] When you initiate an attack, exhaust Michael Leigh and spend 1 evidence: You deal +1 damage for this attack."
   },
   "08087": {
     "name": "Snipe",

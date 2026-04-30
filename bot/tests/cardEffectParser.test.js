@@ -173,3 +173,23 @@ describe('parser - weakness fields', () => {
     expect(e.revelation_effects).toContainEqual({ type: 'deal_horror', count: 2, target: 'self', direct: true });
   });
 });
+
+describe('parser - triggers', () => {
+  test('Dr. Milan Christopher: after successful investigate', () => {
+    const e = parse({ name: 'Dr. Milan Christopher', type_code: 'asset',
+      text: 'You get +1 [intellect].\n[reaction] After you successfully investigate: Gain 1 resource.' });
+    expect(e.triggers).toContainEqual({
+      event: 'after_successful_investigate',
+      effects: [{ type: 'gain_resources', count: 1 }],
+    });
+  });
+
+  test('Psychosis: forced after take horror', () => {
+    const e = parse({ name: 'Psychosis', type_code: 'treachery', subtype_code: 'weakness',
+      text: 'Revelation - Add Psychosis to your threat area.\nForced - After you take 1 or more horror: Take 1 direct damage.\n[action] [action]: Discard Psychosis.' });
+    expect(e.triggers).toContainEqual({
+      event: 'after_take_horror',
+      effects: [{ type: 'deal_damage', count: 1, target: 'self', direct: true }],
+    });
+  });
+});

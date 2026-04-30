@@ -78,6 +78,27 @@ function applyEffectRules(text, entry) {
   return remaining;
 }
 
+const TRIGGER_PATTERNS = [
+  { re: /\[reaction\]\s*After you successfully investigate:\s*([^.\n]+)\./i, event: 'after_successful_investigate' },
+  { re: /Forced\s*[-—]\s*After you take \d+ or more horror:\s*([^.\n]+)\./i, event: 'after_take_horror' },
+  { re: /Forced\s*[-—]\s*After you take \d+ or more damage:\s*([^.\n]+)\./i, event: 'after_take_damage' },
+];
+
+function extractTriggers(text, entry) {
+  let t = text;
+  for (const { re, event } of TRIGGER_PATTERNS) {
+    const m = t.match(re);
+    if (m) {
+      const inner = m[1].trim();
+      const sub = emptyEntry();
+      applyEffectRules(inner, sub);
+      entry.triggers.push({ event, effects: sub.effects });
+      t = t.replace(m[0], '').trim();
+    }
+  }
+  return t;
+}
+
 function extractOnSuccess(text, entry) {
   const m = text.match(/If this (?:skill )?test is successful(?:[^,]*)?,\s*([^.]+)\./i);
   if (!m) return text;
@@ -194,6 +215,7 @@ function parse(card) {
 
   text = applyConditionRules(text, entry);
   text = extractPassives(text, entry);
+  text = extractTriggers(text, entry);
   text = extractOnSuccess(text, entry);
   text = applyEffectRules(text, entry);
 
