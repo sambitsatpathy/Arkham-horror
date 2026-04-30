@@ -1,7 +1,7 @@
 const Database = require('better-sqlite3');
 const path = require('path');
 
-const DB_PATH = path.join(__dirname, 'arkham.db');
+const DB_PATH = process.env.ARKHAM_DB_PATH || path.join(__dirname, 'arkham.db');
 
 let db;
 
@@ -144,6 +144,9 @@ function init() {
   }
   if (!playerCols.includes('scry_buffer')) {
     db.exec("ALTER TABLE players ADD COLUMN scry_buffer TEXT DEFAULT '[]'");
+  }
+  if (!playerCols.includes('threat_area')) {
+    db.exec("ALTER TABLE players ADD COLUMN threat_area TEXT DEFAULT '[]'");
   }
 
   const sessionCols = db.prepare("PRAGMA table_info(game_session)").all().map(c => c.name);

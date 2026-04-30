@@ -101,6 +101,37 @@ function requireHost(interaction) {
   return player;
 }
 
+function getThreatArea(playerId) {
+  const row = getDb().prepare('SELECT threat_area FROM players WHERE id = ?').get(playerId);
+  return row ? JSON.parse(row.threat_area || '[]') : [];
+}
+
+function setThreatArea(playerId, codes) {
+  getDb().prepare('UPDATE players SET threat_area = ? WHERE id = ?').run(JSON.stringify(codes), playerId);
+}
+
+function addToThreatArea(playerId, code) {
+  const codes = getThreatArea(playerId);
+  codes.push(code);
+  setThreatArea(playerId, codes);
+}
+
+function removeFromThreatArea(playerId, code) {
+  const codes = getThreatArea(playerId).filter(c => c !== code);
+  setThreatArea(playerId, codes);
+}
+
+function decrementActions(playerId, n = 1) {
+  const row = getDb().prepare('SELECT action_count FROM players WHERE id = ?').get(playerId);
+  const next = Math.max(0, (row?.action_count ?? 0) - n);
+  getDb().prepare('UPDATE players SET action_count = ? WHERE id = ?').run(next, playerId);
+  return next;
+}
+
+function resetActions(playerId, count) {
+  getDb().prepare('UPDATE players SET action_count = ? WHERE id = ?').run(count, playerId);
+}
+
 function resetDb() {
   const db = getDb();
   db.prepare('DELETE FROM enemies').run();
@@ -119,4 +150,6 @@ module.exports = {
   addCampaignLog, getCampaignLog,
   requireSession, requirePlayer, requireHost,
   resetDb,
+  getThreatArea, setThreatArea, addToThreatArea, removeFromThreatArea,
+  decrementActions, resetActions,
 };
