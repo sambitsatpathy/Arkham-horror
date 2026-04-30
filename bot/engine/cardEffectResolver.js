@@ -104,6 +104,20 @@ function resolveOnPlay(code) {
   };
 }
 
+function fireTriggers(player, eventName) {
+  const out = [];
+  for (const code of passiveCardCodes(player)) {
+    const entry = getEntry(code);
+    if (!entry) continue;
+    for (const trig of (entry.triggers || [])) {
+      if (trig.event === eventName) {
+        out.push({ source: code, source_name: entry.name, effects: trig.effects || [] });
+      }
+    }
+  }
+  return out;
+}
+
 function _resetForTests() { _effects = null; }
 
 module.exports = {
@@ -113,5 +127,6 @@ module.exports = {
   getEffectiveHandSize,
   resolveOnSuccess,
   resolveOnPlay,
+  fireTriggers,
   _resetForTests,
 };

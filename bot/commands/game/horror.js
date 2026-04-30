@@ -1,6 +1,8 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const { requireSession, requirePlayer, getPlayer, updatePlayer, addCampaignLog, getCampaign } = require('../../engine/gameState');
 const { horrorAsset } = require('../../engine/deck');
+const { fireTriggers } = require('../../engine/cardEffectResolver');
+const { execEffect } = require('../../engine/effectExecutors');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -74,5 +76,16 @@ module.exports = {
       : `🧠 **${player.investigator_name}** took ${amount} horror. SAN: **${newSan}/${player.max_sanity}**`;
 
     await interaction.reply(msg);
+
+    const trigs = fireTriggers(player, 'after_take_horror');
+    const triggerLines = [];
+    for (const trig of trigs) {
+      for (const eff of trig.effects) {
+        triggerLines.push(`↪ from **${trig.source_name}**: ` + (await execEffect(eff, { player, session, guild: interaction.guild })));
+      }
+    }
+    if (triggerLines.length > 0) {
+      await interaction.followUp({ content: triggerLines.join('\n'), flags: 64 });
+    }
   },
 };
