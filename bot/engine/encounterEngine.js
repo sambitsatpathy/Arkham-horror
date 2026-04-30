@@ -87,7 +87,37 @@ async function runMythosEncounters(encounterCh, sessionId, players) {
         await encounterCh.send(`📄 **${player.investigator_name}** draws a card. Resolve per card text.`);
       }
     }
+    if (card) await applyRevelationIfWeakness(card, player, encounterCh);
   }
 }
 
-module.exports = { buildEncounterDeck, drawEncounterCard, postEncounterCard, runMythosEncounters, shuffle };
+async function applyRevelationIfWeakness(card, player, channel) {
+  const { getEntry } = require('./cardEffectResolver');
+  const { addToThreatArea, updatePlayer, getPlayerById } = require('./gameState');
+  const entry = getEntry(card.code);
+  if (!entry || !entry.is_weakness || !(entry.revelation_effects || []).length) return;
+  const fresh = getPlayerById(player.id);
+  const lines = [];
+  for (const eff of entry.revelation_effects) {
+    if (eff.type === 'add_to_threat_area') {
+      addToThreatArea(player.id, card.code);
+      lines.push(`🔻 **${card.name}** added to threat area.`);
+    } else if (eff.type === 'discard_all_resources') {
+      updatePlayer(player.id, { resources: 0 });
+      lines.push(`💸 All resources discarded.`);
+    } else if (eff.type === 'deal_horror' && eff.target === 'self') {
+      const newSan = Math.max(0, fresh.sanity - eff.count);
+      updatePlayer(player.id, { sanity: newSan });
+      lines.push(`🧠 Took ${eff.count}${eff.direct ? ' direct' : ''} horror.`);
+    } else if (eff.type === 'deal_damage' && eff.target === 'self') {
+      const newHp = Math.max(0, fresh.hp - eff.count);
+      updatePlayer(player.id, { hp: newHp });
+      lines.push(`🩸 Took ${eff.count}${eff.direct ? ' direct' : ''} damage.`);
+    }
+  }
+  if (lines.length && channel) {
+    await channel.send(`**${player.investigator_name}** revelation: **${card.name}**\n` + lines.join('\n'));
+  }
+}
+
+module.exports = { buildEncounterDeck, drawEncounterCard, postEncounterCard, runMythosEncounters, applyRevelationIfWeakness, shuffle };
