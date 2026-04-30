@@ -6,7 +6,12 @@ const SYSTEM_CHANNELS = ['pre-game', 'bot-log'];
 
 async function cloneAndClear(guild, channelName) {
   const ch = guild.channels.cache.find(c => c.name === channelName);
-  if (!ch) return;
+  if (!ch) {
+    // Channel doesn't exist — create it fresh
+    const created = await guild.channels.create({ name: channelName, type: ChannelType.GuildText });
+    await created.send(`🧹 Channel created fresh.`);
+    return;
+  }
   const position = ch.position;
   const parent = ch.parentId;
   const clone = await ch.clone({ reason: '/clear command' });
