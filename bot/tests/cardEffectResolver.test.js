@@ -86,3 +86,41 @@ describe('resolver - effective stats', () => {
     expect(getEffectiveHandSize({ assets: '[]', threat_area: '[]' })).toBe(8);
   });
 });
+
+describe('resolveOnPlay', () => {
+  test('returns plan with effects + needs_targets list', () => {
+    fs.writeFileSync(TMP, JSON.stringify({
+      ...JSON.parse(fs.readFileSync(TMP, 'utf8')),
+      '01064': { name: 'Drawn to the Flame', fast: false, effects: [
+        { type: 'draw_encounter_card', count: 1 },
+        { type: 'discover_clues', count: 2, target: 'self_location' },
+      ], conditions: [], unparsed_text: '' },
+    }));
+    require('../engine/cardEffectResolver')._resetForTests();
+    const { resolveOnPlay } = require('../engine/cardEffectResolver');
+    const plan = resolveOnPlay('01064');
+    expect(plan.effects[0]).toEqual({ type: 'draw_encounter_card', count: 1 });
+    expect(plan.effects[1]).toEqual({ type: 'discover_clues', count: 2, target: 'self_location' });
+    expect(plan.needs_targets).toEqual([]);
+    expect(plan.fast).toBe(false);
+  });
+
+  test('marks targeted effects in needs_targets', () => {
+    fs.writeFileSync(TMP, JSON.stringify({
+      ...JSON.parse(fs.readFileSync(TMP, 'utf8')),
+      '01052': { name: 'Sneak Attack', fast: false, effects: [{ type: 'deal_damage', count: 2, target: 'chosen_enemy' }] },
+    }));
+    require('../engine/cardEffectResolver')._resetForTests();
+    const { resolveOnPlay } = require('../engine/cardEffectResolver');
+    const plan = resolveOnPlay('01052');
+    expect(plan.needs_targets).toContainEqual({ effect_index: 0, target: 'chosen_enemy' });
+  });
+
+  test('returns empty plan for unknown code', () => {
+    const { resolveOnPlay } = require('../engine/cardEffectResolver');
+    const plan = resolveOnPlay('99999');
+    expect(plan.effects).toEqual([]);
+    expect(plan.needs_targets).toEqual([]);
+    expect(plan.fast).toBe(false);
+  });
+});

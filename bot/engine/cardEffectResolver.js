@@ -86,6 +86,24 @@ function resolveOnSuccess(committedCodes) {
   return out;
 }
 
+function resolveOnPlay(code) {
+  const entry = getEntry(code);
+  if (!entry) return { effects: [], needs_targets: [], fast: false, conditions: [], unparsed: '' };
+  const needsTargets = [];
+  (entry.effects || []).forEach((eff, i) => {
+    if (typeof eff.target === 'string' && eff.target.startsWith('chosen_')) {
+      needsTargets.push({ effect_index: i, target: eff.target });
+    }
+  });
+  return {
+    effects: entry.effects || [],
+    needs_targets: needsTargets,
+    fast: !!entry.fast,
+    conditions: entry.conditions || [],
+    unparsed: entry.unparsed_text || '',
+  };
+}
+
 function _resetForTests() { _effects = null; }
 
 module.exports = {
@@ -94,5 +112,6 @@ module.exports = {
   getEffectiveActions,
   getEffectiveHandSize,
   resolveOnSuccess,
+  resolveOnPlay,
   _resetForTests,
 };
