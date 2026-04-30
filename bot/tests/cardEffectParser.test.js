@@ -61,3 +61,34 @@ describe('parser - simple effects', () => {
     expect(e.effects).toContainEqual({ type: 'add_doom', count: 1 });
   });
 });
+
+describe('parser - damage/horror/heal', () => {
+  const parseText = text => parse({ name: 'X', type_code: 'event', text });
+
+  test('Sneak Attack: deal 2 damage to chosen exhausted enemy', () => {
+    const e = parseText('Deal 2 damage to an exhausted enemy at your location.');
+    expect(e.effects).toContainEqual({ type: 'deal_damage', count: 2, target: 'chosen_enemy' });
+  });
+
+  test('Dynamite Blast: deal 3 damage to each enemy', () => {
+    const e = parseText('Choose either your location or a connecting location. Deal 3 damage to each enemy and to each investigator at the chosen location.');
+    expect(e.effects).toContainEqual({ type: 'deal_damage', count: 3, target: 'all_enemies_at_location' });
+    expect(e.effects).toContainEqual({ type: 'deal_damage', count: 3, target: 'all_investigators_at_location' });
+  });
+
+  test('Ward of Protection: take 1 horror', () => {
+    const e = parseText('Cancel that card’s revelation effect. Then, take 1 horror.');
+    expect(e.effects).toContainEqual({ type: 'deal_horror', count: 1, target: 'self' });
+  });
+
+  test('Abandoned and Alone: take 2 direct horror', () => {
+    const e = parseText('Take 2 direct horror and remove all cards in your discard pile from the game.');
+    expect(e.effects).toContainEqual({ type: 'deal_horror', count: 2, target: 'self', direct: true });
+  });
+
+  test('Moment of Respite: heal 3 horror, draw 1 card', () => {
+    const e = parseText('Heal 3 horror and draw 1 card.');
+    expect(e.effects).toContainEqual({ type: 'heal_horror', count: 3, target: 'self' });
+    expect(e.effects).toContainEqual({ type: 'draw_cards', count: 1 });
+  });
+});

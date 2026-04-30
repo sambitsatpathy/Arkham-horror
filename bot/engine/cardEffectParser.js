@@ -32,10 +32,32 @@ const SIMPLE_EFFECT_RULES = [
     out: m => ({ type: 'discover_clues', count: parseInt(m[1], 10), target: 'self_location' }) },
   { re: /Place (\d+) doom on the current agenda/i,
     out: m => ({ type: 'add_doom', count: parseInt(m[1], 10) }) },
+  { re: /Deal (\d+) damage to an? (?:exhausted )?enemy at your location/i,
+    out: m => ({ type: 'deal_damage', count: parseInt(m[1], 10), target: 'chosen_enemy' }) },
+  { re: /Take (\d+) (direct )?horror/i,
+    out: m => ({ type: 'deal_horror', count: parseInt(m[1], 10), target: 'self', ...(m[2] ? { direct: true } : {}) }) },
+  { re: /Take (\d+) (direct )?damage/i,
+    out: m => ({ type: 'deal_damage', count: parseInt(m[1], 10), target: 'self', ...(m[2] ? { direct: true } : {}) }) },
+  { re: /Heal (\d+) horror/i,
+    out: m => ({ type: 'heal_horror', count: parseInt(m[1], 10), target: 'self' }) },
+  { re: /Heal (\d+) damage/i,
+    out: m => ({ type: 'heal_damage', count: parseInt(m[1], 10), target: 'self' }) },
 ];
 
 function applyEffectRules(text, entry) {
   let remaining = text;
+  // Special: Dynamite Blast — emit two effects from one phrase
+  const dyn = remaining.match(/Deal (\d+) damage to each enemy and to each investigator at (?:the chosen|your) location/i);
+  if (dyn) {
+    const n = parseInt(dyn[1], 10);
+    entry.effects.push({ type: 'deal_damage', count: n, target: 'all_enemies_at_location' });
+    entry.effects.push({ type: 'deal_damage', count: n, target: 'all_investigators_at_location' });
+    remaining = (remaining.slice(0, dyn.index) + remaining.slice(dyn.index + dyn[0].length))
+      .replace(/^[\s.,]+|[\s.,]+$/g, ' ')
+      .replace(/^\s*\bThen\b[\s,.]*/i, '')
+      .replace(/[\s,.]*\bThen\b\s*$/i, '')
+      .trim();
+  }
   let progress = true;
   while (progress) {
     progress = false;
