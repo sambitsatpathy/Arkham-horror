@@ -2,7 +2,7 @@ const { SlashCommandBuilder, ChannelType } = require('discord.js');
 const { requireHost, resetDb } = require('../../engine/gameState');
 const { teardownGameChannels } = require('../../engine/serverBuilder');
 
-const SYSTEM_CHANNELS = ['pregame', 'bot-log'];
+const SYSTEM_CHANNELS = ['pre-game', 'bot-log'];
 
 async function cloneAndClear(guild, channelName) {
   const ch = guild.channels.cache.find(c => c.name === channelName);
@@ -25,9 +25,9 @@ module.exports = {
         .setDescription('What to clear')
         .setRequired(true)
         .addChoices(
-          { name: '#pregame only',   value: 'pregame'  },
+          { name: '#pre-game only',  value: 'pre-game' },
           { name: '#bot-log only',   value: 'bot-log'  },
-          { name: 'System channels (pregame + bot-log)', value: 'system' },
+          { name: 'System channels (pre-game + bot-log)', value: 'system' },
           { name: 'Everything (all game + system channels)', value: 'all' },
         )),
 
@@ -39,7 +39,7 @@ module.exports = {
 
     await interaction.reply({ content: `🧹 Clearing **${scope}**…`, flags: 64 });
 
-    if (scope === 'pregame' || scope === 'bot-log') {
+    if (scope === 'pre-game' || scope === 'bot-log') {
       await cloneAndClear(interaction.guild, scope);
       return;
     }

@@ -168,7 +168,7 @@ module.exports = {
     }
 
     // Post intro narration + setup instructions in pregame channel
-    const pregame = interaction.guild.channels.cache.find(c => c.name === 'pregame');
+    const pregame = interaction.guild.channels.cache.find(c => c.name === 'pre-game');
     if (pregame) {
       if (scenario.intro_text?.length) {
         const introLines = [`# 🎴 ${scenario.name}`, '', ...scenario.intro_text.map(p => `*${p}*`)];

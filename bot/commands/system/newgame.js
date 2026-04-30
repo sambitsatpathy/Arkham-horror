@@ -21,7 +21,7 @@ module.exports = {
     const hostRole = interaction.guild.roles.cache.find(r => r.name === '🎲 Game Host');
     if (hostRole) await hostRole.delete().catch(() => {});
 
-    const pregame = interaction.guild.channels.cache.find(c => c.name === 'pregame');
+    const pregame = interaction.guild.channels.cache.find(c => c.name === 'pre-game');
     if (pregame) {
       await pregame.send('🔄 Server has been reset. Use `/join` to start a new campaign.');
     }

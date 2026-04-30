@@ -49,7 +49,7 @@ module.exports = {
 
     const scenario = loadScenario(session);
 
-    const pregame = interaction.guild.channels.cache.find(c => c.name === 'pregame');
+    const pregame = interaction.guild.channels.cache.find(c => c.name === 'pre-game');
 
     // Post resolution narration first if provided
     if (resolutionKey && scenario?.resolutions?.[resolutionKey]) {
@@ -112,6 +112,6 @@ module.exports = {
     ];
 
     if (pregame) await pregame.send(lines.join('\n'));
-    await interaction.editReply(`✅ Scenario ended (${result}). Summary posted in #pregame.`);
+    await interaction.editReply(`✅ Scenario ended (${result}). Summary posted in #pre-game.`);
   },
 };

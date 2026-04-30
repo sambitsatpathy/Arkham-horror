@@ -124,7 +124,7 @@ module.exports = {
     const action = isReselect ? `changed investigator to` : `chose`;
     const content = `🔍 **${interaction.user.username}** ${action} **${invData.name}** — *${invData.subname}* (${faction})\nHP: ${invData.health} | SAN: ${invData.sanity} | ${skillStr}\n🃏 ${deckSummary}`;
 
-    const pregameCh = interaction.guild.channels.cache.find(c => c.name === 'pregame');
+    const pregameCh = interaction.guild.channels.cache.find(c => c.name === 'pre-game');
     const target = pregameCh || interaction.channel;
     if (imagePath) {
       await target.send({ content, files: [new AttachmentBuilder(imagePath, { name: 'investigator.png' })] });
