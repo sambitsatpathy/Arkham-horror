@@ -146,3 +146,30 @@ describe('parser - passives', () => {
     expect(e.passive).toContainEqual({ type: 'stat_penalty', stat: 'all', value: 1, condition: null });
   });
 });
+
+describe('parser - weakness fields', () => {
+  test('Haunted: discard_cost 2 + revelation adds to threat area', () => {
+    const e = parse({ name: 'Haunted', type_code: 'treachery', subtype_code: 'weakness',
+      text: 'Revelation - Add Haunted to your threat area.\nYou get -1 to each of your skills.\n[action] [action]: Discard Haunted.' });
+    expect(e.discard_cost).toBe(2);
+    expect(e.revelation_effects).toContainEqual({ type: 'add_to_threat_area' });
+  });
+
+  test('Hospital Debts: revelation puts into threat area', () => {
+    const e = parse({ name: 'Hospital Debts', type_code: 'treachery', subtype_code: 'weakness',
+      text: 'Revelation - Put Hospital Debts into play in your threat area.\n[fast]: Move 1 resource from your resource pool to Hospital Debts.' });
+    expect(e.revelation_effects).toContainEqual({ type: 'add_to_threat_area' });
+  });
+
+  test('Paranoia: revelation discards all resources', () => {
+    const e = parse({ name: 'Paranoia', type_code: 'treachery', subtype_code: 'weakness',
+      text: 'Revelation - Discard all your resources.' });
+    expect(e.revelation_effects).toContainEqual({ type: 'discard_all_resources' });
+  });
+
+  test('Abandoned and Alone: direct horror in revelation', () => {
+    const e = parse({ name: 'Abandoned and Alone', type_code: 'treachery', subtype_code: 'weakness',
+      text: 'Revelation - Take 2 direct horror and remove all cards in your discard pile from the game.' });
+    expect(e.revelation_effects).toContainEqual({ type: 'deal_horror', count: 2, target: 'self', direct: true });
+  });
+});

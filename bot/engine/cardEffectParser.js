@@ -165,6 +165,33 @@ function parse(card) {
     text = text.replace(/^\s*Fast\.\s*/i, '');
   }
 
+  // Revelation routing
+  const revMatch = text.match(/Revelation\s*[-—]\s*([^\n]+)/i);
+  if (revMatch) {
+    const revText = revMatch[1];
+    if (/(?:Add|Put) [^.]* (?:to|into play in) your threat area/i.test(revText)) {
+      entry.revelation_effects.push({ type: 'add_to_threat_area' });
+    }
+    if (/Discard all your resources/i.test(revText)) {
+      entry.revelation_effects.push({ type: 'discard_all_resources' });
+    }
+    const dh = revText.match(/Take (\d+) (direct )?horror/i);
+    if (dh) {
+      entry.revelation_effects.push({ type: 'deal_horror', count: parseInt(dh[1], 10), target: 'self', ...(dh[2] ? { direct: true } : {}) });
+    }
+    const dd = revText.match(/Take (\d+) (direct )?damage/i);
+    if (dd) {
+      entry.revelation_effects.push({ type: 'deal_damage', count: parseInt(dd[1], 10), target: 'self', ...(dd[2] ? { direct: true } : {}) });
+    }
+    text = text.replace(revMatch[0], '').trim();
+  }
+
+  // [action] [action]: Discard <name>
+  if (/\[action\]\s*\[action\][^\n]*:\s*Discard\b/i.test(text)) {
+    entry.discard_cost = 2;
+    text = text.replace(/\[action\]\s*\[action\][^\n]*:\s*Discard[^\n]*/i, '').trim();
+  }
+
   text = applyConditionRules(text, entry);
   text = extractPassives(text, entry);
   text = extractOnSuccess(text, entry);
