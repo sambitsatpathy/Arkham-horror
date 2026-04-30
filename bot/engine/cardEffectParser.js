@@ -78,6 +78,24 @@ function applyEffectRules(text, entry) {
   return remaining;
 }
 
+function extractOnSuccess(text, entry) {
+  const m = text.match(/If this (?:skill )?test is successful(?:[^,]*)?,\s*([^.]+)\./i);
+  if (!m) return text;
+  const inner = m[1].trim();
+  const sub = emptyEntry();
+  applyEffectRules(inner, sub);
+  if (sub.effects.length === 0) {
+    // "that attack deals +N damage"
+    const mm = inner.match(/that attack deals \+(\d+) damage/i);
+    if (mm) sub.effects.push({ type: 'bonus_damage_on_attack', count: parseInt(mm[1], 10) });
+  }
+  // "discover N additional clues at that location"
+  const dm = inner.match(/discover (\d+) additional clues? at that location/i);
+  if (dm) sub.effects.push({ type: 'discover_clues', count: parseInt(dm[1], 10), target: 'self_location' });
+  entry.on_success.push(...sub.effects);
+  return (text.slice(0, m.index) + text.slice(m.index + m[0].length)).trim();
+}
+
 function applyConditionRules(text, entry) {
   let t = text;
   if (/Play only during your turn/i.test(t)) {
@@ -103,6 +121,7 @@ function parse(card) {
   }
 
   text = applyConditionRules(text, entry);
+  text = extractOnSuccess(text, entry);
   text = applyEffectRules(text, entry);
 
   entry.unparsed_text = text.trim();

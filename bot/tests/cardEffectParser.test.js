@@ -92,3 +92,27 @@ describe('parser - damage/horror/heal', () => {
     expect(e.effects).toContainEqual({ type: 'draw_cards', count: 1 });
   });
 });
+
+describe('parser - skill on_success', () => {
+  const parseSkill = text => parse({ name: 'X', type_code: 'skill', text });
+
+  test('Vicious Blow', () => {
+    const e = parseSkill('If this skill test is successful during an attack, that attack deals +1 damage.');
+    expect(e.on_success).toContainEqual({ type: 'bonus_damage_on_attack', count: 1 });
+  });
+
+  test('Guts: draw 1 on success', () => {
+    const e = parseSkill('Max 1 committed per skill test.\nIf this test is successful, draw 1 card.');
+    expect(e.on_success).toContainEqual({ type: 'draw_cards', count: 1 });
+  });
+
+  test('Fearless: heal horror on success', () => {
+    const e = parseSkill('If this skill test is successful, heal 1 horror.');
+    expect(e.on_success).toContainEqual({ type: 'heal_horror', count: 1, target: 'self' });
+  });
+
+  test('Deduction: discover 1 additional clue on success while investigating', () => {
+    const e = parseSkill('If this skill test is successful while investigating a location, discover 1 additional clue at that location.');
+    expect(e.on_success).toContainEqual({ type: 'discover_clues', count: 1, target: 'self_location' });
+  });
+});
