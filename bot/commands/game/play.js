@@ -146,6 +146,19 @@ module.exports = {
       for (let i = 0; i < plan.effects.length; i++) {
         const eff = plan.effects[i];
         if (plan.needs_targets.find(n => n.effect_index === i)) {
+          if (eff.target === 'chosen_enemy') {
+            const enemies = getEnemiesAt(session.id, player.location_code);
+            if (enemies.length === 1) {
+              const e = enemies[0];
+              const { damageEnemy, defeatEnemy } = require('../../engine/enemyEngine');
+              if (eff.type === 'deal_damage') {
+                const newHp = damageEnemy(e, eff.count);
+                if (newHp === 0) defeatEnemy(e.id);
+                lines.push(`🩸 Auto-applied: ${eff.count} damage to **${e.name}** (only enemy at location).`);
+                continue;
+              }
+            }
+          }
           lines.push(`🎯 \`${eff.type}\` requires target \`${eff.target}\` — resolve manually.`);
           continue;
         }
