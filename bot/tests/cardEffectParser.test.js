@@ -27,3 +27,37 @@ describe('cardEffectParser', () => {
     expect(parse(card).is_weakness).toBe(false);
   });
 });
+
+describe('parser - simple effects', () => {
+  const parseText = (text, type = 'event') =>
+    parse({ name: 'X', type_code: type, text });
+
+  test('Drawn to the Flame', () => {
+    const e = parseText('Draw the top card of the encounter deck. Then, discover 2 clues at your location.');
+    expect(e.effects).toEqual([
+      { type: 'draw_encounter_card', count: 1 },
+      { type: 'discover_clues', count: 2, target: 'self_location' },
+    ]);
+    expect(e.unparsed_text).toBe('');
+  });
+
+  test('Emergency Cache', () => {
+    const e = parseText('Gain 3 resources and draw 1 card.');
+    expect(e.effects).toEqual([
+      { type: 'gain_resources', count: 3 },
+      { type: 'draw_cards', count: 1 },
+    ]);
+  });
+
+  test('Working a Hunch', () => {
+    const e = parseText('Fast. Play only during your turn.\nDiscover 1 clue at your location.');
+    expect(e.fast).toBe(true);
+    expect(e.effects).toEqual([{ type: 'discover_clues', count: 1, target: 'self_location' }]);
+    expect(e.conditions).toContain('during_your_turn');
+  });
+
+  test('Dark Memory', () => {
+    const e = parseText('Place 1 doom on the current agenda. This effect can cause the current agenda to advance.');
+    expect(e.effects).toContainEqual({ type: 'add_doom', count: 1 });
+  });
+});
