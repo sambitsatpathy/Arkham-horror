@@ -116,3 +116,33 @@ describe('parser - skill on_success', () => {
     expect(e.on_success).toContainEqual({ type: 'discover_clues', count: 1, target: 'self_location' });
   });
 });
+
+describe('parser - passives', () => {
+  const parseAsset = text => parse({ name: 'X', type_code: 'asset', text });
+
+  test('Beat Cop: +1 combat always-on', () => {
+    const e = parseAsset('You get +1 [combat].\n[fast] Discard Beat Cop: Deal 1 damage to an enemy at your location.');
+    expect(e.passive).toContainEqual({ type: 'stat_bonus', stat: 'combat', value: 1, condition: null });
+  });
+
+  test('Magnifying Glass: +1 intellect while investigating', () => {
+    const e = parseAsset('Fast.\nYou get +1 [intellect] while investigating.');
+    expect(e.passive).toContainEqual({ type: 'stat_bonus', stat: 'intellect', value: 1, condition: 'while_investigating' });
+  });
+
+  test('Leo De Luca: extra action', () => {
+    const e = parseAsset('You may take an additional action during your turn.');
+    expect(e.passive).toContainEqual({ type: 'extra_actions', value: 1 });
+  });
+
+  test('Laboratory Assistant: +2 hand size', () => {
+    const e = parseAsset('Your maximum hand size is increased by 2.');
+    expect(e.passive).toContainEqual({ type: 'hand_size_bonus', value: 2 });
+  });
+
+  test('Haunted: -1 to all skills', () => {
+    const e = parse({ name: 'Haunted', type_code: 'treachery', subtype_code: 'weakness',
+      text: 'Revelation - Add Haunted to your threat area.\nYou get -1 to each of your skills.\n[action] [action]: Discard Haunted.' });
+    expect(e.passive).toContainEqual({ type: 'stat_penalty', stat: 'all', value: 1, condition: null });
+  });
+});

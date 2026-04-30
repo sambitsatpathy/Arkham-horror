@@ -108,6 +108,51 @@ function applyConditionRules(text, entry) {
   return t;
 }
 
+const STAT_KEYWORDS = ['combat', 'willpower', 'intellect', 'agility'];
+
+function extractPassives(text, entry) {
+  let t = text;
+
+  // Stat bonuses: "You get +N [stat] while investigating" — must check before simple form
+  for (const stat of STAT_KEYWORDS) {
+    const reCondition = new RegExp(`You get \\+(\\d+) \\[${stat}\\] while investigating`, 'i');
+    const m1 = t.match(reCondition);
+    if (m1) {
+      entry.passive.push({ type: 'stat_bonus', stat, value: parseInt(m1[1], 10), condition: 'while_investigating' });
+      t = t.replace(m1[0], '').trim();
+      continue;
+    }
+    const reSimple = new RegExp(`You get \\+(\\d+) \\[${stat}\\](?!\\s*for)`, 'i');
+    const m2 = t.match(reSimple);
+    if (m2) {
+      entry.passive.push({ type: 'stat_bonus', stat, value: parseInt(m2[1], 10), condition: null });
+      t = t.replace(m2[0], '').trim();
+    }
+  }
+
+  // -N to each of your skills
+  const penAll = t.match(/You get -(\d+) to each of your skills/i);
+  if (penAll) {
+    entry.passive.push({ type: 'stat_penalty', stat: 'all', value: parseInt(penAll[1], 10), condition: null });
+    t = t.replace(penAll[0], '').trim();
+  }
+
+  // Extra actions
+  if (/You may take an additional action during your turn/i.test(t)) {
+    entry.passive.push({ type: 'extra_actions', value: 1 });
+    t = t.replace(/You may take an additional action during your turn\.?/i, '').trim();
+  }
+
+  // Hand size bonus
+  const hs = t.match(/Your maximum hand size is increased by (\d+)/i);
+  if (hs) {
+    entry.passive.push({ type: 'hand_size_bonus', value: parseInt(hs[1], 10) });
+    t = t.replace(hs[0], '').trim();
+  }
+
+  return t;
+}
+
 function parse(card) {
   const entry = emptyEntry();
   entry.name = card.name || '';
@@ -121,6 +166,7 @@ function parse(card) {
   }
 
   text = applyConditionRules(text, entry);
+  text = extractPassives(text, entry);
   text = extractOnSuccess(text, entry);
   text = applyEffectRules(text, entry);
 
