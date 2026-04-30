@@ -76,6 +76,16 @@ function getEffectiveHandSize(player) {
   return total;
 }
 
+function resolveOnSuccess(committedCodes) {
+  const out = [];
+  for (const code of committedCodes) {
+    const entry = getEntry(code);
+    if (!entry) continue;
+    out.push(...(entry.on_success || []));
+  }
+  return out;
+}
+
 function _resetForTests() { _effects = null; }
 
 module.exports = {
@@ -83,5 +93,6 @@ module.exports = {
   getEffectiveStat,
   getEffectiveActions,
   getEffectiveHandSize,
+  resolveOnSuccess,
   _resetForTests,
 };

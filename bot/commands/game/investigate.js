@@ -195,6 +195,29 @@ module.exports = {
       isAutoFail ? '❌ **Auto-fail!**' : success ? '✅ **Success!**' : '❌ **Failed.**');
     if (clueNote) lines.push(clueNote);
 
+    if (success && codes.length > 0) {
+      const { resolveOnSuccess } = require('../../engine/cardEffectResolver');
+      const { drawCards } = require('../../engine/deck');
+      const { getPlayerById, updatePlayer } = require('../../engine/gameState');
+      const onSuccess = resolveOnSuccess(codes);
+      for (const eff of onSuccess) {
+        if (eff.type === 'draw_cards') {
+          const fresh = getPlayerById(player.id);
+          drawCards(fresh, eff.count);
+          lines.push(`🎴 **${player.investigator_name}** drew ${eff.count} card(s) from skill.`);
+        } else if (eff.type === 'heal_horror') {
+          const fresh = getPlayerById(player.id);
+          const newSan = Math.min(fresh.max_sanity, fresh.sanity + eff.count);
+          updatePlayer(player.id, { sanity: newSan });
+          lines.push(`💚 Healed ${eff.count} horror.`);
+        } else if (eff.type === 'discover_clues') {
+          lines.push(`🔎 +${eff.count} clue from skill (resolve location adjustment manually).`);
+        } else if (eff.type === 'bonus_damage_on_attack') {
+          lines.push(`⚔️ +${eff.count} bonus damage on this attack (apply via /fight bonus_damage).`);
+        }
+      }
+    }
+
     await interaction.editReply(lines.join('\n'));
   },
 };

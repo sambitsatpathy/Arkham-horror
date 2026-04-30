@@ -18,6 +18,32 @@ beforeAll(() => {
 
 afterAll(() => fs.unlinkSync(TMP));
 
+describe('resolveOnSuccess', () => {
+  beforeAll(() => {
+    fs.writeFileSync(TMP, JSON.stringify({
+      ...JSON.parse(fs.readFileSync(TMP, 'utf8')),
+      '01089': { name: 'Guts', on_success: [{ type: 'draw_cards', count: 1 }] },
+      '01067': { name: 'Fearless', on_success: [{ type: 'heal_horror', count: 1, target: 'self' }] },
+    }));
+    require('../engine/cardEffectResolver')._resetForTests();
+  });
+
+  test('aggregates effects across committed cards', () => {
+    const { resolveOnSuccess } = require('../engine/cardEffectResolver');
+    const out = resolveOnSuccess(['01089', '01067']);
+    expect(out).toEqual([
+      { type: 'draw_cards', count: 1 },
+      { type: 'heal_horror', count: 1, target: 'self' },
+    ]);
+  });
+
+  test('returns [] for empty / unknown', () => {
+    const { resolveOnSuccess } = require('../engine/cardEffectResolver');
+    expect(resolveOnSuccess([])).toEqual([]);
+    expect(resolveOnSuccess(['99999'])).toEqual([]);
+  });
+});
+
 const investigator = { code: '01001', name: 'Roland', skills: { combat: 4, willpower: 3, intellect: 3, agility: 2 } };
 
 describe('resolver - effective stats', () => {
