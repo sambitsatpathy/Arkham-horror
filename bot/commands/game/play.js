@@ -1,9 +1,11 @@
 const { SlashCommandBuilder, AttachmentBuilder, PermissionFlagsBits } = require('discord.js');
-const { requireSession, requirePlayer, getPlayer, getPlayerById, updatePlayer } = require('../../engine/gameState');
+const { requireSession, requirePlayer, getPlayer, getPlayerById, updatePlayer, decrementActions, getEnemiesAt } = require('../../engine/gameState');
 const { discardCard, playAsset } = require('../../engine/deck');
 const { findCardByCode, getCardCharges, getCardSoak } = require('../../engine/cardLookup');
 const { handChannelName } = require('../../config');
 const { refreshHandDisplay } = require('../../engine/handDisplay');
+const { resolveOnPlay } = require('../../engine/cardEffectResolver');
+const { execEffect } = require('../../engine/effectExecutors');
 
 const TYPE_LABEL = {
   asset: 'Asset',
@@ -122,6 +124,36 @@ module.exports = {
     }
     await refreshHandDisplay(interaction.guild, player);
     await interaction.reply({ content: `✅ Played **${name}**.${costNote}`, flags: 64 });
+
+    // Auto-resolve untargeted on-play effects for event cards
+    const plan = resolveOnPlay(cardCode);
+    if (plan.effects.length || plan.unparsed) {
+      const lines = [];
+      if (plan.conditions.includes('no_enemies_at_location')) {
+        const enemies = getEnemiesAt(session.id, player.location_code);
+        if (enemies.length > 0) {
+          await interaction.followUp({ content: `❌ Cannot resolve effects of \`${cardCode}\` — enemies at your location.`, flags: 64 });
+          return;
+        }
+      }
+      if (!plan.fast) {
+        const remaining = decrementActions(player.id);
+        lines.push(`⏱️ -1 action (${remaining} remaining).`);
+      } else {
+        lines.push(`⚡ Fast — no action cost.`);
+      }
+      const ctx = { player, session, guild: interaction.guild };
+      for (let i = 0; i < plan.effects.length; i++) {
+        const eff = plan.effects[i];
+        if (plan.needs_targets.find(n => n.effect_index === i)) {
+          lines.push(`🎯 \`${eff.type}\` requires target \`${eff.target}\` — resolve manually.`);
+          continue;
+        }
+        lines.push(await execEffect(eff, ctx));
+      }
+      if (plan.unparsed) lines.push(`📖 **Manual:** ${plan.unparsed}`);
+      await interaction.followUp({ content: lines.join('\n'), flags: 64 });
+    }
   },
 };
 
