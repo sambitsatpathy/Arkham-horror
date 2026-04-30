@@ -1,5 +1,6 @@
 const { SlashCommandBuilder, AttachmentBuilder, PermissionFlagsBits } = require('discord.js');
-const { requireSession, requireHost, getSession, getPlayer, getPlayerById, getCampaign, getPlayers, updateSession, updatePlayer } = require('../../engine/gameState');
+const { requireSession, requireHost, getSession, getPlayer, getPlayerById, getCampaign, getPlayers, updateSession, updatePlayer, resetActions } = require('../../engine/gameState');
+const { getEffectiveActions, getEffectiveHandSize } = require('../../engine/cardEffectResolver');
 const { drawCards } = require('../../engine/deck');
 const { runMythosEncounters } = require('../../engine/encounterEngine');
 const { findCardByCode } = require('../../engine/cardLookup');
@@ -81,14 +82,15 @@ module.exports = {
         // 4. Hand size check
         const p4 = getPlayerById(player.id);
         const currentHand = JSON.parse(p4.hand || '[]');
-        if (currentHand.length > 8) {
+        const handMax = getEffectiveHandSize(p4);
+        if (currentHand.length > handMax) {
           const handCh = interaction.guild.channels.cache.find(c =>
             c.name === handChannelName(p4.investigator_name)
           );
           if (handCh) {
-            await handCh.send(`⚠️ **${p4.investigator_name}** has **${currentHand.length}** cards in hand (limit 8). Use \`/discard\` to reduce to 8.`);
+            await handCh.send(`⚠️ **${p4.investigator_name}** has **${currentHand.length}** cards in hand (limit ${handMax}). Use \`/discard\` to reduce to ${handMax}.`);
           }
-          steps.push(`⚠️ hand has ${currentHand.length} cards — discard to 8`);
+          steps.push(`⚠️ hand has ${currentHand.length} cards — discard to ${handMax}`);
         }
 
         summaryLines.push(`**${player.investigator_name}**: ${steps.join(', ')}`);
@@ -123,6 +125,13 @@ module.exports = {
       }
 
       updateSession(session.id, { phase: 'investigation' });
+      const allPlayers = getPlayers(getCampaign().id);
+      for (const p of allPlayers) {
+        const fresh = getPlayerById(p.id);
+        const max = getEffectiveActions(fresh);
+        resetActions(p.id, max);
+      }
+      if (doomCh) await doomCh.send('🎯 Actions reset for all players (3 + bonuses).');
       if (doomCh) await doomCh.send([
         `## 🔍 Investigation Phase — Round ${newRound}`,
         '',
@@ -140,6 +149,13 @@ module.exports = {
     // ── MYTHOS → INVESTIGATION (manual fallback) ─────────────────────────
     if (current === 'mythos') {
       updateSession(session.id, { phase: 'investigation' });
+      const allPlayersMythos = getPlayers(getCampaign().id);
+      for (const p of allPlayersMythos) {
+        const fresh = getPlayerById(p.id);
+        const max = getEffectiveActions(fresh);
+        resetActions(p.id, max);
+      }
+      if (doomCh) await doomCh.send('🎯 Actions reset for all players (3 + bonuses).');
       if (doomCh) await doomCh.send([
         `## 🔍 Investigation Phase — Round ${session.round}`,
         '',
