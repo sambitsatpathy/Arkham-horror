@@ -4,6 +4,7 @@ const { drawToken, displayToken } = require('../../engine/chaosBag');
 const { findCardByCode, getCardSkills } = require('../../engine/cardLookup');
 const { commitCards } = require('../../engine/deck');
 const { refreshHandDisplay } = require('../../engine/handDisplay');
+const { getEffectiveStat } = require('../../engine/cardEffectResolver');
 const { updateLocationStatus } = require('../../engine/locationManager');
 const { getLocation } = require('../../engine/gameState');
 const allInvestigators = require('../../data/investigators/investigators.json');
@@ -104,7 +105,7 @@ module.exports = {
     await interaction.deferReply();
 
     const inv = allInvestigators.find(i => i.code === player.investigator_code);
-    const statValue = inv?.skills?.[statName] ?? 0;
+    const statValue = getEffectiveStat(player, statName, {}, inv);
     const short = STAT_SHORT[statName] || statName.toUpperCase();
     const icon = STAT_ICON[statName] || '💨';
 
@@ -202,7 +203,7 @@ async function executeEvadeAction(interaction, player, session, enemyId, commitC
   const statName = 'agility';
   const freshPlayer = getPlayerById(player.id);
   const inv = allInvestigators.find(i => i.code === freshPlayer.investigator_code);
-  const statValue = inv?.skills?.[statName] ?? 0;
+  const statValue = getEffectiveStat(freshPlayer, statName, {}, inv);
 
   let commitBonus = 0;
   const commitLines = [];

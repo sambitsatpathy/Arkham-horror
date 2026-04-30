@@ -4,6 +4,7 @@ const { drawToken, displayToken } = require('../../engine/chaosBag');
 const { findCardByCode, getCardSkills } = require('../../engine/cardLookup');
 const { commitCards } = require('../../engine/deck');
 const { refreshHandDisplay } = require('../../engine/handDisplay');
+const { getEffectiveStat } = require('../../engine/cardEffectResolver');
 const allInvestigators = require('../../data/investigators/investigators.json');
 
 const STATS = ['willpower', 'intellect', 'combat', 'agility'];
@@ -126,7 +127,7 @@ module.exports = {
     await interaction.deferReply();
 
     const inv = allInvestigators.find(i => i.code === player.investigator_code);
-    const statValue = inv?.skills?.[statName] ?? 0;
+    const statValue = getEffectiveStat(player, statName, {}, inv);
 
     // Commit bonus
     let commitBonus = 0;
@@ -215,7 +216,7 @@ async function executeTestAction(interaction, player, session, stat, difficulty,
 
   const freshPlayer = getPlayerById(player.id);
   const inv = allInvestigators.find(i => i.code === freshPlayer.investigator_code);
-  const statValue = inv?.skills?.[stat] ?? 0;
+  const statValue = getEffectiveStat(freshPlayer, stat, {}, inv);
   const short = STAT_SHORT[stat] || stat.toUpperCase();
   const icon = STAT_ICON_MAP[stat] || '🎲';
 
