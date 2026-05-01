@@ -106,7 +106,20 @@ module.exports = {
       return interaction.reply({ content: `✅ **${name}** is now in play${chargesNote}.${costNote}`, flags: 64 });
     }
 
-    // Event / everything else — play and discard, deduct resources in one write
+    // Event / everything else — compute plan and check guards BEFORE any state mutation
+    const plan = resolveOnPlay(cardCode);
+    if (plan.conditions.includes('no_enemies_at_location')) {
+      const enemies = getEnemiesAt(session.id, player.location_code);
+      if (enemies.length > 0) {
+        return interaction.reply({ content: `❌ Cannot play \`${cardCode}\` — enemies at your location.`, flags: 64 });
+      }
+    }
+    const fresh0 = getPlayerById(player.id);
+    if (!plan.fast && (fresh0.action_count ?? 0) <= 0) {
+      return interaction.reply({ content: `❌ No actions remaining. Use a Fast card or wait for next turn.`, flags: 64 });
+    }
+
+    // Guards passed — now safe to mutate state
     discardCard(player, cardCode);
     if (cost > 0) {
       const fresh = getPlayerById(player.id);
@@ -126,16 +139,8 @@ module.exports = {
     await interaction.reply({ content: `✅ Played **${name}**.${costNote}`, flags: 64 });
 
     // Auto-resolve untargeted on-play effects for event cards
-    const plan = resolveOnPlay(cardCode);
     if (plan.effects.length || plan.unparsed) {
       const lines = [];
-      if (plan.conditions.includes('no_enemies_at_location')) {
-        const enemies = getEnemiesAt(session.id, player.location_code);
-        if (enemies.length > 0) {
-          await interaction.followUp({ content: `❌ Cannot resolve effects of \`${cardCode}\` — enemies at your location.`, flags: 64 });
-          return;
-        }
-      }
       if (!plan.fast) {
         const remaining = decrementActions(player.id);
         lines.push(`⏱️ -1 action (${remaining} remaining).`);
@@ -229,7 +234,25 @@ async function executePlayCard(interaction, player, session, cardCode) {
     return interaction.update ? interaction.update(replyContent) : interaction.editReply(replyContent);
   }
 
-  // Event / everything else — play and discard
+  // Event / everything else — check guards BEFORE any state mutation
+  const { resolveOnPlay } = require('../../engine/cardEffectResolver');
+  const { execEffect } = require('../../engine/effectExecutors');
+  const { getEnemiesAt, decrementActions } = require('../../engine/gameState');
+  const plan = resolveOnPlay(cardCode);
+  if (plan.conditions.includes('no_enemies_at_location')) {
+    const enemies = getEnemiesAt(session.id, freshPlayer.location_code);
+    if (enemies.length > 0) {
+      const msg = { content: `❌ Cannot play \`${cardCode}\` — enemies at your location.`, flags: 64 };
+      return interaction.update ? interaction.update(msg) : interaction.reply(msg);
+    }
+  }
+  const fresh0 = getPlayerById(freshPlayer.id);
+  if (!plan.fast && (fresh0.action_count ?? 0) <= 0) {
+    const msg = { content: `❌ No actions remaining. Use a Fast card or wait for next turn.`, flags: 64 };
+    return interaction.update ? interaction.update(msg) : interaction.reply(msg);
+  }
+
+  // Guards passed — now safe to mutate state
   discardCard(freshPlayer, cardCode);
   if (cost > 0) {
     const latest = getPlayerById(freshPlayer.id);
@@ -247,7 +270,43 @@ async function executePlayCard(interaction, player, session, cardCode) {
   }
   await refreshHandDisplay(interaction.guild, freshPlayer);
   const replyContent = { content: `✅ Played **${name}**.${costNote}`, components: [], flags: 64 };
-  return interaction.update ? interaction.update(replyContent) : interaction.editReply(replyContent);
+  const replied = interaction.update ? await interaction.update(replyContent) : await interaction.editReply(replyContent);
+
+  // Auto-resolve untargeted on-play effects for event cards
+  if (plan.effects.length || plan.unparsed) {
+    const lines = [];
+    if (!plan.fast) {
+      const remaining = decrementActions(freshPlayer.id);
+      lines.push(`⏱️ -1 action (${remaining} remaining).`);
+    } else {
+      lines.push(`⚡ Fast — no action cost.`);
+    }
+    const ctx = { player: freshPlayer, session, guild: interaction.guild };
+    for (let i = 0; i < plan.effects.length; i++) {
+      const eff = plan.effects[i];
+      if (plan.needs_targets.find(n => n.effect_index === i)) {
+        if (eff.target === 'chosen_enemy') {
+          const enemies = getEnemiesAt(session.id, freshPlayer.location_code);
+          if (enemies.length === 1) {
+            const e = enemies[0];
+            const { damageEnemy, defeatEnemy } = require('../../engine/enemyEngine');
+            if (eff.type === 'deal_damage') {
+              const newHp = damageEnemy(e, eff.count);
+              if (newHp === 0) defeatEnemy(e.id);
+              lines.push(`🩸 Auto-applied: ${eff.count} damage to **${e.name}** (only enemy at location).`);
+              continue;
+            }
+          }
+        }
+        lines.push(`🎯 \`${eff.type}\` requires target \`${eff.target}\` — resolve manually.`);
+        continue;
+      }
+      lines.push(await execEffect(eff, ctx));
+    }
+    if (plan.unparsed) lines.push(`📖 **Manual:** ${plan.unparsed}`);
+    await interaction.followUp({ content: lines.join('\n'), flags: 64 });
+  }
+  return replied;
 }
 
 module.exports.executePlayCard = executePlayCard;
