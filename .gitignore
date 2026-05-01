@@ -18,3 +18,12 @@ bot/data/location_backs/
 9*/
 
 *.log
+
+# macOS
+.DS_Store
+
+# Test artifacts
+bot/coverage/
+bot/tests/tmp_*.db
+bot/tests/tmp_*.db-shm
+bot/tests/tmp_*.db-wal
