@@ -18,9 +18,11 @@ async function execEffect(effect, ctx) {
       if (effect.target === 'self_location') {
         const loc = getLocation(session.id, fresh.location_code);
         if (loc) {
-          const newClues = Math.max(0, loc.clues - effect.count);
-          updateLocation(loc.id, { clues: newClues });
-          return `🔎 Discovered ${effect.count} clue(s) at ${loc.name} (${newClues} remaining).`;
+          const cluesGained = Math.min(effect.count, loc.clues);
+          const newLocClues = loc.clues - cluesGained;
+          updateLocation(loc.id, { clues: newLocClues });
+          updatePlayer(player.id, { clues: fresh.clues + cluesGained });
+          return `🔎 Discovered ${cluesGained} clue(s) at ${loc.name} (${newLocClues} remaining).`;
         }
       }
       return `🔎 Discover ${effect.count} clue(s) — manual.`;
