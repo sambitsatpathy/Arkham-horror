@@ -344,6 +344,39 @@ async function executeInvestigateAction(interaction, player, session, commitCode
     lines.push('❌ **Fail.** No clue collected.');
   }
 
+  if (success && codes.length > 0) {
+    const { resolveOnSuccess } = require('../../engine/cardEffectResolver');
+    const { drawCards } = require('../../engine/deck');
+    const onSuccess = resolveOnSuccess(codes);
+    for (const eff of onSuccess) {
+      if (eff.type === 'draw_cards') {
+        const fresh = getPlayerById(freshPlayer.id);
+        drawCards(fresh, eff.count);
+        lines.push(`🎴 **${freshPlayer.investigator_name}** drew ${eff.count} card(s) from skill.`);
+      } else if (eff.type === 'heal_horror') {
+        const fresh = getPlayerById(freshPlayer.id);
+        const newSan = Math.min(fresh.max_sanity, fresh.sanity + eff.count);
+        updatePlayer(freshPlayer.id, { sanity: newSan });
+        lines.push(`💚 Healed ${eff.count} horror.`);
+      } else if (eff.type === 'discover_clues') {
+        lines.push(`🔎 +${eff.count} clue from skill (resolve location adjustment manually).`);
+      } else if (eff.type === 'bonus_damage_on_attack') {
+        lines.push(`⚔️ +${eff.count} bonus damage on this attack (apply via /fight bonus_damage).`);
+      }
+    }
+  }
+
+  if (success) {
+    const { fireTriggers } = require('../../engine/cardEffectResolver');
+    const { execEffect } = require('../../engine/effectExecutors');
+    const trigs = fireTriggers(freshPlayer, 'after_successful_investigate');
+    for (const trig of trigs) {
+      for (const eff of trig.effects) {
+        lines.push(`↪ from **${trig.source_name}**: ` + (await execEffect(eff, { player: freshPlayer, session, guild: interaction.guild })));
+      }
+    }
+  }
+
   const chaosCh = interaction.guild.channels.cache.get(session.chaos_channel_id);
   if (chaosCh) {
     await chaosCh.send(`🔎 **${freshPlayer.investigator_name}** investigates **${loc.name}** — token: ${tokenLabel} — ${success ? '✅ Clue!' : '❌ Fail'}`);

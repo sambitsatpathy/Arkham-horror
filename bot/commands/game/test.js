@@ -290,6 +290,29 @@ async function executeTestAction(interaction, player, session, stat, difficulty,
   lines.push(`**Token:** ${tokenLabel}${specialNote}`, `**Result:** ${mathLine}`, '');
   lines.push(success ? '✅ **Success!**' : '❌ **Fail.**');
 
+  if (success && commitCodes.length > 0) {
+    const { resolveOnSuccess } = require('../../engine/cardEffectResolver');
+    const { drawCards } = require('../../engine/deck');
+    const { updatePlayer } = require('../../engine/gameState');
+    const onSuccess = resolveOnSuccess(commitCodes);
+    for (const eff of onSuccess) {
+      if (eff.type === 'draw_cards') {
+        const fresh = getPlayerById(freshPlayer.id);
+        drawCards(fresh, eff.count);
+        lines.push(`🎴 **${freshPlayer.investigator_name}** drew ${eff.count} card(s) from skill.`);
+      } else if (eff.type === 'heal_horror') {
+        const fresh = getPlayerById(freshPlayer.id);
+        const newSan = Math.min(fresh.max_sanity, fresh.sanity + eff.count);
+        updatePlayer(freshPlayer.id, { sanity: newSan });
+        lines.push(`💚 Healed ${eff.count} horror.`);
+      } else if (eff.type === 'discover_clues') {
+        lines.push(`🔎 +${eff.count} clue from skill (resolve location adjustment manually).`);
+      } else if (eff.type === 'bonus_damage_on_attack') {
+        lines.push(`⚔️ +${eff.count} bonus damage on this attack (apply via /fight bonus_damage).`);
+      }
+    }
+  }
+
   const chaosCh = interaction.guild.channels.cache.get(session.chaos_channel_id);
   if (chaosCh) await chaosCh.send(`🎲 **${freshPlayer.investigator_name}** tests ${stat} vs ${difficulty} — token: ${tokenLabel} — ${success ? '✅' : '❌'}`);
 
