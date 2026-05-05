@@ -33,7 +33,12 @@ module.exports = {
       const nextActIndex = session.act_index + 1;
       const result = await advanceAct(interaction.guild, session, scenario);
       if (result === 'no_more') return interaction.editReply('No more acts to advance.');
-      return interaction.editReply(`✅ Act advanced to **${scenario.acts[nextActIndex].name}**.`);
+      if (result?.status === 'insufficient_clues') {
+        return interaction.editReply(`❌ Cannot advance — each investigator needs **${result.cost}** clue(s). Short: ${result.short}`);
+      }
+      const cost = scenario.acts[session.act_index].clue_cost_per_investigator ?? 0;
+      const note = cost > 0 ? ` (spent ${cost} clue${cost !== 1 ? 's' : ''} per investigator)` : '';
+      return interaction.editReply(`✅ Act advanced to **${scenario.acts[nextActIndex].name}**${note}.`);
     }
 
     if (type === 'agenda') {

@@ -50,6 +50,21 @@ async function advanceAct(guild, session, scenario) {
   const nextIndex = session.act_index + 1;
   if (nextIndex >= scenario.acts.length) return 'no_more';
 
+  const currentAct = scenario.acts[session.act_index];
+  const cost = currentAct?.clue_cost_per_investigator ?? 0;
+  if (cost > 0) {
+    const campaign = getCampaign();
+    const livePlayers = getPlayers(campaign.id).filter(p => !p.is_eliminated);
+    const short = livePlayers.filter(p => (p.clues ?? 0) < cost);
+    if (short.length > 0) {
+      const list = short.map(p => `${p.investigator_name} (${p.clues}/${cost})`).join(', ');
+      return { status: 'insufficient_clues', cost, short: list };
+    }
+    for (const p of livePlayers) {
+      updatePlayer(p.id, { clues: (p.clues ?? 0) - cost });
+    }
+  }
+
   updateSession(session.id, { act_index: nextIndex });
   const newAct = scenario.acts[nextIndex];
 
