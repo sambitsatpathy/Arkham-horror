@@ -18,18 +18,18 @@ function buildMulliganEmbed(player) {
   if (selectOptions.length > 0) {
     const select = new StringSelectMenuBuilder()
       .setCustomId('mull:swap')
-      .setPlaceholder('Select cards to swap out…')
+      .setPlaceholder('Pick cards to swap (selecting finalizes mulligan)…')
       .setMinValues(0)
       .setMaxValues(selectOptions.length)
       .addOptions(selectOptions);
     components.push(new ActionRowBuilder().addComponents(select));
   }
 
-  const doneBtn = new ButtonBuilder()
+  const keepBtn = new ButtonBuilder()
     .setCustomId('mull:done')
-    .setLabel('Done — shuffle rest into deck')
+    .setLabel('Keep this hand')
     .setStyle(ButtonStyle.Success);
-  components.push(new ActionRowBuilder().addComponents(doneBtn));
+  components.push(new ActionRowBuilder().addComponents(keepBtn));
 
   const handNames = hand.map(code => {
     const r = findCardByCode(code);
@@ -37,7 +37,7 @@ function buildMulliganEmbed(player) {
   });
 
   return {
-    content: `**Mulligan** — Current hand (${hand.length} cards):\n${handNames.map((n, i) => `${i + 1}. ${n}`).join('\n')}\n\nSelect cards to swap, or click **Done** to keep this hand.`,
+    content: `**Mulligan** — Opening hand (${hand.length} cards):\n${handNames.map((n, i) => `${i + 1}. ${n}`).join('\n')}\n\nPick cards to swap (single submission, replacements drawn + discards shuffled into deck) **or** click **Keep this hand**.`,
     components,
     flags: 64,
   };
@@ -63,25 +63,36 @@ async function handleMulliganSwap(interaction) {
   });
 
   let hand = JSON.parse(player.hand || '[]');
-  let discard = JSON.parse(player.discard || '[]');
-  // Sort descending by index so splicing doesn't shift later indices
+  const swapped = [];
   toDiscard.sort((a, b) => b.idx - a.idx);
   for (const { code, idx } of toDiscard) {
     if (idx >= 0 && idx < hand.length && hand[idx] === code) {
       hand.splice(idx, 1);
-      discard.push(code);
+      swapped.push(code);
     }
   }
-  updatePlayer(player.id, { hand: JSON.stringify(hand), discard: JSON.stringify(discard) });
 
-  const freshPlayer = getPlayerById(player.id);
-  drawCards(freshPlayer, toDiscard.length);
+  // Draw replacements from current deck for the cards being swapped
+  let deck = JSON.parse(player.deck || '[]');
+  const drawn = deck.splice(0, swapped.length);
+  hand.push(...drawn);
+
+  // Shuffle the swapped-out cards back into the deck (mulligan rule)
+  deck = shuffle([...deck, ...swapped]);
+
+  updatePlayer(player.id, {
+    hand: JSON.stringify(hand),
+    deck: JSON.stringify(deck),
+  });
 
   const finalPlayer = getPlayerById(player.id);
   await refreshHandDisplay(interaction.guild, finalPlayer);
 
-  const msg = buildMulliganEmbed(finalPlayer);
-  await interaction.editReply(msg);
+  const swappedNames = swapped.map(c => findCardByCode(c)?.card.name || c).join(', ');
+  await interaction.editReply({
+    content: `✅ Mulligan complete. Swapped **${swapped.length}** card${swapped.length !== 1 ? 's' : ''}${swapped.length ? ` (${swappedNames})` : ''}. Replacements drawn; discarded cards shuffled back into deck.`,
+    components: [],
+  });
 }
 
 async function handleMulliganDone(interaction) {
@@ -90,12 +101,7 @@ async function handleMulliganDone(interaction) {
   const player = getPlayer(interaction.user.id);
   if (!player) return interaction.editReply({ content: '❌ You are not registered.', components: [] });
 
-  let deck = JSON.parse(player.deck || '[]');
-  let discard = JSON.parse(player.discard || '[]');
-  deck = shuffle([...deck, ...discard]);
-  updatePlayer(player.id, { deck: JSON.stringify(deck), discard: JSON.stringify([]) });
-
-  await interaction.editReply({ content: '✅ Mulligan complete. Remaining cards shuffled back into deck.', components: [] });
+  await interaction.editReply({ content: '✅ Kept opening hand. No cards swapped.', components: [] });
 }
 
 module.exports = {
