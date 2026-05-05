@@ -50,7 +50,12 @@ module.exports = {
         .addStringOption(opt =>
           opt.setName('card9').setDescription('9th card').setRequired(false).setAutocomplete(true))
         .addStringOption(opt =>
-          opt.setName('card10').setDescription('10th card').setRequired(false).setAutocomplete(true))),
+          opt.setName('card10').setDescription('10th card').setRequired(false).setAutocomplete(true)))
+    .addSubcommand(sub =>
+      sub.setName('take')
+        .setDescription('Take a chosen card from the scry buffer into your hand, shuffle the rest back into the deck.')
+        .addStringOption(opt =>
+          opt.setName('card').setDescription('Card to draw into hand').setRequired(true).setAutocomplete(true))),
 
   async autocomplete(interaction) {
     const player = getPlayer(interaction.user.id);
@@ -110,6 +115,22 @@ module.exports = {
             return [{ name, value: code }];
           })
           .slice(0, 25)
+      );
+    }
+
+    if (sub === 'take' && focused.name === 'card') {
+      const buf = getBuffer(player);
+      if (!buf || !buf.cards.length) return interaction.respond([]);
+      const query = focused.value.toLowerCase();
+      return interaction.respond(
+        buf.cards.flatMap(code => {
+          const r = findCardByCode(code);
+          const name = r?.card.name || code;
+          const traits = r?.card.traits || '';
+          if (query && !name.toLowerCase().includes(query) && !traits.toLowerCase().includes(query)) return [];
+          const label = traits ? `${name} [${traits.replace(/\.\s*$/,'')}]` : name;
+          return [{ name: label.slice(0, 100), value: code }];
+        }).slice(0, 25)
       );
     }
 
@@ -257,6 +278,52 @@ module.exports = {
       }
 
       return interaction.reply({ content: lines.join('\n'), flags: 64 });
+    }
+
+    // ── TAKE ────────────────────────────────────────────────────────────────
+    if (sub === 'take') {
+      const buf = getBuffer(player);
+      if (!buf || !buf.cards.length) {
+        return interaction.reply({ content: '❌ No scry in progress. Use `/scry reveal` first.', flags: 64 });
+      }
+      const cardCode = interaction.options.getString('card');
+      if (!buf.cards.includes(cardCode)) {
+        return interaction.reply({ content: `❌ \`${cardCode}\` not in the scry buffer.`, flags: 64 });
+      }
+      const remaining = buf.cards.filter(c => c !== cardCode);
+      const { shuffle } = require('../../engine/deck');
+
+      if (!buf.source || buf.source === 'deck') {
+        const deck = JSON.parse(player.deck || '[]');
+        const deckWithoutBuffer = deck.filter(c => !buf.cards.includes(c));
+        const newDeck = shuffle([...deckWithoutBuffer, ...remaining]);
+        const hand = JSON.parse(player.hand || '[]');
+        hand.push(cardCode);
+        updatePlayer(player.id, { deck: JSON.stringify(newDeck), hand: JSON.stringify(hand), scry_buffer: 'null' });
+      } else if (buf.source.startsWith('asset:')) {
+        const assetCode = buf.source.slice(6);
+        const assets = JSON.parse(player.assets || '[]');
+        const asset = assets.find(a => a.code === assetCode);
+        if (!asset) return interaction.reply({ content: '❌ Asset no longer in play.', flags: 64 });
+        const subdeckWithoutBuffer = (asset.subdeck || []).filter(c => !buf.cards.includes(c));
+        asset.subdeck = shuffle([...subdeckWithoutBuffer, ...remaining]);
+        const hand = JSON.parse(player.hand || '[]');
+        hand.push(cardCode);
+        updatePlayer(player.id, { assets: JSON.stringify(assets), hand: JSON.stringify(hand), scry_buffer: 'null' });
+      } else {
+        return interaction.reply({ content: '❌ /scry take only supports your own deck or a tome subdeck.', flags: 64 });
+      }
+
+      const { refreshHandDisplay } = require('../../engine/handDisplay');
+      const { getPlayerById } = require('../../engine/gameState');
+      await refreshHandDisplay(interaction.guild, getPlayerById(player.id));
+
+      const cardName = findCardByCode(cardCode)?.card.name || cardCode;
+      const remNames = remaining.map(c => findCardByCode(c)?.card.name || c).join(', ');
+      return interaction.reply({
+        content: `🎴 Drew **${cardName}** into hand. ${remaining.length ? `Shuffled back into deck: ${remNames}.` : ''}`,
+        flags: 64,
+      });
     }
   },
 };
