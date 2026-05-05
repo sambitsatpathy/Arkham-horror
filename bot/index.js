@@ -64,8 +64,12 @@ client.on('interactionCreate', async interaction => {
         if (interaction.isStringSelectMenu()) return await mulligan.handleSelect(interaction);
         if (interaction.isButton()) return await mulligan.handleButton(interaction);
       } catch (e) {
-        console.error('Mulligan interaction error:', e);
-        await interaction.reply({ content: `❌ Error: ${e.message}`, flags: 64 }).catch(() => {});
+        if (e.code === 10062 || e.code === 'InteractionAlreadyReplied') {
+          console.warn('Mulligan: stale interaction ignored');
+        } else {
+          console.error('Mulligan interaction error:', e);
+          await interaction.reply({ content: `❌ Error: ${e.message}`, flags: 64 }).catch(() => {});
+        }
       }
       return;
     }
@@ -78,8 +82,12 @@ client.on('interactionCreate', async interaction => {
         if (interaction.isStringSelectMenu()) return await action.handleSelect(interaction);
         if (interaction.isModalSubmit()) return await action.handleModal(interaction);
       } catch (e) {
-        console.error('Action hub interaction error:', e);
-        await interaction.reply({ content: `❌ Error: ${e.message}`, flags: 64 }).catch(() => {});
+        if (e.code === 10062 || e.code === 'InteractionAlreadyReplied') {
+          console.warn('Action hub: stale interaction ignored');
+        } else {
+          console.error('Action hub interaction error:', e);
+          await interaction.reply({ content: `❌ Error: ${e.message}`, flags: 64 }).catch(() => {});
+        }
       }
       return;
     }
@@ -95,6 +103,10 @@ client.on('interactionCreate', async interaction => {
   try {
     await command.execute(interaction);
   } catch (err) {
+    if (err.code === 10062) {
+      console.warn(`/${interaction.commandName}: stale interaction ignored`);
+      return;
+    }
     console.error(`Error in /${interaction.commandName}:`, err);
     const msg = { content: `❌ An error occurred: ${err.message}`, flags: 64 };
     if (interaction.deferred || interaction.replied) {
