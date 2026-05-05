@@ -25,7 +25,9 @@ function getEntry(code) {
 function passiveCardCodes(player) {
   const assets = JSON.parse(player.assets || '[]');
   const threat = JSON.parse(player.threat_area || '[]');
-  return [...assets, ...threat];
+  const assetCodes = assets.map(a => typeof a === 'string' ? a : a?.code).filter(Boolean);
+  const threatCodes = threat.map(t => typeof t === 'string' ? t : t?.code).filter(Boolean);
+  return [...assetCodes, ...threatCodes];
 }
 
 function passiveApplies(passive, ctx) {

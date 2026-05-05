@@ -188,7 +188,7 @@ async function executePlayCard(interaction, player, session, cardCode) {
 
   if (!hand.includes(cardCode)) {
     const msg = { content: 'That card is not in your hand.', flags: 64 };
-    return interaction.update ? interaction.update(msg) : interaction.reply(msg);
+    return interaction.deferred || interaction.replied ? interaction.editReply(msg) : interaction.reply(msg);
   }
 
   const result = findCardByCode(cardCode);
@@ -199,12 +199,12 @@ async function executePlayCard(interaction, player, session, cardCode) {
 
   if (cost > 0 && freshPlayer.resources < cost) {
     const msg = { content: `❌ Not enough resources to play **${name}** (costs ${cost}, you have ${freshPlayer.resources}).`, flags: 64 };
-    return interaction.update ? interaction.update(msg) : interaction.reply(msg);
+    return interaction.deferred || interaction.replied ? interaction.editReply(msg) : interaction.reply(msg);
   }
 
   if (typeCode === 'skill') {
     const msg = { content: `**${name}** is a skill card — use \`/commit\` to commit it to a skill test.`, flags: 64 };
-    return interaction.update ? interaction.update(msg) : interaction.reply(msg);
+    return interaction.deferred || interaction.replied ? interaction.editReply(msg) : interaction.reply(msg);
   }
 
   const handCh = interaction.guild.channels.cache.find(c => c.name === handChannelName(freshPlayer.investigator_name));
@@ -231,7 +231,7 @@ async function executePlayCard(interaction, player, session, cardCode) {
     }
     await refreshHandDisplay(interaction.guild, freshPlayer);
     const replyContent = { content: `✅ **${name}** is now in play${chargesNote}.${costNote}`, components: [], flags: 64 };
-    return interaction.update ? interaction.update(replyContent) : interaction.editReply(replyContent);
+    return interaction.deferred || interaction.replied ? interaction.editReply(replyContent) : interaction.reply(replyContent);
   }
 
   // Event / everything else — check guards BEFORE any state mutation
@@ -243,13 +243,13 @@ async function executePlayCard(interaction, player, session, cardCode) {
     const enemies = getEnemiesAt(session.id, freshPlayer.location_code);
     if (enemies.length > 0) {
       const msg = { content: `❌ Cannot play \`${cardCode}\` — enemies at your location.`, flags: 64 };
-      return interaction.update ? interaction.update(msg) : interaction.reply(msg);
+      return interaction.deferred || interaction.replied ? interaction.editReply(msg) : interaction.reply(msg);
     }
   }
   const fresh0 = getPlayerById(freshPlayer.id);
   if (!plan.fast && (fresh0.action_count ?? 0) <= 0) {
     const msg = { content: `❌ No actions remaining. Use a Fast card or wait for next turn.`, flags: 64 };
-    return interaction.update ? interaction.update(msg) : interaction.reply(msg);
+    return interaction.deferred || interaction.replied ? interaction.editReply(msg) : interaction.reply(msg);
   }
 
   // Guards passed — now safe to mutate state
@@ -270,7 +270,7 @@ async function executePlayCard(interaction, player, session, cardCode) {
   }
   await refreshHandDisplay(interaction.guild, freshPlayer);
   const replyContent = { content: `✅ Played **${name}**.${costNote}`, components: [], flags: 64 };
-  const replied = interaction.update ? await interaction.update(replyContent) : await interaction.editReply(replyContent);
+  const replied = interaction.deferred || interaction.replied ? await interaction.editReply(replyContent) : await interaction.reply(replyContent);
 
   // Auto-resolve untargeted on-play effects for event cards
   if (plan.effects.length || plan.unparsed) {

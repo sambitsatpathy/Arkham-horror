@@ -44,6 +44,28 @@ describe('resolveOnSuccess', () => {
   });
 });
 
+describe('resolver - asset object form (playAsset stores objects)', () => {
+  test('Beat Cop as asset object still applies +1 combat', () => {
+    const { getEffectiveStat } = require('../engine/cardEffectResolver');
+    const investigator = { skills: { combat: 4 } };
+    const player = {
+      investigator_code: '01001',
+      assets: JSON.stringify([{ code: '01018', name: 'Beat Cop', charges: 0, exhausted: false }]),
+      threat_area: '[]',
+    };
+    expect(getEffectiveStat(player, 'combat', {}, investigator)).toBe(5);
+  });
+
+  test('Leo De Luca as asset object grants extra action', () => {
+    const { getEffectiveActions } = require('../engine/cardEffectResolver');
+    const player = {
+      assets: JSON.stringify([{ code: '01048', name: 'Leo De Luca', charges: 0, exhausted: false }]),
+      threat_area: '[]',
+    };
+    expect(getEffectiveActions(player)).toBe(4);
+  });
+});
+
 const investigator = { code: '01001', name: 'Roland', skills: { combat: 4, willpower: 3, intellect: 3, agility: 2 } };
 
 describe('resolver - effective stats', () => {
