@@ -1,14 +1,38 @@
 const { SlashCommandBuilder, AttachmentBuilder, PermissionFlagsBits } = require('discord.js');
-const { requireSession, requirePlayer, getPlayer, getEnemy } = require('../../engine/gameState');
+const { requireSession, requirePlayer, getPlayer, getEnemy, getEnemiesAt, getCampaign, getPlayers, getPlayerById } = require('../../engine/gameState');
 const { drawToken, displayToken } = require('../../engine/chaosBag');
 const { damageEnemy, defeatEnemy } = require('../../engine/enemyEngine');
 const { updateLocationStatus } = require('../../engine/locationManager');
 const { findCardByCode, getCardSkills } = require('../../engine/cardLookup');
-const { commitCards } = require('../../engine/deck');
+const { commitCards, useCharge } = require('../../engine/deck');
 const { refreshHandDisplay } = require('../../engine/handDisplay');
 const { getEffectiveStat } = require('../../engine/cardEffectResolver');
 const { getLocation } = require('../../engine/gameState');
 const allInvestigators = require('../../data/investigators/investigators.json');
+const fs = require('fs');
+const path = require('path');
+const { cardDataRoot } = require('../../config');
+
+let _fullCardCache = null;
+function getFullCard(code) {
+  if (!_fullCardCache) {
+    _fullCardCache = new Map();
+    const dirs = fs.readdirSync(cardDataRoot, { withFileTypes: true }).filter(e => e.isDirectory());
+    for (const d of dirs) {
+      const p = path.join(cardDataRoot, d.name, 'cards.json');
+      if (!fs.existsSync(p)) continue;
+      try { for (const c of JSON.parse(fs.readFileSync(p, 'utf8'))) _fullCardCache.set(c.code, c); } catch (_) {}
+    }
+  }
+  return _fullCardCache.get(code);
+}
+
+function isFightWeapon(code) {
+  const c = getFullCard(code);
+  if (!c?.text) return false;
+  const txt = c.text.replace(/<[^>]+>/g, '');
+  return /\[action\][^:]*?:\s*Fight/i.test(txt) || /\[action\][^:]*?Spend 1 (?:ammo|charge)[^:]*?:\s*Fight/i.test(txt);
+}
 
 const SPECIAL_TOKENS = new Set(['skull', 'cultist', 'tablet', 'elder_thing', 'auto_fail', 'elder_sign']);
 const STATS = ['combat', 'willpower', 'intellect', 'agility'];
@@ -33,8 +57,14 @@ module.exports = {
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addIntegerOption(opt =>
       opt.setName('enemy_id')
-        .setDescription('Enemy ID (from /enemy list)')
-        .setRequired(true))
+        .setDescription('Enemy to fight')
+        .setRequired(true)
+        .setAutocomplete(true))
+    .addStringOption(opt =>
+      opt.setName('weapon')
+        .setDescription('Weapon/spell asset to use (deducts 1 ammo/charge)')
+        .setRequired(false)
+        .setAutocomplete(true))
     .addIntegerOption(opt =>
       opt.setName('damage')
         .setDescription('Damage to deal on success (default: 1)')
@@ -59,6 +89,48 @@ module.exports = {
     if (!player) return interaction.respond([]);
 
     const focused = interaction.options.getFocused(true);
+
+    if (focused.name === 'enemy_id') {
+      const session = require('../../engine/gameState').getSession();
+      if (!session) return interaction.respond([]);
+      const all = getEnemiesAt(session.id, player.location_code);
+      const campaign = getCampaign();
+      const others = campaign ? getPlayers(campaign.id).filter(p => p.id !== player.id && !p.is_eliminated && p.location_code === player.location_code) : [];
+      const sharedLoc = others.length > 0;
+
+      const groups = { you: [], shared: [], aloof: [] };
+      for (const e of all) {
+        if (e.is_aloof) groups.aloof.push(e);
+        else if (sharedLoc) groups.shared.push(e);
+        else groups.you.push(e);
+      }
+      const fmt = (e, prefix) => ({
+        name: `${prefix} ${e.name} [${e.id}] HP:${e.hp}/${e.max_hp} F:${e.fight}${e.is_exhausted ? ' 😴' : ''}`.slice(0, 100),
+        value: e.id,
+      });
+      const choices = [
+        ...groups.you.map(e => fmt(e, '⚔️ you:')),
+        ...groups.shared.map(e => fmt(e, '👥 shared:')),
+        ...groups.aloof.map(e => fmt(e, '🛡️ aloof:')),
+      ];
+      const q = (focused.value || '').toString().toLowerCase();
+      const filtered = q ? choices.filter(c => c.name.toLowerCase().includes(q)) : choices;
+      return interaction.respond(filtered.slice(0, 25));
+    }
+
+    if (focused.name === 'weapon') {
+      const assets = JSON.parse(player.assets || '[]');
+      const q = focused.value.toLowerCase();
+      const choices = assets
+        .filter(a => isFightWeapon(a.code))
+        .filter(a => !q || a.name.toLowerCase().includes(q))
+        .map(a => ({
+          name: `${a.name} (${a.charges} charge${a.charges !== 1 ? 's' : ''}${a.exhausted ? ', exhausted' : ''})`.slice(0, 100),
+          value: a.code,
+        }))
+        .slice(0, 25);
+      return interaction.respond(choices);
+    }
 
     if (focused.name === 'stat') {
       const inv = allInvestigators.find(i => i.code === player.investigator_code);
@@ -111,7 +183,15 @@ module.exports = {
     if (!enemy) return interaction.reply({ content: `❌ No enemy with ID ${enemyId}.`, flags: 64 });
 
     const statName = interaction.options.getString('stat') || 'combat';
+    const weaponCode = interaction.options.getString('weapon') || null;
     const codes = ['card1', 'card2', 'card3', 'card4'].map(n => interaction.options.getString(n)).filter(Boolean);
+
+    if (weaponCode) {
+      const assets = JSON.parse(player.assets || '[]');
+      const weapon = assets.find(a => a.code === weaponCode);
+      if (!weapon) return interaction.reply({ content: `❌ Weapon \`${weaponCode}\` is not in play.`, flags: 64 });
+      if ((weapon.charges ?? 0) <= 0) return interaction.reply({ content: `❌ **${weapon.name}** has no ammo/charges left.`, flags: 64 });
+    }
 
     const hand = JSON.parse(player.hand || '[]');
     const notInHand = codes.filter(c => !hand.includes(c));
@@ -136,6 +216,16 @@ module.exports = {
       if (skills[statName]) icons.push(`${short}×${skills[statName]}`);
       if (skills.wild) icons.push(`WILD×${skills.wild}`);
       commitLines.push(`  • **${name}** ${icons.length ? `[${icons.join(' ')}] +${contribution}` : '(no matching icons)'}`);
+    }
+
+    let weaponNote = '';
+    if (weaponCode) {
+      const remaining = useCharge(player, weaponCode);
+      const fresh = getPlayerById(player.id);
+      const stillIn = JSON.parse(fresh.assets || '[]').find(a => a.code === weaponCode);
+      const wname = findCardByCode(weaponCode)?.card.name || weaponCode;
+      if (!stillIn) weaponNote = `🔫 Spent last charge of **${wname}** — discarded.`;
+      else weaponNote = `🔫 Spent 1 charge of **${wname}** (${remaining} left).`;
     }
 
     if (codes.length > 0) { commitCards(player, codes); await refreshHandDisplay(interaction.guild, player); }
@@ -179,6 +269,7 @@ module.exports = {
       `**${player.investigator_name}** | ${short}: ${statValue} | Enemy Fight: ${fightRating}`,
     ];
     if (commitLines.length) { lines.push('**Committed:**'); lines.push(...commitLines); }
+    if (weaponNote) lines.push(weaponNote);
     lines.push(`**Token:** ${tokenLabel}${specialNote}`, `**Result:** ${mathLine}`, '');
 
     if (success) {
