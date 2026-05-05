@@ -1,6 +1,7 @@
 const { getPlayerById, updatePlayer, getLocation, updateLocation, getSession, updateSession } = require('./gameState');
 const { drawCards } = require('./deck');
 const { drawEncounterCard, postEncounterCard } = require('./encounterEngine');
+const { updateLocationStatus } = require('./locationManager');
 
 async function execEffect(effect, ctx) {
   const { player, session, guild } = ctx;
@@ -22,6 +23,8 @@ async function execEffect(effect, ctx) {
           const newLocClues = loc.clues - cluesGained;
           updateLocation(loc.id, { clues: newLocClues });
           updatePlayer(player.id, { clues: fresh.clues + cluesGained });
+          const refreshed = getLocation(session.id, fresh.location_code);
+          try { await updateLocationStatus(guild, session, refreshed); } catch (e) { console.warn('updateLocationStatus failed:', e.message); }
           return `🔎 Discovered ${cluesGained} clue(s) at ${loc.name} (${newLocClues} remaining).`;
         }
       }
