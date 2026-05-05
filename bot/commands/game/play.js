@@ -52,11 +52,13 @@ module.exports = {
     const player = requirePlayer(interaction);
     if (!player) return;
 
+    await interaction.deferReply({ flags: 64 });
+
     const cardCode = interaction.options.getString('card');
     const hand = JSON.parse(player.hand || '[]');
 
     if (!hand.includes(cardCode)) {
-      return interaction.reply({ content: 'That card is not in your hand.', flags: 64 });
+      return interaction.editReply({ content: 'That card is not in your hand.' });
     }
 
     const result = findCardByCode(cardCode);
@@ -66,18 +68,16 @@ module.exports = {
     const cost = card?.cost ?? 0;
 
     if (cost > 0 && player.resources < cost) {
-      return interaction.reply({
+      return interaction.editReply({
         content: `❌ Not enough resources to play **${name}** (costs ${cost}, you have ${player.resources}).`,
-        flags: 64,
       });
     }
 
     const handCh = interaction.guild.channels.cache.find(c => c.name === handChannelName(player.investigator_name));
 
     if (typeCode === 'skill') {
-      return interaction.reply({
+      return interaction.editReply({
         content: `**${name}** is a skill card — use \`/commit\` to commit it to a skill test.`,
-        flags: 64,
       });
     }
 
@@ -103,7 +103,7 @@ module.exports = {
         }
       }
       await refreshHandDisplay(interaction.guild, player);
-      return interaction.reply({ content: `✅ **${name}** is now in play${chargesNote}.${costNote}`, flags: 64 });
+      return interaction.editReply({ content: `✅ **${name}** is now in play${chargesNote}.${costNote}` });
     }
 
     // Event / everything else — compute plan and check guards BEFORE any state mutation
@@ -111,12 +111,12 @@ module.exports = {
     if (plan.conditions.includes('no_enemies_at_location')) {
       const enemies = getEnemiesAt(session.id, player.location_code);
       if (enemies.length > 0) {
-        return interaction.reply({ content: `❌ Cannot play \`${cardCode}\` — enemies at your location.`, flags: 64 });
+        return interaction.editReply({ content: `❌ Cannot play \`${cardCode}\` — enemies at your location.` });
       }
     }
     const fresh0 = getPlayerById(player.id);
     if (!plan.fast && (fresh0.action_count ?? 0) <= 0) {
-      return interaction.reply({ content: `❌ No actions remaining. Use a Fast card or wait for next turn.`, flags: 64 });
+      return interaction.editReply({ content: `❌ No actions remaining. Use a Fast card or wait for next turn.` });
     }
 
     // Guards passed — now safe to mutate state
@@ -136,7 +136,7 @@ module.exports = {
       }
     }
     await refreshHandDisplay(interaction.guild, player);
-    await interaction.reply({ content: `✅ Played **${name}**.${costNote}`, flags: 64 });
+    await interaction.editReply({ content: `✅ Played **${name}**.${costNote}` });
 
     // Auto-resolve untargeted on-play effects for event cards
     if (plan.effects.length || plan.unparsed) {
