@@ -82,7 +82,7 @@ async function buildGameServer(guild, scenario, investigators, botUserId) {
     const catName = `${isFirst ? '🔍' : '🔒'} ACT ${act.index + 1} — ${act.name}`;
     const overwrite = isFirst ? [] : [
       { id: everyone.id, deny: [PermissionFlagsBits.ViewChannel] },
-      { id: botUserId, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.ManageChannels] },
+      { id: botUserId, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.ManageChannels, PermissionFlagsBits.ManageRoles, PermissionFlagsBits.SendMessages] },
     ];
 
     const actCat = await step(`create act category: ${catName}`, () => ensureCategory(guild, catName, overwrite));
@@ -91,7 +91,7 @@ async function buildGameServer(guild, scenario, investigators, botUserId) {
       const prefix = loc.start_revealed ? 'revealed-' : 'hidden-';
       const chName = prefix + loc.name.toLowerCase().replace(/\s+/g, '-');
       const locPerms = [
-        { id: botUserId, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ManageMessages] },
+        { id: botUserId, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ManageMessages, PermissionFlagsBits.ManageChannels, PermissionFlagsBits.ManageRoles] },
         ...(loc.start_revealed ? [] : [{ id: everyone.id, deny: [PermissionFlagsBits.ViewChannel] }]),
       ];
       const locCh = await step(`create location channel: ${chName}`, () => ensureChannel(guild, chName, actCat, locPerms));
