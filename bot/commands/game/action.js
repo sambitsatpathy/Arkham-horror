@@ -40,7 +40,8 @@ function buildMainMenu(round) {
 }
 
 function buildCommitSelect(hand, stat, customIdForSelect) {
-  const options = hand.flatMap(code => {
+  const counts = hand.reduce((m, c) => (m[c] = (m[c] || 0) + 1, m), {});
+  const options = [...new Set(hand)].flatMap(code => {
     const skills = getCardSkills(code) || {};
     const matching = (skills[stat] || 0) + (skills.wild || 0);
     if (matching === 0) return [];
@@ -49,7 +50,8 @@ function buildCommitSelect(hand, stat, customIdForSelect) {
     const icons = [];
     if (skills[stat]) icons.push(`${STAT_ICON[stat]}×${skills[stat]}`);
     if (skills.wild) icons.push(`🌟×${skills.wild}`);
-    return [{ label: `${name} [${icons.join(' ')}]`, value: code }];
+    const qty = counts[code] > 1 ? ` ×${counts[code]}` : '';
+    return [{ label: `${name}${qty} [${icons.join(' ')}]`, value: code }];
   }).slice(0, 25);
 
   if (options.length === 0) return null;
@@ -256,14 +258,16 @@ module.exports = {
     if (customId === 'ah:btn:play') {
       const hand = JSON.parse(player.hand || '[]');
       const freshPlayer = getPlayerById(player.id);
-      const options = hand.flatMap(code => {
+      const counts = hand.reduce((m, c) => (m[c] = (m[c] || 0) + 1, m), {});
+      const options = [...new Set(hand)].flatMap(code => {
         const r = findCardByCode(code);
         if (!r) return [];
         const { card } = r;
         if (!['asset', 'event'].includes(card.type_code)) return [];
         const cost = card.cost ?? 0;
         if (freshPlayer.resources < cost) return [];
-        const label = `${card.name} [${card.type_code} | ${cost}r]`;
+        const qty = counts[code] > 1 ? ` ×${counts[code]}` : '';
+        const label = `${card.name}${qty} [${card.type_code} | ${cost}r]`;
         return [{ label, value: code }];
       }).slice(0, 25);
 
@@ -321,7 +325,8 @@ module.exports = {
 
     if (customId === 'ah:btn:commit') {
       const hand = JSON.parse(player.hand || '[]');
-      const options = hand.flatMap(code => {
+      const counts = hand.reduce((m, c) => (m[c] = (m[c] || 0) + 1, m), {});
+      const options = [...new Set(hand)].flatMap(code => {
         const skills = getCardSkills(code);
         const hasAny = Object.values(skills).some(v => v > 0);
         if (!hasAny) return [];
@@ -331,7 +336,8 @@ module.exports = {
           .filter(([, v]) => v > 0)
           .map(([k, v]) => `${STAT_SKILL_ICON[k] || k}×${v}`)
           .join(' ');
-        return [{ label: `${name} [${icons}]`, value: code }];
+        const qty = counts[code] > 1 ? ` ×${counts[code]}` : '';
+        return [{ label: `${name}${qty} [${icons}]`, value: code }];
       }).slice(0, 25);
 
       if (options.length === 0) {
