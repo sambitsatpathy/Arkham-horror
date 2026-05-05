@@ -64,10 +64,15 @@ module.exports = {
       const inv = allInvestigators.find(i => i.code === player.investigator_code);
       const query = focused.value.toLowerCase();
       return interaction.respond(
-        STATS.filter(s => !query || s.includes(query)).map(s => ({
-          name: `${STAT_ICON[s]} ${s.charAt(0).toUpperCase() + s.slice(1)}${inv ? ` (${inv.skills?.[s] ?? 0})` : ''}`,
-          value: s,
-        }))
+        STATS.filter(s => !query || s.includes(query)).map(s => {
+          let label = `${STAT_ICON[s]} ${s.charAt(0).toUpperCase() + s.slice(1)}`;
+          if (inv) {
+            const base = inv.skills?.[s] ?? 0;
+            const eff = getEffectiveStat(player, s, {}, inv);
+            label += eff !== base ? ` (${eff} = ${base}${eff > base ? '+' : ''}${eff - base})` : ` (${base})`;
+          }
+          return { name: label, value: s };
+        })
       );
     }
 

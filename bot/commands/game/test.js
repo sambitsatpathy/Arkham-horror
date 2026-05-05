@@ -59,12 +59,15 @@ module.exports = {
       const query = focused.value.toLowerCase();
       const choices = STATS
         .filter(s => !query || s.includes(query))
-        .map(s => ({
-          name: inv
-            ? `${STAT_ICON[s]} ${s.charAt(0).toUpperCase() + s.slice(1)} (${inv.skills?.[s] ?? 0})`
-            : `${STAT_ICON[s]} ${s.charAt(0).toUpperCase() + s.slice(1)}`,
-          value: s,
-        }));
+        .map(s => {
+          let label = `${STAT_ICON[s]} ${s.charAt(0).toUpperCase() + s.slice(1)}`;
+          if (inv && player) {
+            const base = inv.skills?.[s] ?? 0;
+            const eff = getEffectiveStat(player, s, {}, inv);
+            label += eff !== base ? ` (${eff} = ${base}${eff > base ? '+' : ''}${eff - base})` : ` (${base})`;
+          }
+          return { name: label, value: s };
+        });
       return interaction.respond(choices);
     }
 
