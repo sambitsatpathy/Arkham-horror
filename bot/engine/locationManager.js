@@ -33,7 +33,13 @@ async function revealLocation(guild, session, loc, investigators) {
   await channel.setName(newName);
 
   // Unlock for everyone
-  await channel.permissionOverwrites.delete(guild.roles.everyone);
+  try {
+    await channel.permissionOverwrites.delete(guild.roles.everyone);
+  } catch (e) {
+    if (e.code === 50013) {
+      console.warn(`revealLocation: cannot remove @everyone deny on ${channel.name} — bot lacks ManageRoles. Grant Administrator role.`);
+    } else throw e;
+  }
 
   // Pin card image
   const result = findCard(loc.name, { typeCode: 'location' });
