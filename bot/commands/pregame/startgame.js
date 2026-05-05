@@ -146,11 +146,21 @@ module.exports = {
       );
     }
 
-    // Set starting location for all investigators
+    // Set starting location for all investigators + post arrival in location channel
     const startLoc = scenario.locations.find(l => l.starting_location);
     if (startLoc) {
       for (const p of players) {
         updatePlayer(p.id, { location_code: startLoc.code });
+      }
+      const startLocRow = getDb()
+        .prepare('SELECT * FROM locations WHERE session_id = ? AND code = ?')
+        .get(sessionId, startLoc.code);
+      if (startLocRow?.channel_id) {
+        const ch = interaction.guild.channels.cache.get(startLocRow.channel_id);
+        if (ch) {
+          const names = players.map(p => `**${p.investigator_name}**`).join(', ');
+          await ch.send(`🚶 ${names} arrive at **${startLoc.name}**.`);
+        }
       }
     }
 
