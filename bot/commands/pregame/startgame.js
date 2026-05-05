@@ -152,14 +152,19 @@ module.exports = {
       for (const p of players) {
         updatePlayer(p.id, { location_code: startLoc.code });
       }
-      const startLocRow = getDb()
-        .prepare('SELECT * FROM locations WHERE session_id = ? AND code = ?')
-        .get(sessionId, startLoc.code);
-      if (startLocRow?.channel_id) {
-        const ch = interaction.guild.channels.cache.get(startLocRow.channel_id);
-        if (ch) {
-          const names = players.map(p => `**${p.investigator_name}**`).join(', ');
-          await ch.send(`🚶 ${names} arrive at **${startLoc.name}**.`);
+      const startChId = locationChannelIds[startLoc.code];
+      if (startChId) {
+        try {
+          const ch = interaction.guild.channels.cache.get(startChId)
+            || await interaction.guild.channels.fetch(startChId).catch(() => null);
+          if (ch) {
+            const names = players.map(p => `**${p.investigator_name}**`).join(', ');
+            await ch.send(`🚶 ${names} arrive at **${startLoc.name}**.`);
+          } else {
+            console.warn(`startgame: starting location channel ${startChId} not found`);
+          }
+        } catch (e) {
+          console.error('startgame: failed to post arrival', e.message);
         }
       }
     }
