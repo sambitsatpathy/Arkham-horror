@@ -9,6 +9,12 @@ const EMPTY_ENTRY = {
   passive: [],
   triggers: [],
   revelation_effects: [],
+  revelation: null,
+  keywords: [],
+  prey: null,
+  victory: 0,
+  uses: null,
+  health_per_investigator: false,
   discard_cost: null,
   unparsed_text: '',
 };
@@ -23,25 +29,48 @@ function stripHtml(s) {
 
 const SIMPLE_EFFECT_RULES = [
   { re: /Draw the top card of the encounter deck\.?/i,
-    out: () => ({ type: 'draw_encounter_card', count: 1 }) },
+    out: () => [{ type: 'draw_encounter_card', count: 1 }] },
   { re: /Gain (\d+) resources?/i,
-    out: m => ({ type: 'gain_resources', count: parseInt(m[1], 10) }) },
+    out: m => [{ type: 'gain_resources', count: parseInt(m[1], 10) }] },
   { re: /Draw (\d+) cards?/i,
-    out: m => ({ type: 'draw_cards', count: parseInt(m[1], 10) }) },
+    out: m => [{ type: 'draw_cards', count: parseInt(m[1], 10) }] },
   { re: /Discover (\d+) clues? (?:in|at) your location/i,
-    out: m => ({ type: 'discover_clues', count: parseInt(m[1], 10), target: 'self_location' }) },
-  { re: /Place (\d+) doom on the current agenda/i,
-    out: m => ({ type: 'add_doom', count: parseInt(m[1], 10) }) },
+    out: m => [{ type: 'discover_clues', count: parseInt(m[1], 10), target: 'self_location' }] },
+  { re: /Place (\d+)( \[per_investigator\])? doom on the current agenda/i,
+    out: m => [{ type: 'add_doom', count: parseInt(m[1], 10), ...(m[2] ? { per_investigator: true } : {}) }] },
   { re: /Deal (\d+) damage to an? (?:exhausted )?enemy at your location/i,
-    out: m => ({ type: 'deal_damage', count: parseInt(m[1], 10), target: 'chosen_enemy' }) },
+    out: m => [{ type: 'deal_damage', count: parseInt(m[1], 10), target: 'chosen_enemy' }] },
+  { re: /Deal (\d+) damage to each investigator at (?:your|this|that) location/i,
+    out: m => [{ type: 'deal_damage', count: parseInt(m[1], 10), target: 'all_investigators_at_location' }] },
+  { re: /Deal (\d+) horror to each investigator at (?:your|this|that) location/i,
+    out: m => [{ type: 'deal_horror', count: parseInt(m[1], 10), target: 'all_investigators_at_location' }] },
+  // Combined forms must come before the single damage/horror rules
+  { re: /[Tt]ake (\d+) damage and (\d+) horror/,
+    out: m => [
+      { type: 'deal_damage', count: parseInt(m[1], 10), target: 'self' },
+      { type: 'deal_horror', count: parseInt(m[2], 10), target: 'self' },
+    ] },
+  { re: /[Tt]ake (\d+) horror and (\d+) damage/,
+    out: m => [
+      { type: 'deal_horror', count: parseInt(m[1], 10), target: 'self' },
+      { type: 'deal_damage', count: parseInt(m[2], 10), target: 'self' },
+    ] },
   { re: /Take (\d+) (direct )?horror/i,
-    out: m => ({ type: 'deal_horror', count: parseInt(m[1], 10), target: 'self', ...(m[2] ? { direct: true } : {}) }) },
+    out: m => [{ type: 'deal_horror', count: parseInt(m[1], 10), target: 'self', ...(m[2] ? { direct: true } : {}) }] },
   { re: /Take (\d+) (direct )?damage/i,
-    out: m => ({ type: 'deal_damage', count: parseInt(m[1], 10), target: 'self', ...(m[2] ? { direct: true } : {}) }) },
+    out: m => [{ type: 'deal_damage', count: parseInt(m[1], 10), target: 'self', ...(m[2] ? { direct: true } : {}) }] },
   { re: /Heal (\d+) horror/i,
-    out: m => ({ type: 'heal_horror', count: parseInt(m[1], 10), target: 'self' }) },
+    out: m => [{ type: 'heal_horror', count: parseInt(m[1], 10), target: 'self' }] },
   { re: /Heal (\d+) damage/i,
-    out: m => ({ type: 'heal_damage', count: parseInt(m[1], 10), target: 'self' }) },
+    out: m => [{ type: 'heal_damage', count: parseInt(m[1], 10), target: 'self' }] },
+  { re: /(?:Choose and discard|Discard) (\d+) cards? (at random )?from your hand/i,
+    out: m => [{ type: 'discard_cards', count: parseInt(m[1], 10), random: !!m[2] }] },
+  { re: /Discard (\d+) cards? at random/i,
+    out: m => [{ type: 'discard_cards', count: parseInt(m[1], 10), random: true }] },
+  { re: /Discard all your resources/i,
+    out: () => [{ type: 'discard_all_resources' }] },
+  { re: /Lose (\d+) resources?/i,
+    out: m => [{ type: 'lose_resources', count: parseInt(m[1], 10) }] },
 ];
 
 function applyEffectRules(text, entry) {
@@ -64,7 +93,7 @@ function applyEffectRules(text, entry) {
     for (const rule of SIMPLE_EFFECT_RULES) {
       const m = remaining.match(rule.re);
       if (m) {
-        entry.effects.push(rule.out(m));
+        entry.effects.push(...rule.out(m));
         remaining = (remaining.slice(0, m.index) + remaining.slice(m.index + m[0].length))
           .replace(/^[\s.,]+|[\s.,]+$/g, ' ')
           .replace(/^\s*\bThen\b[\s,.]*/i, '')
@@ -78,10 +107,106 @@ function applyEffectRules(text, entry) {
   return remaining;
 }
 
+// Keyword sentences are capitalized on cards — match case-sensitively so prose
+// like "Stay alert." is not consumed.
+const KEYWORD_RE = /(?:^|\s)(Hunter|Aloof|Retaliate|Alert|Massive|Elusive|Surge|Peril)\.(?=\s|$)/;
+
+function extractKeywords(text, entry) {
+  let t = text;
+  let m;
+  while ((m = t.match(KEYWORD_RE))) {
+    const kw = m[1].toLowerCase();
+    if (!entry.keywords.includes(kw)) entry.keywords.push(kw);
+    t = (t.slice(0, m.index) + ' ' + t.slice(m.index + m[0].length)).trim();
+  }
+  return t;
+}
+
+function extractPrey(text, entry) {
+  const m = text.match(/Prey\s*-\s*([^.\n]+)\.?/);
+  if (!m) return text;
+  entry.prey = m[1].trim();
+  return (text.slice(0, m.index) + text.slice(m.index + m[0].length)).trim();
+}
+
+function extractUses(text, entry) {
+  const m = text.match(/Uses\s*\((\d+)\s+([a-z]+)\)\.?/i);
+  if (!m) return text;
+  let type = m[2].toLowerCase();
+  if (type === 'charge') type = 'charges';
+  entry.uses = { type, count: parseInt(m[1], 10) };
+  return (text.slice(0, m.index) + text.slice(m.index + m[0].length)).trim();
+}
+
+function parseClauseEffects(clause) {
+  const sub = emptyEntry();
+  const remaining = applyEffectRules(clause, sub);
+  return { effects: sub.effects, remaining };
+}
+
+// Parses the body of a "Revelation - ..." line into { effects, test, unparsed }.
+// Test-conditional effects live under test.on_fail / test.on_pass so they are
+// never applied unconditionally; whatever can't be parsed lands in `unparsed`
+// for manual resolution.
+function parseRevelation(revText) {
+  const rev = { effects: [], test: null, unparsed: '' };
+  let t = revText.trim();
+
+  if (/(?:Add|Put) [^.]* (?:to|into play in) your threat area/i.test(t)) {
+    rev.effects.push({ type: 'add_to_threat_area' });
+    t = t.replace(/(?:Add|Put) [^.]*? (?:to|into play in) your threat area\.?/i, '').trim();
+  }
+
+  const tm = t.match(/Test\s+\[(\w+)\](?:\s+or\s+\[(\w+)\])?\s*\((\d+)\)\.?/i);
+  if (tm) {
+    rev.test = {
+      stat: tm[1].toLowerCase(),
+      stat_alternatives: tm[2] ? [tm[2].toLowerCase()] : [],
+      difficulty: parseInt(tm[3], 10),
+      on_fail: [],
+      on_pass: [],
+    };
+    t = (t.slice(0, tm.index) + t.slice(tm.index + tm[0].length)).trim();
+
+    const perPoint = t.match(/For each point you fail by,\s*([^.]+)\./i);
+    if (perPoint) {
+      const { effects } = parseClauseEffects(perPoint[1]);
+      if (effects.length) {
+        effects.forEach(e => { e.per_point_failed = true; });
+        rev.test.on_fail.push(...effects);
+        t = (t.slice(0, perPoint.index) + t.slice(perPoint.index + perPoint[0].length)).trim();
+      }
+    }
+
+    const onFail = t.match(/If you fail,\s*([^.]+)\./i);
+    if (onFail) {
+      const { effects } = parseClauseEffects(onFail[1]);
+      if (effects.length) {
+        rev.test.on_fail.push(...effects);
+        t = (t.slice(0, onFail.index) + t.slice(onFail.index + onFail[0].length)).trim();
+      }
+    }
+
+    const onPass = t.match(/If you succeed,\s*([^.]+)\./i);
+    if (onPass) {
+      const { effects } = parseClauseEffects(onPass[1]);
+      if (effects.length) {
+        rev.test.on_pass.push(...effects);
+        t = (t.slice(0, onPass.index) + t.slice(onPass.index + onPass[0].length)).trim();
+      }
+    }
+  }
+
+  const direct = parseClauseEffects(t);
+  rev.effects.push(...direct.effects);
+  rev.unparsed = direct.remaining.trim();
+  return rev;
+}
+
 const TRIGGER_PATTERNS = [
   { re: /\[reaction\]\s*After you successfully investigate:\s*([^.\n]+)\./i, event: 'after_successful_investigate' },
-  { re: /Forced\s*[-—]\s*After you take \d+ or more horror:\s*([^.\n]+)\./i, event: 'after_take_horror' },
-  { re: /Forced\s*[-—]\s*After you take \d+ or more damage:\s*([^.\n]+)\./i, event: 'after_take_damage' },
+  { re: /Forced\s*-\s*After you take \d+ or more horror:\s*([^.\n]+)\./i, event: 'after_take_horror' },
+  { re: /Forced\s*-\s*After you take \d+ or more damage:\s*([^.\n]+)\./i, event: 'after_take_damage' },
 ];
 
 function extractTriggers(text, entry) {
@@ -179,30 +304,39 @@ function parse(card) {
   entry.name = card.name || '';
   entry.type = card.type_code || '';
   entry.is_weakness = card.subtype_code === 'weakness' || card.subtype_code === 'basicweakness';
-  let text = stripHtml(card.text || '').trim();
+  entry.victory = typeof card.victory === 'number' ? card.victory : 0;
+  entry.health_per_investigator = !!card.health_per_investigator;
+  // Normalize en/em dashes so "Revelation –" and "Forced —" all parse alike
+  let text = stripHtml(card.text || '').replace(/[–—]/g, '-').trim();
 
   if (/^\s*Fast\./i.test(text)) {
     entry.fast = true;
     text = text.replace(/^\s*Fast\.\s*/i, '');
   }
 
+  text = extractKeywords(text, entry);
+  text = extractPrey(text, entry);
+  text = extractUses(text, entry);
+
+  const vm = text.match(/Victory (\d+)\.?/i);
+  if (vm) {
+    if (!entry.victory) entry.victory = parseInt(vm[1], 10);
+    text = (text.slice(0, vm.index) + text.slice(vm.index + vm[0].length)).trim();
+  }
+
   // Revelation routing
-  const revMatch = text.match(/Revelation\s*[-—]\s*([^\n]+)/i);
+  const revMatch = text.match(/Revelation\s*-\s*([^\n]+)/i);
   if (revMatch) {
-    const revText = revMatch[1];
-    if (/(?:Add|Put) [^.]* (?:to|into play in) your threat area/i.test(revText)) {
-      entry.revelation_effects.push({ type: 'add_to_threat_area' });
-    }
-    if (/Discard all your resources/i.test(revText)) {
-      entry.revelation_effects.push({ type: 'discard_all_resources' });
-    }
-    const dh = revText.match(/Take (\d+) (direct )?horror/i);
-    if (dh) {
-      entry.revelation_effects.push({ type: 'deal_horror', count: parseInt(dh[1], 10), target: 'self', ...(dh[2] ? { direct: true } : {}) });
-    }
-    const dd = revText.match(/Take (\d+) (direct )?damage/i);
-    if (dd) {
-      entry.revelation_effects.push({ type: 'deal_damage', count: parseInt(dd[1], 10), target: 'self', ...(dd[2] ? { direct: true } : {}) });
+    const rev = parseRevelation(revMatch[1]);
+    entry.revelation = rev;
+    // Legacy flat list, kept for existing consumers — unconditional effects only,
+    // so test-gated damage/horror is no longer flattened into always-on effects.
+    for (const eff of rev.effects) {
+      if (eff.type === 'add_to_threat_area' || eff.type === 'discard_all_resources') {
+        entry.revelation_effects.push(eff);
+      } else if ((eff.type === 'deal_horror' || eff.type === 'deal_damage') && eff.target === 'self') {
+        entry.revelation_effects.push(eff);
+      }
     }
     text = text.replace(revMatch[0], '').trim();
   }
