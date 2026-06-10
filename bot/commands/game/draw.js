@@ -2,6 +2,7 @@ const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const { requireSession, requirePlayer } = require('../../engine/gameState');
 const { drawCards } = require('../../engine/deck');
 const { refreshHandDisplay } = require('../../engine/handDisplay');
+const { trySpendAction, actionGuardMessage } = require('../../engine/actionEconomy');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -21,6 +22,13 @@ module.exports = {
     if (!player) return;
 
     const count = interaction.options.getInteger('count') ?? 1;
+
+    // Drawing as an action costs 1 regardless of count (multi-draws come from card effects)
+    const spend = trySpendAction(player.id, session);
+    if (!spend.ok) {
+      return interaction.reply({ content: actionGuardMessage(), flags: 64 });
+    }
+
     await interaction.deferReply({ flags: 64 });
 
     const drawn = drawCards(player, count);
@@ -30,6 +38,6 @@ module.exports = {
 
     await refreshHandDisplay(interaction.guild, player);
 
-    return interaction.editReply(`✅ Drew **${drawn.length}** card${drawn.length !== 1 ? 's' : ''}.`);
+    return interaction.editReply(`✅ Drew **${drawn.length}** card${drawn.length !== 1 ? 's' : ''}.${spend.note ? ` ${spend.note}` : ''}`);
   },
 };

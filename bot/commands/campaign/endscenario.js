@@ -65,7 +65,7 @@ module.exports = {
     // Calculate XP
     const defeatedEnemies = db.prepare(
       'SELECT COUNT(*) as n FROM campaign_log WHERE campaign_id = ? AND scenario_code = ? AND entry LIKE ?'
-    ).get(campaign.id, session.scenario_code, '%defeated%');
+    ).get(campaign.id, session.scenario_code, 'Enemy defeated:%');
     const baseXp = result === 'victory' ? 2 : 0;
     const enemyXp = defeatedEnemies?.n || 0;
     const totalXp = baseXp + enemyXp;

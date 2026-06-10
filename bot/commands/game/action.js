@@ -9,6 +9,7 @@ const {
 const { findCardByCode, getCardSkills } = require('../../engine/cardLookup');
 const { drawCards } = require('../../engine/deck');
 const { refreshHandDisplay } = require('../../engine/handDisplay');
+const { trySpendAction, actionGuardMessage } = require('../../engine/actionEconomy');
 
 const STAT_ICON = { combat: '⚔️', willpower: '🕯️', intellect: '🔎', agility: '💨' };
 const STAT_SKILL_ICON = { combat: '⚔️', willpower: '🕯️', intellect: '🔎', agility: '💨', wild: '🌟' };
@@ -151,18 +152,23 @@ module.exports = {
 
     if (customId === 'ah:btn:draw') {
       const freshPlayer = getPlayerById(player.id);
+      if (JSON.parse(freshPlayer.deck || '[]').length === 0 && JSON.parse(freshPlayer.discard || '[]').length === 0) {
+        return interaction.editReply({ content: '❌ No cards left to draw (deck and discard empty).', components: [new ActionRowBuilder().addComponents(backButton())], flags: 64 });
+      }
+
+      const spend = trySpendAction(freshPlayer.id, session);
+      if (!spend.ok) {
+        return interaction.editReply({ content: actionGuardMessage(), components: [new ActionRowBuilder().addComponents(backButton())], flags: 64 });
+      }
+
       const drawn = drawCards(freshPlayer, 1);
       const afterDraw = getPlayerById(player.id);
       await refreshHandDisplay(interaction.guild, afterDraw);
 
-      if (drawn.length === 0) {
-        return interaction.editReply({ content: '❌ No cards left to draw (deck and discard empty).', components: [new ActionRowBuilder().addComponents(backButton())], flags: 64 });
-      }
-
       const result = findCardByCode(drawn[0]);
       const name = result?.card.name || drawn[0];
       return interaction.editReply({
-        content: `✅ **Drew:** ${name}. Hand updated in your private channel.`,
+        content: `✅ **Drew:** ${name}. Hand updated in your private channel.${spend.note ? ` ${spend.note}` : ''}`,
         components: [new ActionRowBuilder().addComponents(backButton())],
         flags: 64,
       });
@@ -170,10 +176,14 @@ module.exports = {
 
     if (customId === 'ah:btn:resource') {
       const freshPlayer = getPlayerById(player.id);
+      const spend = trySpendAction(freshPlayer.id, session);
+      if (!spend.ok) {
+        return interaction.editReply({ content: actionGuardMessage(), components: [new ActionRowBuilder().addComponents(backButton())], flags: 64 });
+      }
       const newResources = freshPlayer.resources + 1;
       updatePlayer(freshPlayer.id, { resources: newResources });
       return interaction.editReply({
-        content: `✅ **Gained 1 resource** — now at ${newResources} resources.`,
+        content: `✅ **Gained 1 resource** — now at ${newResources} resources.${spend.note ? ` ${spend.note}` : ''}`,
         components: [new ActionRowBuilder().addComponents(backButton())],
         flags: 64,
       });
@@ -442,9 +452,13 @@ module.exports = {
     if (customId === 'ah:sel:engage') {
       const enemyId = parseInt(interaction.values[0], 10);
       const enemy = getEnemy(enemyId);
+      const spend = trySpendAction(player.id, session);
+      if (!spend.ok) {
+        return interaction.editReply({ content: actionGuardMessage(), components: [new ActionRowBuilder().addComponents(backButton())], flags: 64 });
+      }
       updateEnemy(enemyId, { is_aloof: 0 });
       return interaction.editReply({
-        content: `✅ **Engaged ${enemy.name}**! It will now activate during the enemy phase.`,
+        content: `✅ **Engaged ${enemy.name}**! It will now activate during the enemy phase.${spend.note ? ` ${spend.note}` : ''}`,
         components: [new ActionRowBuilder().addComponents(backButton())],
         flags: 64,
       });

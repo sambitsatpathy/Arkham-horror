@@ -7,6 +7,7 @@ const { refreshHandDisplay } = require('../../engine/handDisplay');
 const { getEffectiveStat } = require('../../engine/cardEffectResolver');
 const { updateLocationStatus } = require('../../engine/locationManager');
 const { getLocation } = require('../../engine/gameState');
+const { trySpendAction, actionGuardMessage } = require('../../engine/actionEconomy');
 const allInvestigators = require('../../data/investigators/investigators.json');
 
 const SPECIAL_TOKENS = new Set(['skull', 'cultist', 'tablet', 'elder_thing', 'auto_fail', 'elder_sign']);
@@ -107,6 +108,10 @@ module.exports = {
     const notInHand = codes.filter(c => !hand.includes(c));
     if (notInHand.length) return interaction.reply({ content: `❌ Not in your hand: ${notInHand.join(', ')}`, flags: 64 });
 
+    // Spend the action before the test — actions are spent even if the evade fails
+    const spend = trySpendAction(player.id, session);
+    if (!spend.ok) return interaction.reply({ content: actionGuardMessage(), flags: 64 });
+
     await interaction.deferReply();
 
     const inv = allInvestigators.find(i => i.code === player.investigator_code);
@@ -175,10 +180,11 @@ module.exports = {
       updateEnemy(enemyId, { is_exhausted: 1 });
       const loc = getLocation(session.id, enemy.location_code);
       if (loc) await updateLocationStatus(interaction.guild, session, loc);
-      lines.push(`✅ **Evaded!** **${enemy.name}** is now exhausted and disengaged.`);
+      lines.push(`✅ **Evaded!** **${enemy.name}** is exhausted (it won't activate this round).`);
     } else {
       lines.push(`❌ **Failed!** You couldn't evade **${enemy.name}**.`);
     }
+    if (spend.note) lines.push(spend.note);
 
     if (success && codes.length > 0) {
       const { resolveOnSuccess } = require('../../engine/cardEffectResolver');
@@ -230,6 +236,15 @@ async function executeEvadeAction(interaction, player, session, enemyId, commitC
 
   const statName = 'agility';
   const freshPlayer = getPlayerById(player.id);
+
+  // Spend the action before the test — actions are spent even if the evade fails
+  const { trySpendAction, actionGuardMessage } = require('../../engine/actionEconomy');
+  const spend = trySpendAction(freshPlayer.id, session);
+  if (!spend.ok) {
+    const msg = { content: actionGuardMessage(), flags: 64 };
+    return interaction.deferred || interaction.replied ? interaction.editReply(msg) : interaction.update(msg);
+  }
+
   const inv = allInvestigators.find(i => i.code === freshPlayer.investigator_code);
   const statValue = getEffectiveStat(freshPlayer, statName, {}, inv);
 
@@ -283,10 +298,11 @@ async function executeEvadeAction(interaction, player, session, enemyId, commitC
 
   if (success) {
     updateEnemy(enemyId, { is_exhausted: 1 });
-    lines.push(`✅ **Success!** **${enemy.name}** is exhausted and disengaged.`);
+    lines.push(`✅ **Success!** **${enemy.name}** is exhausted (it won't activate this round).`);
   } else {
     lines.push('❌ **Fail.** Enemy stays engaged.');
   }
+  if (spend.note) lines.push(spend.note);
 
   if (success && commitCodes.length > 0) {
     const { resolveOnSuccess } = require('../../engine/cardEffectResolver');

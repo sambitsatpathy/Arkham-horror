@@ -41,7 +41,23 @@ function damageEnemy(enemy, amount) {
 }
 
 function defeatEnemy(enemyId) {
-  getDb().prepare('DELETE FROM enemies WHERE id = ?').run(enemyId);
+  const db = getDb();
+  const enemy = db.prepare('SELECT * FROM enemies WHERE id = ?').get(enemyId);
+  db.prepare('DELETE FROM enemies WHERE id = ?').run(enemyId);
+  // Log here so every defeat path (fight, events, /enemy) counts for XP at /endscenario
+  if (enemy) {
+    const campaign = getCampaign();
+    const session = getSession();
+    if (campaign && session) {
+      addCampaignLog(campaign.id, session.scenario_code, `Enemy defeated: ${enemy.name} [${enemy.card_code}]`);
+    }
+  }
+  return enemy;
+}
+
+function readyAllEnemies(sessionId) {
+  const info = getDb().prepare('UPDATE enemies SET is_exhausted = 0 WHERE session_id = ? AND is_exhausted = 1').run(sessionId);
+  return info.changes;
 }
 
 async function activateEnemies(guild, session, players) {
@@ -125,4 +141,4 @@ async function activateEnemies(guild, session, players) {
   return results;
 }
 
-module.exports = { spawnEnemy, spawnEnemyManual, damageEnemy, defeatEnemy, activateEnemies };
+module.exports = { spawnEnemy, spawnEnemyManual, damageEnemy, defeatEnemy, readyAllEnemies, activateEnemies };
