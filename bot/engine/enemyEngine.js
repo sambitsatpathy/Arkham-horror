@@ -125,6 +125,41 @@ async function enemyAttack(guild, session, enemy, targetPlayer, { label = 'attac
   return `⚔️ **${enemy.name}** [${enemy.id}] ${label} **${freshTarget.investigator_name}** (${enemy.damage} dmg / ${enemy.horror} hor)`;
 }
 
+// One BFS step from the enemy's location toward the nearest investigator over
+// the scenario's connection graph. Locations from not-yet-unlocked acts are
+// not traversed. Returns the next location row, or null when the scenario has
+// no connection data (caller falls back to the legacy jump).
+function hunterStep(session, enemy, activePlayers) {
+  const { getLocations } = require('./gameState');
+  const locs = getLocations(session.id).filter(l => l.act_index <= session.act_index);
+  const byCode = new Map(locs.map(l => [l.code, l]));
+  const conn = code => {
+    try { return JSON.parse(byCode.get(code)?.connections || '[]'); } catch (_) { return []; }
+  };
+
+  const hasMapData = locs.some(l => conn(l.code).length > 0);
+  if (!hasMapData || !byCode.has(enemy.location_code)) return null;
+
+  const targets = new Set(activePlayers.map(p => p.location_code));
+  const prev = new Map([[enemy.location_code, null]]);
+  const queue = [enemy.location_code];
+  let found = null;
+  while (queue.length) {
+    const cur = queue.shift();
+    if (targets.has(cur) && cur !== enemy.location_code) { found = cur; break; }
+    for (const nb of conn(cur)) {
+      if (!byCode.has(nb) || prev.has(nb)) continue;
+      prev.set(nb, cur);
+      queue.push(nb);
+    }
+  }
+  if (!found) return null;
+
+  let step = found;
+  while (prev.get(step) !== enemy.location_code) step = prev.get(step);
+  return byCode.get(step);
+}
+
 async function activateEnemies(guild, session, players) {
   const enemies = getEnemies(session.id);
   const activePlayers = players.filter(p => !p.is_eliminated);
@@ -150,25 +185,45 @@ async function activateEnemies(guild, session, players) {
 
     let hunted = false;
     if (playersHere.length === 0 && enemy.is_hunter) {
-      // Simplified: move to first active player's location.
-      // True "nearest" requires adjacency graph not yet modelled.
-      const dest = activePlayers[0];
-      if (!dest) continue;
+      if (activePlayers.length === 0) continue;
 
-      updateEnemy(enemy.id, { location_code: dest.location_code });
+      const step = hunterStep(session, enemy, activePlayers);
+      if (step) {
+        // Move one connection toward the nearest investigator
+        const oldLoc = getLocation(session.id, enemy.location_code);
+        updateEnemy(enemy.id, { location_code: step.code });
+        const newLoc = getLocation(session.id, step.code);
+        if (oldLoc) await updateLocationStatus(guild, session, oldLoc);
+        if (newLoc) await updateLocationStatus(guild, session, newLoc);
 
-      const oldLoc = getLocation(session.id, enemy.location_code);
-      const newLoc = getLocation(session.id, dest.location_code);
-      if (oldLoc) await updateLocationStatus(guild, session, oldLoc);
-      if (newLoc) await updateLocationStatus(guild, session, newLoc);
+        const newLocCh = newLoc ? guild.channels.cache.get(newLoc.channel_id) : null;
+        if (newLocCh) await newLocCh.send(`👹 **${enemy.name}** hunts into **${newLoc.name}**!`);
 
-      const newLocCh = newLoc ? guild.channels.cache.get(newLoc.channel_id) : null;
-      if (newLocCh) {
-        await newLocCh.send(`👹 **${enemy.name}** hunts toward **${dest.investigator_name}** in **${newLoc.name}**!`);
+        const arrived = activePlayers.filter(p => p.location_code === step.code);
+        if (arrived.length === 0) {
+          results.push(`🏃 **${enemy.name}** [${enemy.id}] hunts into **${step.name}**.`);
+          continue;
+        }
+        playersHere.push(...arrived);
+        hunted = true;
+      } else {
+        // No connection data for this scenario — legacy jump to first player
+        const dest = activePlayers[0];
+        updateEnemy(enemy.id, { location_code: dest.location_code });
+
+        const oldLoc = getLocation(session.id, enemy.location_code);
+        const newLoc = getLocation(session.id, dest.location_code);
+        if (oldLoc) await updateLocationStatus(guild, session, oldLoc);
+        if (newLoc) await updateLocationStatus(guild, session, newLoc);
+
+        const newLocCh = newLoc ? guild.channels.cache.get(newLoc.channel_id) : null;
+        if (newLocCh) {
+          await newLocCh.send(`👹 **${enemy.name}** hunts toward **${dest.investigator_name}** in **${newLoc.name}**! *(no map data)*`);
+        }
+
+        playersHere.push(dest);
+        hunted = true;
       }
-
-      playersHere.push(dest);
-      hunted = true;
     }
 
     if (playersHere.length === 0) continue;
@@ -196,4 +251,4 @@ async function activateEnemies(guild, session, players) {
   return results;
 }
 
-module.exports = { spawnEnemy, spawnEnemyManual, damageEnemy, defeatEnemy, readyAllEnemies, enemyAttack, activateEnemies };
+module.exports = { spawnEnemy, spawnEnemyManual, damageEnemy, defeatEnemy, readyAllEnemies, enemyAttack, hunterStep, activateEnemies };

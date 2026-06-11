@@ -3,11 +3,26 @@
   "name": "The Midnight Masks",
   "pack": "core",
   "acts": [
-    { "index": 0, "name": "Uncovering the Conspiracy", "card_code": "01123", "doom_threshold": null }
+    {
+      "index": 0,
+      "name": "Uncovering the Conspiracy",
+      "card_code": "01123",
+      "doom_threshold": null
+    }
   ],
   "agendas": [
-    { "index": 0, "name": "Predator or Prey?", "card_code": "01121a", "doom_threshold": 9 },
-    { "index": 1, "name": "Time Is Running Short", "card_code": "01122", "doom_threshold": 13 }
+    {
+      "index": 0,
+      "name": "Predator or Prey?",
+      "card_code": "01121a",
+      "doom_threshold": 9
+    },
+    {
+      "index": 1,
+      "name": "Time Is Running Short",
+      "card_code": "01122",
+      "doom_threshold": 13
+    }
   ],
   "locations": [
     {
@@ -18,7 +33,10 @@
       "shroud": 2,
       "clues_per_investigator": 0,
       "start_revealed": true,
-      "starting_location": true
+      "starting_location": true,
+      "connections": [
+        "rivertown"
+      ]
     },
     {
       "code": "rivertown",
@@ -27,7 +45,15 @@
       "act_index": 0,
       "shroud": 1,
       "clues_per_investigator": 0,
-      "start_revealed": false
+      "start_revealed": false,
+      "connections": [
+        "your_house",
+        "easttown",
+        "miskatonic",
+        "southside_historical",
+        "southside_boarding",
+        "graveyard"
+      ]
     },
     {
       "code": "southside_historical",
@@ -36,7 +62,12 @@
       "act_index": 0,
       "shroud": 2,
       "clues_per_investigator": 2,
-      "start_revealed": false
+      "start_revealed": false,
+      "connections": [
+        "rivertown",
+        "miskatonic",
+        "st_marys"
+      ]
     },
     {
       "code": "southside_boarding",
@@ -45,7 +76,12 @@
       "act_index": 0,
       "shroud": 3,
       "clues_per_investigator": 2,
-      "start_revealed": false
+      "start_revealed": false,
+      "connections": [
+        "rivertown",
+        "miskatonic",
+        "st_marys"
+      ]
     },
     {
       "code": "st_marys",
@@ -54,7 +90,12 @@
       "act_index": 0,
       "shroud": 3,
       "clues_per_investigator": 1,
-      "start_revealed": false
+      "start_revealed": false,
+      "connections": [
+        "miskatonic",
+        "southside_historical",
+        "southside_boarding"
+      ]
     },
     {
       "code": "miskatonic",
@@ -63,7 +104,14 @@
       "act_index": 0,
       "shroud": 3,
       "clues_per_investigator": 1,
-      "start_revealed": false
+      "start_revealed": false,
+      "connections": [
+        "northside",
+        "st_marys",
+        "rivertown",
+        "southside_historical",
+        "southside_boarding"
+      ]
     },
     {
       "code": "downtown_diner",
@@ -72,7 +120,11 @@
       "act_index": 0,
       "shroud": 2,
       "clues_per_investigator": 2,
-      "start_revealed": false
+      "start_revealed": false,
+      "connections": [
+        "easttown",
+        "northside"
+      ]
     },
     {
       "code": "downtown_police",
@@ -81,7 +133,11 @@
       "act_index": 0,
       "shroud": 1,
       "clues_per_investigator": 0,
-      "start_revealed": false
+      "start_revealed": false,
+      "connections": [
+        "easttown",
+        "northside"
+      ]
     },
     {
       "code": "easttown",
@@ -90,7 +146,12 @@
       "act_index": 0,
       "shroud": 2,
       "clues_per_investigator": 1,
-      "start_revealed": false
+      "start_revealed": false,
+      "connections": [
+        "rivertown",
+        "downtown_diner",
+        "downtown_police"
+      ]
     },
     {
       "code": "graveyard",
@@ -99,7 +160,10 @@
       "act_index": 0,
       "shroud": 4,
       "clues_per_investigator": 2,
-      "start_revealed": false
+      "start_revealed": false,
+      "connections": [
+        "rivertown"
+      ]
     },
     {
       "code": "northside",
@@ -108,7 +172,12 @@
       "act_index": 0,
       "shroud": 2,
       "clues_per_investigator": 1,
-      "start_revealed": false
+      "start_revealed": false,
+      "connections": [
+        "miskatonic",
+        "downtown_diner",
+        "downtown_police"
+      ]
     }
   ],
   "encounter_sets": [
