@@ -1,5 +1,6 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const { requireSession, requirePlayer, getEnemiesAt, updateEnemy } = require('../../engine/gameState');
+const { trySpendAction, actionGuardMessage } = require('../../engine/actionEconomy');
 const { handChannelName } = require('../../config');
 
 module.exports = {
@@ -30,7 +31,12 @@ module.exports = {
       return interaction.reply({ content: `❌ **${enemy.name}** is not aloof — it's already engaged.`, flags: 64 });
     }
 
-    updateEnemy(enemyId, { is_aloof: 0 });
+    const spend = trySpendAction(player.id, session);
+    if (!spend.ok) {
+      return interaction.reply({ content: actionGuardMessage(), flags: 64 });
+    }
+
+    updateEnemy(enemyId, { is_aloof: 0, engaged_player_id: player.id });
 
     const handCh = interaction.guild.channels.cache.find(c =>
       c.name === handChannelName(player.investigator_name)
@@ -39,6 +45,6 @@ module.exports = {
       await handCh.send(`⚔️ **${player.investigator_name}** engages **${enemy.name}**! (aloof cleared)`);
     }
 
-    return interaction.reply({ content: `✅ You engage **${enemy.name}**. It will now activate normally during the enemy phase.`, flags: 64 });
+    return interaction.reply({ content: `✅ You engage **${enemy.name}**. It will now activate normally during the enemy phase.${spend.note ? ` ${spend.note}` : ''}`, flags: 64 });
   },
 };

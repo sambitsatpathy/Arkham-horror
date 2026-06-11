@@ -8,6 +8,7 @@ const { commitCards, useCharge } = require('../../engine/deck');
 const { refreshHandDisplay } = require('../../engine/handDisplay');
 const { getEffectiveStat } = require('../../engine/cardEffectResolver');
 const { getLocation } = require('../../engine/gameState');
+const { trySpendAction, actionGuardMessage } = require('../../engine/actionEconomy');
 const allInvestigators = require('../../data/investigators/investigators.json');
 const fs = require('fs');
 const path = require('path');
@@ -197,6 +198,10 @@ module.exports = {
     const notInHand = codes.filter(c => !hand.includes(c));
     if (notInHand.length) return interaction.reply({ content: `❌ Not in your hand: ${notInHand.join(', ')}`, flags: 64 });
 
+    // Spend the action before the test — actions are spent even if the attack misses
+    const spend = trySpendAction(player.id, session);
+    if (!spend.ok) return interaction.reply({ content: actionGuardMessage(), flags: 64 });
+
     await interaction.deferReply();
 
     const inv = allInvestigators.find(i => i.code === player.investigator_code);
@@ -290,7 +295,13 @@ module.exports = {
       }
     } else {
       lines.push(`❌ **Miss!** The attack fails.`);
+      if (enemy.is_retaliate && !enemy.is_exhausted) {
+        const { enemyAttack } = require('../../engine/enemyEngine');
+        const line = await enemyAttack(interaction.guild, session, enemy, player, { label: 'retaliates against' });
+        lines.push(`↩️ **Retaliate!** ${line}`);
+      }
     }
+    if (spend.note) lines.push(spend.note);
 
     if (success && codes.length > 0) {
       const { resolveOnSuccess } = require('../../engine/cardEffectResolver');
@@ -349,6 +360,14 @@ async function executeFightAction(interaction, player, session, enemyId, commitC
   const notInHand = commitCodes.filter(c => !hand.includes(c));
   if (notInHand.length) {
     const msg = { content: `❌ Not in hand: ${notInHand.join(', ')}`, flags: 64 };
+    return interaction.deferred || interaction.replied ? interaction.editReply(msg) : interaction.update(msg);
+  }
+
+  // Spend the action before the test — actions are spent even if the attack misses
+  const { trySpendAction, actionGuardMessage } = require('../../engine/actionEconomy');
+  const spend = trySpendAction(freshPlayer.id, session);
+  if (!spend.ok) {
+    const msg = { content: actionGuardMessage(), flags: 64 };
     return interaction.deferred || interaction.replied ? interaction.editReply(msg) : interaction.update(msg);
   }
 
@@ -428,7 +447,13 @@ async function executeFightAction(interaction, player, session, enemyId, commitC
     }
   } else {
     lines.push('❌ **Miss!** The attack fails.');
+    if (enemy.is_retaliate && !enemy.is_exhausted) {
+      const { enemyAttack } = require('../../engine/enemyEngine');
+      const line = await enemyAttack(interaction.guild, session, enemy, freshPlayer, { label: 'retaliates against' });
+      lines.push(`↩️ **Retaliate!** ${line}`);
+    }
   }
+  if (spend.note) lines.push(spend.note);
 
   if (success && commitCodes.length > 0) {
     const { resolveOnSuccess } = require('../../engine/cardEffectResolver');

@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const { requireSession, requirePlayer, getSession, getPlayer, getCampaign, getPlayers, getLocation, getLocations, updatePlayer } = require('../../engine/gameState');
 const { revealLocation, updateLocationStatus } = require('../../engine/locationManager');
+const { trySpendAction, actionGuardMessage } = require('../../engine/actionEconomy');
 
 const STATUS_ICON = {
   hidden:   '🌑',
@@ -65,6 +66,12 @@ module.exports = {
       return interaction.reply({ content: `❌ **${loc.name}** is not accessible yet (unlocks at Act ${loc.act_index + 1}).`, flags: 64 });
     }
 
+    const spend = trySpendAction(player.id, session);
+    if (!spend.ok) {
+      return interaction.reply({ content: actionGuardMessage(), flags: 64 });
+    }
+    const actionNote = spend.note ? ` ${spend.note}` : '';
+
     const wasHidden = loc.status === 'hidden';
     const oldLoc = player.location_code;
     updatePlayer(player.id, { location_code: loc.code });
@@ -75,7 +82,7 @@ module.exports = {
       await revealLocation(interaction.guild, session, loc, players);
       const channel = interaction.guild.channels.cache.get(loc.channel_id);
       if (channel) await channel.send(`🚶 **${player.investigator_name}** enters **${loc.name}** for the first time.`);
-      await interaction.reply(`✅ Moved to **${loc.name}** — location revealed!`);
+      await interaction.reply(`✅ Moved to **${loc.name}** — location revealed!${actionNote}`);
     } else {
       if (oldLoc && oldLoc !== loc.code) {
         const prevLoc = getLocation(session.id, oldLoc);
@@ -86,7 +93,7 @@ module.exports = {
 
       const channel = interaction.guild.channels.cache.get(loc.channel_id);
       if (channel) await channel.send(`🚶 **${player.investigator_name}** enters **${loc.name}**.`);
-      await interaction.reply(`✅ Moved to **${loc.name}**.`);
+      await interaction.reply(`✅ Moved to **${loc.name}**.${actionNote}`);
     }
   },
 };
@@ -94,11 +101,18 @@ module.exports = {
 async function executeMoveAction(interaction, player, session, locationCode) {
   const { getLocations, updatePlayer, getPlayerById } = require('../../engine/gameState');
   const { revealLocation } = require('../../engine/locationManager');
+  const { trySpendAction, actionGuardMessage } = require('../../engine/actionEconomy');
 
   const locations = getLocations(session.id);
   const loc = locations.find(l => l.code === locationCode);
   if (!loc) {
     const msg = { content: `❌ Location not found: ${locationCode}`, flags: 64 };
+    return interaction.deferred || interaction.replied ? interaction.editReply(msg) : interaction.update(msg);
+  }
+
+  const spend = trySpendAction(player.id, session);
+  if (!spend.ok) {
+    const msg = { content: actionGuardMessage(), flags: 64 };
     return interaction.deferred || interaction.replied ? interaction.editReply(msg) : interaction.update(msg);
   }
 
@@ -114,7 +128,7 @@ async function executeMoveAction(interaction, player, session, locationCode) {
     await locCh.send(`🚶 **${fresh.investigator_name}** moves to **${loc.name}**.`);
   }
 
-  const replyContent = { content: `✅ Moved to **${loc.name}**.`, components: [], flags: 64 };
+  const replyContent = { content: `✅ Moved to **${loc.name}**.${spend.note ? ` ${spend.note}` : ''}`, components: [], flags: 64 };
   return interaction.deferred || interaction.replied ? interaction.editReply(replyContent) : interaction.update(replyContent);
 }
 

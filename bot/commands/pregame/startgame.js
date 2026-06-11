@@ -136,13 +136,14 @@ module.exports = {
     for (const loc of scenario.locations) {
       const clues = loc.clues_per_investigator * players.length;
       db.prepare(`
-        INSERT INTO locations (session_id, code, name, channel_id, status, clues, shroud, act_index)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO locations (session_id, code, name, channel_id, status, clues, shroud, act_index, connections)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).run(
         sessionId, loc.code, loc.name,
         locationChannelIds[loc.code] || null,
         loc.start_revealed ? 'revealed' : 'hidden',
         clues, loc.shroud, loc.act_index,
+        JSON.stringify(loc.connections || []),
       );
     }
 

@@ -141,12 +141,15 @@ function findInvestigator(query) {
   return findCard(query, { typeCode: 'investigator' });
 }
 
-// Returns starting charge count for a card, 0 if none.
+// Returns starting uses count for a card (ammo, charges, secrets, supplies, …), 0 if none.
 function getCardCharges(cardCode) {
   const card = loadFullCards().get(cardCode);
-  if (!card) return 0;
-  const match = card.text?.match(/Uses \((\d+) charges?\)/i);
-  return match ? parseInt(match[1], 10) : 0;
+  const match = card?.text?.match(/Uses\s*\((\d+)\s+[a-z]+\)/i);
+  if (match) return parseInt(match[1], 10);
+  // Fallback: parsed uses from card_effects.json (covers checkouts without pack data)
+  const { getEntry } = require('./cardEffectResolver');
+  const entry = getEntry(cardCode);
+  return entry?.uses?.count || 0;
 }
 
 // Returns { intellect, combat, willpower, agility, wild } skill icon counts.

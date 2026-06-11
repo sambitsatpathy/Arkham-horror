@@ -154,12 +154,35 @@ function init() {
     db.exec("ALTER TABLE game_session ADD COLUMN campaign_dir TEXT DEFAULT 'night_of_zealot'");
   }
 
+  const locationCols = db.prepare("PRAGMA table_info(locations)").all().map(c => c.name);
+  if (!locationCols.includes('connections')) {
+    db.exec("ALTER TABLE locations ADD COLUMN connections TEXT DEFAULT '[]'");
+  }
+
   const enemyCols = db.prepare("PRAGMA table_info(enemies)").all().map(c => c.name);
   if (!enemyCols.includes('is_hunter')) {
     db.exec("ALTER TABLE enemies ADD COLUMN is_hunter INTEGER DEFAULT 0");
   }
   if (!enemyCols.includes('is_aloof')) {
     db.exec("ALTER TABLE enemies ADD COLUMN is_aloof INTEGER DEFAULT 0");
+  }
+  if (!enemyCols.includes('is_retaliate')) {
+    db.exec("ALTER TABLE enemies ADD COLUMN is_retaliate INTEGER DEFAULT 0");
+  }
+  if (!enemyCols.includes('is_massive')) {
+    db.exec("ALTER TABLE enemies ADD COLUMN is_massive INTEGER DEFAULT 0");
+  }
+  if (!enemyCols.includes('is_elusive')) {
+    db.exec("ALTER TABLE enemies ADD COLUMN is_elusive INTEGER DEFAULT 0");
+  }
+  if (!enemyCols.includes('prey')) {
+    db.exec("ALTER TABLE enemies ADD COLUMN prey TEXT");
+  }
+  if (!enemyCols.includes('victory')) {
+    db.exec("ALTER TABLE enemies ADD COLUMN victory INTEGER DEFAULT 0");
+  }
+  if (!enemyCols.includes('engaged_player_id')) {
+    db.exec("ALTER TABLE enemies ADD COLUMN engaged_player_id INTEGER");
   }
 }
 

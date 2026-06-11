@@ -6,6 +6,7 @@ const { findCardByCode, getCardSkills } = require('../../engine/cardLookup');
 const { commitCards } = require('../../engine/deck');
 const { refreshHandDisplay } = require('../../engine/handDisplay');
 const { getEffectiveStat } = require('../../engine/cardEffectResolver');
+const { trySpendAction, actionGuardMessage } = require('../../engine/actionEconomy');
 const allInvestigators = require('../../data/investigators/investigators.json');
 
 const SPECIAL_TOKENS = new Set(['skull', 'cultist', 'tablet', 'elder_thing', 'auto_fail', 'elder_sign']);
@@ -121,6 +122,12 @@ module.exports = {
       return interaction.reply({ content: `❌ Not in your hand: **${notInHand.join(', ')}**`, flags: 64 });
     }
 
+    // Spend the action before the test — actions are spent even if the test fails
+    const spend = trySpendAction(player.id, session);
+    if (!spend.ok) {
+      return interaction.reply({ content: actionGuardMessage(), flags: 64 });
+    }
+
     await interaction.deferReply();
 
     const inv = allInvestigators.find(i => i.code === player.investigator_code);
@@ -199,6 +206,7 @@ module.exports = {
     lines.push(`**Token:** ${tokenLabel}${specialNote}`, `**Result:** ${mathLine}`, '',
       isAutoFail ? '❌ **Auto-fail!**' : success ? '✅ **Success!**' : '❌ **Failed.**');
     if (clueNote) lines.push(clueNote);
+    if (spend.note) lines.push(spend.note);
 
     if (success && codes.length > 0) {
       const { resolveOnSuccess } = require('../../engine/cardEffectResolver');
@@ -266,6 +274,14 @@ async function executeInvestigateAction(interaction, player, session, commitCode
   const notInHand = codes.filter(c => !hand.includes(c));
   if (notInHand.length) {
     const msg = { content: `❌ Not in your hand: ${notInHand.join(', ')}`, flags: 64 };
+    return interaction.deferred || interaction.replied ? interaction.editReply(msg) : interaction.update(msg);
+  }
+
+  // Spend the action before the test — actions are spent even if the test fails
+  const { trySpendAction, actionGuardMessage } = require('../../engine/actionEconomy');
+  const spend = trySpendAction(freshPlayer.id, session);
+  if (!spend.ok) {
+    const msg = { content: actionGuardMessage(), flags: 64 };
     return interaction.deferred || interaction.replied ? interaction.editReply(msg) : interaction.update(msg);
   }
 
@@ -348,6 +364,7 @@ async function executeInvestigateAction(interaction, player, session, commitCode
   } else {
     lines.push('❌ **Fail.** No clue collected.');
   }
+  if (spend.note) lines.push(spend.note);
 
   if (success && codes.length > 0) {
     const { resolveOnSuccess } = require('../../engine/cardEffectResolver');

@@ -1,11 +1,12 @@
 const { SlashCommandBuilder, AttachmentBuilder, PermissionFlagsBits } = require('discord.js');
-const { requireSession, requirePlayer, getPlayer, getPlayerById, updatePlayer, decrementActions, getEnemiesAt } = require('../../engine/gameState');
+const { requireSession, requirePlayer, getPlayer, getPlayerById, updatePlayer, getEnemiesAt } = require('../../engine/gameState');
 const { discardCard, playAsset } = require('../../engine/deck');
 const { findCardByCode, getCardCharges, getCardSoak } = require('../../engine/cardLookup');
 const { handChannelName } = require('../../config');
 const { refreshHandDisplay } = require('../../engine/handDisplay');
 const { resolveOnPlay } = require('../../engine/cardEffectResolver');
 const { execEffect } = require('../../engine/effectExecutors');
+const { trySpendAction, actionGuardMessage } = require('../../engine/actionEconomy');
 
 const TYPE_LABEL = {
   asset: 'Asset',
@@ -81,7 +82,12 @@ module.exports = {
       });
     }
 
+    const plan = resolveOnPlay(cardCode);
+
     if (typeCode === 'asset') {
+      const spend = trySpendAction(player.id, session, { fast: plan.fast });
+      if (!spend.ok) return interaction.editReply({ content: actionGuardMessage() });
+
       const charges = getCardCharges(cardCode);
       const soak = getCardSoak(cardCode);
       playAsset(player, cardCode, name, charges, soak.hp, soak.sanity);
@@ -93,6 +99,7 @@ module.exports = {
 
       const chargesNote = charges > 0 ? ` with **${charges} charge${charges !== 1 ? 's' : ''}**` : '';
       const costNote = cost > 0 ? ` (spent ${cost} resource${cost !== 1 ? 's' : ''}, ${player.resources - cost} remaining)` : '';
+      const actionNote = spend.note ? `\n${spend.note}` : '';
       const msg = `🃏 Played asset: **${name}**${chargesNote} *(now in play)*`;
 
       if (handCh) {
@@ -103,21 +110,18 @@ module.exports = {
         }
       }
       await refreshHandDisplay(interaction.guild, player);
-      return interaction.editReply({ content: `✅ **${name}** is now in play${chargesNote}.${costNote}` });
+      return interaction.editReply({ content: `✅ **${name}** is now in play${chargesNote}.${costNote}${actionNote}` });
     }
 
-    // Event / everything else — compute plan and check guards BEFORE any state mutation
-    const plan = resolveOnPlay(cardCode);
+    // Event / everything else — check guards BEFORE any state mutation
     if (plan.conditions.includes('no_enemies_at_location')) {
       const enemies = getEnemiesAt(session.id, player.location_code);
       if (enemies.length > 0) {
         return interaction.editReply({ content: `❌ Cannot play \`${cardCode}\` — enemies at your location.` });
       }
     }
-    const fresh0 = getPlayerById(player.id);
-    if (!plan.fast && (fresh0.action_count ?? 0) <= 0) {
-      return interaction.editReply({ content: `❌ No actions remaining. Use a Fast card or wait for next turn.` });
-    }
+    const spend = trySpendAction(player.id, session, { fast: plan.fast });
+    if (!spend.ok) return interaction.editReply({ content: actionGuardMessage() });
 
     // Guards passed — now safe to mutate state
     discardCard(player, cardCode);
@@ -127,6 +131,7 @@ module.exports = {
     }
 
     const costNote = cost > 0 ? ` (spent ${cost} resource${cost !== 1 ? 's' : ''}, ${player.resources - cost} remaining)` : '';
+    const actionNote = spend.note ? `\n${spend.note}` : '';
     const msg = `▶️ Played: **${name}** *(discarded)*`;
     if (handCh) {
       if (result?.imagePath) {
@@ -136,17 +141,11 @@ module.exports = {
       }
     }
     await refreshHandDisplay(interaction.guild, player);
-    await interaction.editReply({ content: `✅ Played **${name}**.${costNote}` });
+    await interaction.editReply({ content: `✅ Played **${name}**.${costNote}${actionNote}` });
 
     // Auto-resolve untargeted on-play effects for event cards
     if (plan.effects.length || plan.unparsed) {
       const lines = [];
-      if (!plan.fast) {
-        const remaining = decrementActions(player.id);
-        lines.push(`⏱️ -1 action (${remaining} remaining).`);
-      } else {
-        lines.push(`⚡ Fast — no action cost.`);
-      }
       const ctx = { player, session, guild: interaction.guild };
       for (let i = 0; i < plan.effects.length; i++) {
         const eff = plan.effects[i];
@@ -209,7 +208,19 @@ async function executePlayCard(interaction, player, session, cardCode) {
 
   const handCh = interaction.guild.channels.cache.find(c => c.name === handChannelName(freshPlayer.investigator_name));
 
+  const { resolveOnPlay } = require('../../engine/cardEffectResolver');
+  const { execEffect } = require('../../engine/effectExecutors');
+  const { getEnemiesAt } = require('../../engine/gameState');
+  const { trySpendAction, actionGuardMessage } = require('../../engine/actionEconomy');
+  const plan = resolveOnPlay(cardCode);
+
   if (typeCode === 'asset') {
+    const spend = trySpendAction(freshPlayer.id, session, { fast: plan.fast });
+    if (!spend.ok) {
+      const msg = { content: actionGuardMessage(), flags: 64 };
+      return interaction.deferred || interaction.replied ? interaction.editReply(msg) : interaction.reply(msg);
+    }
+
     const charges = getCardCharges(cardCode);
     const soak = getCardSoak(cardCode);
     playAsset(freshPlayer, cardCode, name, charges, soak.hp, soak.sanity);
@@ -220,6 +231,7 @@ async function executePlayCard(interaction, player, session, cardCode) {
 
     const chargesNote = charges > 0 ? ` with **${charges} charge${charges !== 1 ? 's' : ''}**` : '';
     const costNote = cost > 0 ? ` (spent ${cost} resource${cost !== 1 ? 's' : ''}, ${freshPlayer.resources - cost} remaining)` : '';
+    const actionNote = spend.note ? `\n${spend.note}` : '';
     const msg = `🃏 Played asset: **${name}**${chargesNote} *(now in play)*`;
 
     if (handCh) {
@@ -230,15 +242,11 @@ async function executePlayCard(interaction, player, session, cardCode) {
       }
     }
     await refreshHandDisplay(interaction.guild, freshPlayer);
-    const replyContent = { content: `✅ **${name}** is now in play${chargesNote}.${costNote}`, components: [], flags: 64 };
+    const replyContent = { content: `✅ **${name}** is now in play${chargesNote}.${costNote}${actionNote}`, components: [], flags: 64 };
     return interaction.deferred || interaction.replied ? interaction.editReply(replyContent) : interaction.reply(replyContent);
   }
 
   // Event / everything else — check guards BEFORE any state mutation
-  const { resolveOnPlay } = require('../../engine/cardEffectResolver');
-  const { execEffect } = require('../../engine/effectExecutors');
-  const { getEnemiesAt, decrementActions } = require('../../engine/gameState');
-  const plan = resolveOnPlay(cardCode);
   if (plan.conditions.includes('no_enemies_at_location')) {
     const enemies = getEnemiesAt(session.id, freshPlayer.location_code);
     if (enemies.length > 0) {
@@ -246,9 +254,9 @@ async function executePlayCard(interaction, player, session, cardCode) {
       return interaction.deferred || interaction.replied ? interaction.editReply(msg) : interaction.reply(msg);
     }
   }
-  const fresh0 = getPlayerById(freshPlayer.id);
-  if (!plan.fast && (fresh0.action_count ?? 0) <= 0) {
-    const msg = { content: `❌ No actions remaining. Use a Fast card or wait for next turn.`, flags: 64 };
+  const spend = trySpendAction(freshPlayer.id, session, { fast: plan.fast });
+  if (!spend.ok) {
+    const msg = { content: actionGuardMessage(), flags: 64 };
     return interaction.deferred || interaction.replied ? interaction.editReply(msg) : interaction.reply(msg);
   }
 
@@ -260,6 +268,7 @@ async function executePlayCard(interaction, player, session, cardCode) {
   }
 
   const costNote = cost > 0 ? ` (spent ${cost} resource${cost !== 1 ? 's' : ''}, ${freshPlayer.resources - cost} remaining)` : '';
+  const actionNote = spend.note ? `\n${spend.note}` : '';
   const eventMsg = `▶️ Played: **${name}** *(discarded)*`;
   if (handCh) {
     if (result?.imagePath) {
@@ -269,18 +278,12 @@ async function executePlayCard(interaction, player, session, cardCode) {
     }
   }
   await refreshHandDisplay(interaction.guild, freshPlayer);
-  const replyContent = { content: `✅ Played **${name}**.${costNote}`, components: [], flags: 64 };
+  const replyContent = { content: `✅ Played **${name}**.${costNote}${actionNote}`, components: [], flags: 64 };
   const replied = interaction.deferred || interaction.replied ? await interaction.editReply(replyContent) : await interaction.reply(replyContent);
 
   // Auto-resolve untargeted on-play effects for event cards
   if (plan.effects.length || plan.unparsed) {
     const lines = [];
-    if (!plan.fast) {
-      const remaining = decrementActions(freshPlayer.id);
-      lines.push(`⏱️ -1 action (${remaining} remaining).`);
-    } else {
-      lines.push(`⚡ Fast — no action cost.`);
-    }
     const ctx = { player: freshPlayer, session, guild: interaction.guild };
     for (let i = 0; i < plan.effects.length; i++) {
       const eff = plan.effects[i];

@@ -52,6 +52,10 @@ module.exports = {
       updateSession(session.id, { phase: 'upkeep' });
       const summaryLines = [`## ☀️ Upkeep Phase — Round ${session.round}`, ''];
 
+      const { readyAllEnemies } = require('../../engine/enemyEngine');
+      const readied = readyAllEnemies(session.id);
+      if (readied > 0) summaryLines.push(`👹 ${readied} exhausted enem${readied !== 1 ? 'ies' : 'y'} readied.`, '');
+
       for (const player of players) {
         const steps = [];
 

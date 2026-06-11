@@ -174,6 +174,137 @@ describe('parser - weakness fields', () => {
   });
 });
 
+describe('parser - keywords / prey / victory / uses', () => {
+  test('Ghoul Priest: Hunter + Retaliate, Prey, per-investigator health, Victory 2', () => {
+    const e = parse({
+      name: 'Ghoul Priest', type_code: 'enemy', health: 5, health_per_investigator: true, victory: 2,
+      text: '<b>Prey</b> - Highest [combat].\nHunter. Retaliate.',
+    });
+    expect(e.keywords).toEqual(expect.arrayContaining(['hunter', 'retaliate']));
+    expect(e.prey).toBe('Highest [combat]');
+    expect(e.victory).toBe(2);
+    expect(e.health_per_investigator).toBe(true);
+    expect(e.unparsed_text).toBe('');
+  });
+
+  test('keyword chain: Aloof. Elusive. Hunter.', () => {
+    const e = parse({ name: 'X', type_code: 'enemy', text: 'Aloof. Elusive. Hunter.' });
+    expect(e.keywords).toEqual(expect.arrayContaining(['aloof', 'elusive', 'hunter']));
+  });
+
+  test('prose with lowercase keyword is not consumed', () => {
+    const e = parse({ name: 'X', type_code: 'enemy', text: 'Stay alert. Hunter.' });
+    expect(e.keywords).toEqual(['hunter']);
+    expect(e.unparsed_text).toContain('Stay alert.');
+  });
+
+  test('Victory from text when no data field', () => {
+    const e = parse({ name: 'X', type_code: 'enemy', text: 'Hunter.\nVictory 1.' });
+    expect(e.victory).toBe(1);
+    expect(e.unparsed_text).toBe('');
+  });
+
+  test('.45 Automatic: Uses (4 ammo)', () => {
+    const e = parse({ name: '.45 Automatic', type_code: 'asset',
+      text: 'Uses (4 ammo).\n[action] Spend 1 ammo: Fight. You get +1 [combat] for this attack.' });
+    expect(e.uses).toEqual({ type: 'ammo', count: 4 });
+  });
+
+  test('Shrivelling: Uses (4 charges)', () => {
+    const e = parse({ name: 'Shrivelling', type_code: 'asset',
+      text: 'Uses (4 charges).\n[action] Spend 1 charge: Fight. Use [willpower] instead of [combat] for this attack.' });
+    expect(e.uses).toEqual({ type: 'charges', count: 4 });
+  });
+
+  test('Old Book of Lore: Uses (2 secrets)', () => {
+    const e = parse({ name: 'Old Book of Lore', type_code: 'asset', text: 'Uses (2 secrets).' });
+    expect(e.uses).toEqual({ type: 'secrets', count: 2 });
+  });
+});
+
+describe('parser - revelation tests', () => {
+  test('Rotting Remains: test-gated horror is not flattened', () => {
+    const e = parse({ name: 'Rotting Remains', type_code: 'treachery',
+      text: '<b>Revelation</b> - Test [willpower] (3). For each point you fail by, take 1 horror.' });
+    expect(e.revelation.test).toEqual({
+      stat: 'willpower', stat_alternatives: [], difficulty: 3,
+      on_fail: [{ type: 'deal_horror', count: 1, target: 'self', per_point_failed: true }],
+      on_pass: [],
+    });
+    expect(e.revelation.effects).toEqual([]);
+    // the old bug: unconditional horror in revelation_effects
+    expect(e.revelation_effects).toEqual([]);
+  });
+
+  test('Frozen in Fear: unparsed body falls back to manual', () => {
+    const e = parse({ name: 'Frozen in Fear', type_code: 'treachery',
+      text: '<b>Revelation</b> - Attach Frozen in Fear to your play area.' });
+    expect(e.revelation.test).toBeNull();
+    expect(e.revelation.unparsed).toContain('Attach Frozen in Fear');
+  });
+
+  test('en-dash revelation parses after normalization', () => {
+    const e = parse({ name: 'X', type_code: 'treachery',
+      text: 'Revelation – Test [intellect] or [agility] (4). If you fail, take 2 damage.' });
+    expect(e.revelation.test.stat).toBe('intellect');
+    expect(e.revelation.test.stat_alternatives).toEqual(['agility']);
+    expect(e.revelation.test.difficulty).toBe(4);
+    expect(e.revelation.test.on_fail).toContainEqual({ type: 'deal_damage', count: 2, target: 'self' });
+  });
+
+  test('direct revelation damage still parses (Grasping Hands shape)', () => {
+    const e = parse({ name: 'Grasping Hands', type_code: 'treachery',
+      text: 'Revelation - Test [agility] (3). For each point you fail by, take 1 damage.' });
+    expect(e.revelation.test.on_fail).toContainEqual({ type: 'deal_damage', count: 1, target: 'self', per_point_failed: true });
+  });
+
+  test('unconditional revelation keeps legacy revelation_effects', () => {
+    const e = parse({ name: 'X', type_code: 'treachery', subtype_code: 'weakness',
+      text: 'Revelation - Take 2 direct horror and remove all cards in your discard pile from the game.' });
+    expect(e.revelation.effects).toContainEqual({ type: 'deal_horror', count: 2, target: 'self', direct: true });
+    expect(e.revelation_effects).toContainEqual({ type: 'deal_horror', count: 2, target: 'self', direct: true });
+  });
+
+  test('Surge keyword extracted from treachery', () => {
+    const e = parse({ name: 'Ancient Evils', type_code: 'treachery',
+      text: 'Revelation - Place 1 doom on the current agenda. This effect can cause the current agenda to advance.\nSurge.' });
+    expect(e.keywords).toContain('surge');
+    expect(e.revelation.effects).toContainEqual({ type: 'add_doom', count: 1 });
+  });
+});
+
+describe('parser - new effect rules', () => {
+  const parseText = text => parse({ name: 'X', type_code: 'event', text });
+
+  test('combined damage and horror', () => {
+    const e = parseText('Take 1 damage and 1 horror.');
+    expect(e.effects).toEqual([
+      { type: 'deal_damage', count: 1, target: 'self' },
+      { type: 'deal_horror', count: 1, target: 'self' },
+    ]);
+  });
+
+  test('discard cards at random from hand', () => {
+    const e = parseText('Discard 2 cards at random from your hand.');
+    expect(e.effects).toContainEqual({ type: 'discard_cards', count: 2, random: true });
+  });
+
+  test('choose and discard from hand', () => {
+    const e = parseText('Choose and discard 1 card from your hand.');
+    expect(e.effects).toContainEqual({ type: 'discard_cards', count: 1, random: false });
+  });
+
+  test('lose resources', () => {
+    const e = parseText('Lose 2 resources.');
+    expect(e.effects).toContainEqual({ type: 'lose_resources', count: 2 });
+  });
+
+  test('damage to each investigator at location', () => {
+    const e = parseText('Deal 1 damage to each investigator at your location.');
+    expect(e.effects).toContainEqual({ type: 'deal_damage', count: 1, target: 'all_investigators_at_location' });
+  });
+});
+
 describe('parser - triggers', () => {
   test('Dr. Milan Christopher: after successful investigate', () => {
     const e = parse({ name: 'Dr. Milan Christopher', type_code: 'asset',

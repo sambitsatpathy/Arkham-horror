@@ -62,12 +62,17 @@ module.exports = {
       if (pregame) await pregame.send(resLines.join('\n'));
     }
 
-    // Calculate XP
-    const defeatedEnemies = db.prepare(
-      'SELECT COUNT(*) as n FROM campaign_log WHERE campaign_id = ? AND scenario_code = ? AND entry LIKE ?'
-    ).get(campaign.id, session.scenario_code, '%defeated%');
+    // Calculate XP: Victory X values from the victory display (per AH rules,
+    // only enemies with Victory points grant XP)
+    const defeatRows = db.prepare(
+      'SELECT entry FROM campaign_log WHERE campaign_id = ? AND scenario_code = ? AND entry LIKE ?'
+    ).all(campaign.id, session.scenario_code, 'Enemy defeated:%');
+    let enemyXp = 0;
+    for (const row of defeatRows) {
+      const m = row.entry.match(/\(Victory (\d+)\)/);
+      if (m) enemyXp += parseInt(m[1], 10);
+    }
     const baseXp = result === 'victory' ? 2 : 0;
-    const enemyXp = defeatedEnemies?.n || 0;
     const totalXp = baseXp + enemyXp;
 
     // Apply trauma and XP, reset per-scenario state
