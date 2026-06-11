@@ -161,6 +161,24 @@ function init() {
   if (!enemyCols.includes('is_aloof')) {
     db.exec("ALTER TABLE enemies ADD COLUMN is_aloof INTEGER DEFAULT 0");
   }
+  if (!enemyCols.includes('is_retaliate')) {
+    db.exec("ALTER TABLE enemies ADD COLUMN is_retaliate INTEGER DEFAULT 0");
+  }
+  if (!enemyCols.includes('is_massive')) {
+    db.exec("ALTER TABLE enemies ADD COLUMN is_massive INTEGER DEFAULT 0");
+  }
+  if (!enemyCols.includes('is_elusive')) {
+    db.exec("ALTER TABLE enemies ADD COLUMN is_elusive INTEGER DEFAULT 0");
+  }
+  if (!enemyCols.includes('prey')) {
+    db.exec("ALTER TABLE enemies ADD COLUMN prey TEXT");
+  }
+  if (!enemyCols.includes('victory')) {
+    db.exec("ALTER TABLE enemies ADD COLUMN victory INTEGER DEFAULT 0");
+  }
+  if (!enemyCols.includes('engaged_player_id')) {
+    db.exec("ALTER TABLE enemies ADD COLUMN engaged_player_id INTEGER");
+  }
 }
 
 module.exports = { getDb };

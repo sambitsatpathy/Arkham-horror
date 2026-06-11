@@ -456,7 +456,7 @@ module.exports = {
       if (!spend.ok) {
         return interaction.editReply({ content: actionGuardMessage(), components: [new ActionRowBuilder().addComponents(backButton())], flags: 64 });
       }
-      updateEnemy(enemyId, { is_aloof: 0 });
+      updateEnemy(enemyId, { is_aloof: 0, engaged_player_id: player.id });
       return interaction.editReply({
         content: `✅ **Engaged ${enemy.name}**! It will now activate during the enemy phase.${spend.note ? ` ${spend.note}` : ''}`,
         components: [new ActionRowBuilder().addComponents(backButton())],

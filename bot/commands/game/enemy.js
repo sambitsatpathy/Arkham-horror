@@ -56,16 +56,19 @@ module.exports = {
         const c = cardResult.card;
         const fullResult = findCardByCode(c.code);
         const fullCard = fullResult?.card || c;
+        // Stats/keywords come from parsed card data; explicit options override.
         enemyId = spawnEnemy(session.id, loc.code, {
           code: c.code,
           name: c.name,
-          health: interaction.options.getInteger('hp') || fullCard.health || c.health || 1,
-          enemy_fight: interaction.options.getInteger('fight') || fullCard.enemy_fight || c.enemy_fight || 1,
-          enemy_evade: interaction.options.getInteger('evade') || fullCard.enemy_evade || c.enemy_evade || 1,
-          enemy_damage: interaction.options.getInteger('damage') ?? fullCard.enemy_damage ?? c.enemy_damage ?? 1,
-          enemy_horror: interaction.options.getInteger('horror') ?? fullCard.enemy_horror ?? c.enemy_horror ?? 1,
-          is_hunter: interaction.options.getBoolean('hunter') ? 1 : 0,
-          is_aloof: interaction.options.getBoolean('aloof') ? 1 : 0,
+          health: fullCard.health ?? c.health ?? undefined,
+          enemy_fight: interaction.options.getInteger('fight') || fullCard.enemy_fight || c.enemy_fight || undefined,
+          enemy_evade: interaction.options.getInteger('evade') || fullCard.enemy_evade || c.enemy_evade || undefined,
+          enemy_damage: interaction.options.getInteger('damage') ?? fullCard.enemy_damage ?? c.enemy_damage ?? undefined,
+          enemy_horror: interaction.options.getInteger('horror') ?? fullCard.enemy_horror ?? c.enemy_horror ?? undefined,
+        }, {
+          hp_override: interaction.options.getInteger('hp'),
+          is_hunter: interaction.options.getBoolean('hunter'),
+          is_aloof: interaction.options.getBoolean('aloof'),
         });
 
         if (cardResult.imagePath) {

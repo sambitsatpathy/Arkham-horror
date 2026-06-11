@@ -15,6 +15,7 @@ const EMPTY_ENTRY = {
   victory: 0,
   uses: null,
   health_per_investigator: false,
+  enemy_stats: null,
   discard_cost: null,
   unparsed_text: '',
 };
@@ -306,6 +307,15 @@ function parse(card) {
   entry.is_weakness = card.subtype_code === 'weakness' || card.subtype_code === 'basicweakness';
   entry.victory = typeof card.victory === 'number' ? card.victory : 0;
   entry.health_per_investigator = !!card.health_per_investigator;
+  if (entry.type === 'enemy') {
+    entry.enemy_stats = {
+      fight: card.enemy_fight ?? null,
+      evade: card.enemy_evade ?? null,
+      health: card.health ?? null,
+      damage: card.enemy_damage ?? 0,
+      horror: card.enemy_horror ?? 0,
+    };
+  }
   // Normalize en/em dashes so "Revelation –" and "Forced —" all parse alike
   let text = stripHtml(card.text || '').replace(/[–—]/g, '-').trim();
 

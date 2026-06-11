@@ -177,12 +177,17 @@ module.exports = {
     lines.push(`**Token:** ${tokenLabel}${specialNote}`, `**Result:** ${mathLine}`, '');
 
     if (success) {
-      updateEnemy(enemyId, { is_exhausted: 1 });
+      updateEnemy(enemyId, { is_exhausted: 1, engaged_player_id: null });
       const loc = getLocation(session.id, enemy.location_code);
       if (loc) await updateLocationStatus(interaction.guild, session, loc);
-      lines.push(`✅ **Evaded!** **${enemy.name}** is exhausted (it won't activate this round).`);
+      lines.push(`✅ **Evaded!** **${enemy.name}** is exhausted and disengaged (it won't activate this round).`);
     } else {
       lines.push(`❌ **Failed!** You couldn't evade **${enemy.name}**.`);
+      if (enemy.is_alerted && !enemy.is_exhausted) {
+        const { enemyAttack } = require('../../engine/enemyEngine');
+        const line = await enemyAttack(interaction.guild, session, enemy, player, { label: 'attacks (Alert)' });
+        lines.push(`⚠️ **Alert!** ${line}`);
+      }
     }
     if (spend.note) lines.push(spend.note);
 
@@ -297,10 +302,15 @@ async function executeEvadeAction(interaction, player, session, enemyId, commitC
   lines.push(`**Token:** ${tokenLabel}${specialNote}`, `**Result:** ${mathLine}`, '');
 
   if (success) {
-    updateEnemy(enemyId, { is_exhausted: 1 });
-    lines.push(`✅ **Success!** **${enemy.name}** is exhausted (it won't activate this round).`);
+    updateEnemy(enemyId, { is_exhausted: 1, engaged_player_id: null });
+    lines.push(`✅ **Success!** **${enemy.name}** is exhausted and disengaged (it won't activate this round).`);
   } else {
     lines.push('❌ **Fail.** Enemy stays engaged.');
+    if (enemy.is_alerted && !enemy.is_exhausted) {
+      const { enemyAttack } = require('../../engine/enemyEngine');
+      const line = await enemyAttack(interaction.guild, session, enemy, freshPlayer, { label: 'attacks (Alert)' });
+      lines.push(`⚠️ **Alert!** ${line}`);
+    }
   }
   if (spend.note) lines.push(spend.note);
 

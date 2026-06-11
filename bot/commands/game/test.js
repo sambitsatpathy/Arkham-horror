@@ -320,8 +320,13 @@ async function executeTestAction(interaction, player, session, stat, difficulty,
   if (chaosCh) await chaosCh.send(`🎲 **${freshPlayer.investigator_name}** tests ${stat} vs ${difficulty} — token: ${tokenLabel} — ${success ? '✅' : '❌'}`);
 
   const replyContent = { content: lines.join('\n'), components: [], flags: 64 };
-  if (interaction.deferred || interaction.replied) return interaction.editReply(replyContent);
-  return interaction.update ? interaction.update(replyContent) : interaction.reply(replyContent);
+  if (interaction.deferred || interaction.replied) await interaction.editReply(replyContent);
+  else if (interaction.update) await interaction.update(replyContent);
+  else await interaction.reply(replyContent);
+
+  // Auto-fail counts the skill value as 0, so you fail by the full difficulty
+  const failedBy = success ? 0 : (isAutoFail ? difficulty : Math.max(0, difficulty - total));
+  return { success, total: isAutoFail ? 0 : total, failedBy };
 }
 
 module.exports.executeTestAction = executeTestAction;

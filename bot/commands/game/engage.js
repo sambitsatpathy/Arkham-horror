@@ -36,7 +36,7 @@ module.exports = {
       return interaction.reply({ content: actionGuardMessage(), flags: 64 });
     }
 
-    updateEnemy(enemyId, { is_aloof: 0 });
+    updateEnemy(enemyId, { is_aloof: 0, engaged_player_id: player.id });
 
     const handCh = interaction.guild.channels.cache.find(c =>
       c.name === handChannelName(player.investigator_name)

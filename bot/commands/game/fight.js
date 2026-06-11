@@ -295,6 +295,11 @@ module.exports = {
       }
     } else {
       lines.push(`❌ **Miss!** The attack fails.`);
+      if (enemy.is_retaliate && !enemy.is_exhausted) {
+        const { enemyAttack } = require('../../engine/enemyEngine');
+        const line = await enemyAttack(interaction.guild, session, enemy, player, { label: 'retaliates against' });
+        lines.push(`↩️ **Retaliate!** ${line}`);
+      }
     }
     if (spend.note) lines.push(spend.note);
 
@@ -442,6 +447,11 @@ async function executeFightAction(interaction, player, session, enemyId, commitC
     }
   } else {
     lines.push('❌ **Miss!** The attack fails.');
+    if (enemy.is_retaliate && !enemy.is_exhausted) {
+      const { enemyAttack } = require('../../engine/enemyEngine');
+      const line = await enemyAttack(interaction.guild, session, enemy, freshPlayer, { label: 'retaliates against' });
+      lines.push(`↩️ **Retaliate!** ${line}`);
+    }
   }
   if (spend.note) lines.push(spend.note);
 

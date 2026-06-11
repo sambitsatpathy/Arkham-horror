@@ -74,6 +74,21 @@ client.on('interactionCreate', async interaction => {
       return;
     }
 
+    if (customId.startsWith('trev:')) {
+      const { handleTreacheryTestButton } = require('./engine/encounterEngine');
+      try {
+        return await handleTreacheryTestButton(interaction);
+      } catch (e) {
+        if (e.code === 10062 || e.code === 'InteractionAlreadyReplied') {
+          console.warn('Treachery test: stale interaction ignored');
+        } else {
+          console.error('Treachery test interaction error:', e);
+          await interaction.reply({ content: `❌ Error: ${e.message}`, flags: 64 }).catch(() => {});
+        }
+      }
+      return;
+    }
+
     if (customId.startsWith('ah:')) {
       const action = client.commands.get('action');
       if (!action) return;

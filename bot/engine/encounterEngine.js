@@ -1,6 +1,6 @@
 const { updateSession, getSession } = require('./gameState');
 const { findCardByCode } = require('./cardLookup');
-const { AttachmentBuilder } = require('discord.js');
+const { AttachmentBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 
 function buildEncounterDeck(encounterSets, allCards) {
   const codes = [];
@@ -78,46 +78,164 @@ async function runMythosEncounters(encounterCh, sessionId, players) {
       continue;
     }
     const card = await postEncounterCard(encounterCh, code);
-    if (encounterCh && card) {
-      if (card.type_code === 'treachery') {
+    if (!card) continue;
+
+    if (card.type_code === 'enemy') {
+      await autoSpawnDrawnEnemy(encounterCh, fresh, card, player);
+    } else if (card.type_code === 'treachery') {
+      const res = await applyRevelation(card, player, encounterCh, fresh);
+      if (encounterCh && !res.handled) {
         await encounterCh.send(`☠️ **${player.investigator_name}** draws a treachery. Resolve it, then use \`/resolved\`.`);
-      } else if (card.type_code === 'enemy') {
-        await encounterCh.send(`👹 **${player.investigator_name}** draws an enemy. Use \`/enemy spawn\` to place it.`);
-      } else {
-        await encounterCh.send(`📄 **${player.investigator_name}** draws a card. Resolve per card text.`);
+      }
+    } else {
+      if (encounterCh) await encounterCh.send(`📄 **${player.investigator_name}** draws a card. Resolve per card text.`);
+    }
+  }
+}
+
+// Spawns a drawn enemy at the drawing player's location (engaged unless Aloof).
+async function autoSpawnDrawnEnemy(channel, session, card, player) {
+  const { spawnEnemy } = require('./enemyEngine');
+  const { getEntry } = require('./cardEffectResolver');
+  const { getLocation, getPlayerById } = require('./gameState');
+  const { updateLocationStatus } = require('./locationManager');
+
+  const fresh = getPlayerById(player.id);
+  if (!fresh.location_code) {
+    if (channel) await channel.send(`👹 **${player.investigator_name}** draws **${card.name}** — no location set, use \`/enemy spawn\` to place it.`);
+    return null;
+  }
+
+  const enemyId = spawnEnemy(session.id, fresh.location_code, { code: card.code, name: card.name }, { engaged_player_id: fresh.id });
+  const entry = getEntry(card.code);
+  const loc = getLocation(session.id, fresh.location_code);
+  if (loc && channel?.guild) {
+    try { await updateLocationStatus(channel.guild, session, loc); } catch (_) {}
+  }
+  if (channel) {
+    const notes = [];
+    const kw = entry?.keywords || [];
+    if (kw.length) notes.push(`Keywords: ${kw.join(', ')}`);
+    if (/spawn/i.test(entry?.unparsed_text || '')) notes.push(`⚠️ Card has a spawn instruction — relocate manually if it says otherwise.`);
+    await channel.send(
+      `👹 **${player.investigator_name}** draws **${card.name}** — spawned at **${loc?.name || fresh.location_code}** (ID ${enemyId}).` +
+      (notes.length ? `\n${notes.join('\n')}` : '')
+    );
+  }
+  return enemyId;
+}
+
+// Auto-resolves a drawn treachery's Revelation: applies unconditional effects,
+// posts a button for test-based revelations, and falls back to manual notes
+// for anything the parser left unparsed. Returns { handled }.
+async function applyRevelation(card, player, channel, session) {
+  const { getEntry } = require('./cardEffectResolver');
+  const entry = getEntry(card.code);
+  if (!entry) return { handled: false };
+
+  const sess = session || getSession();
+  const lines = [];
+  let components = [];
+  const rev = entry.revelation;
+
+  if (rev && (rev.effects.length || rev.test || rev.unparsed)) {
+    const { execEffect } = require('./effectExecutors');
+    const ctx = { player, session: sess, guild: channel?.guild, cardCode: card.code };
+    for (const eff of rev.effects) {
+      lines.push(await execEffect(eff, ctx));
+    }
+    if (rev.test) {
+      const stats = [rev.test.stat, ...(rev.test.stat_alternatives || [])];
+      const row = new ActionRowBuilder().addComponents(
+        stats.slice(0, 5).map(s =>
+          new ButtonBuilder()
+            .setCustomId(`trev:${card.code}:${player.id}:${s}`)
+            .setLabel(`Test ${s} (${rev.test.difficulty})`)
+            .setStyle(ButtonStyle.Primary)
+        )
+      );
+      components = [row];
+      lines.push(`🎲 **Test required:** ${stats.join(' or ')} (${rev.test.difficulty}). Press the button to draw a token (or run \`/test\` with commits and resolve manually).`);
+    }
+    if (rev.unparsed) lines.push(`📖 **Manual:** ${rev.unparsed}`);
+  } else if (entry.is_weakness && (entry.revelation_effects || []).length) {
+    // Legacy data without the structured revelation field
+    const { execEffect } = require('./effectExecutors');
+    const ctx = { player, session: sess, guild: channel?.guild, cardCode: card.code };
+    for (const eff of entry.revelation_effects) {
+      lines.push(await execEffect(eff, ctx));
+    }
+  }
+
+  if (!lines.length) return { handled: false };
+  if (channel) {
+    await channel.send({
+      content: `**${player.investigator_name}** revelation: **${card.name}**\n` + lines.join('\n'),
+      components,
+    });
+  }
+  return { handled: true };
+}
+
+// Backwards-compatible alias for older callers.
+async function applyRevelationIfWeakness(card, player, channel) {
+  return applyRevelation(card, player, channel);
+}
+
+// Handles the `trev:<cardCode>:<playerId>:<stat>` button posted by
+// applyRevelation: runs the revelation skill test for the drawing player and
+// auto-applies the parsed on_fail / on_pass effects (scaling per-point-failed
+// effects by the failure margin).
+async function handleTreacheryTestButton(interaction) {
+  const [, cardCode, playerIdStr, stat] = interaction.customId.split(':');
+  const { getPlayerById, getSession: getSess } = require('./gameState');
+  const player = getPlayerById(parseInt(playerIdStr, 10));
+  const session = getSess();
+  if (!player || !session) {
+    return interaction.reply({ content: '❌ No active session or player for this test.', flags: 64 });
+  }
+  if (interaction.user.id !== player.discord_id) {
+    return interaction.reply({ content: `❌ Only **${player.investigator_name}** can take this test.`, flags: 64 });
+  }
+
+  const { getEntry } = require('./cardEffectResolver');
+  const entry = getEntry(cardCode);
+  const test = entry?.revelation?.test;
+  if (!test) {
+    return interaction.reply({ content: '❌ No test data found for this card.', flags: 64 });
+  }
+
+  await interaction.deferReply();
+  // One test per button — drop the buttons so it can't be re-rolled
+  await interaction.message.edit({ components: [] }).catch(() => {});
+
+  const { executeTestAction } = require('../commands/game/test');
+  const result = await executeTestAction(interaction, player, session, stat || test.stat, test.difficulty, []);
+
+  const effects = result.success ? test.on_pass : test.on_fail;
+  const lines = [];
+  const { execEffect } = require('./effectExecutors');
+  for (const eff of effects) {
+    const e = { ...eff };
+    if (e.per_point_failed) {
+      e.count = e.count * result.failedBy;
+      if (e.count <= 0) {
+        lines.push(`➖ Failed by 0 — no effect.`);
+        continue;
       }
     }
-    if (card) await applyRevelationIfWeakness(card, player, encounterCh);
+    lines.push(await execEffect(e, { player, session, guild: interaction.guild, cardCode }));
+  }
+  if (lines.length) {
+    await interaction.followUp({
+      content: [`**${entry.name}** — ${result.success ? '✅ passed' : `❌ failed${result.failedBy ? ` by ${result.failedBy}` : ''}`}:`, ...lines].join('\n'),
+    });
+  } else if (!result.success) {
+    await interaction.followUp({ content: `**${entry.name}** — failed. No parsed consequence; resolve per card text.` });
   }
 }
 
-async function applyRevelationIfWeakness(card, player, channel) {
-  const { getEntry } = require('./cardEffectResolver');
-  const { addToThreatArea, updatePlayer, getPlayerById } = require('./gameState');
-  const entry = getEntry(card.code);
-  if (!entry || !entry.is_weakness || !(entry.revelation_effects || []).length) return;
-  const fresh = getPlayerById(player.id);
-  const lines = [];
-  for (const eff of entry.revelation_effects) {
-    if (eff.type === 'add_to_threat_area') {
-      addToThreatArea(player.id, card.code);
-      lines.push(`🔻 **${card.name}** added to threat area.`);
-    } else if (eff.type === 'discard_all_resources') {
-      updatePlayer(player.id, { resources: 0 });
-      lines.push(`💸 All resources discarded.`);
-    } else if (eff.type === 'deal_horror' && eff.target === 'self') {
-      const newSan = Math.max(0, fresh.sanity - eff.count);
-      updatePlayer(player.id, { sanity: newSan });
-      lines.push(`🧠 Took ${eff.count}${eff.direct ? ' direct' : ''} horror.`);
-    } else if (eff.type === 'deal_damage' && eff.target === 'self') {
-      const newHp = Math.max(0, fresh.hp - eff.count);
-      updatePlayer(player.id, { hp: newHp });
-      lines.push(`🩸 Took ${eff.count}${eff.direct ? ' direct' : ''} damage.`);
-    }
-  }
-  if (lines.length && channel) {
-    await channel.send(`**${player.investigator_name}** revelation: **${card.name}**\n` + lines.join('\n'));
-  }
-}
-
-module.exports = { buildEncounterDeck, drawEncounterCard, postEncounterCard, runMythosEncounters, applyRevelationIfWeakness, shuffle };
+module.exports = {
+  buildEncounterDeck, drawEncounterCard, postEncounterCard, runMythosEncounters,
+  applyRevelation, applyRevelationIfWeakness, autoSpawnDrawnEnemy, handleTreacheryTestButton, shuffle,
+};
