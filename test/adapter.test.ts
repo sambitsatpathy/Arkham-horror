@@ -612,3 +612,21 @@ test('opening a new story clears the channels of finished stories in the guild',
   t.gameId = ng.id;
   assert.ok(t.fake.channels.has(t.chan('lobby')), 'the new lobby exists');
 });
+
+test('a later new story only counts stories that still had channels to clear', async () => {
+  const t = await startedTable(1, 31); await pastMulligans(t);
+  await t.cmd('u1', t.chan('talk'), 'host', {}, 'end');
+  const first = await t.cmd('u1', 'general', 'host', {}, 'new');
+  assert.match(String(first.replies.at(-1)?.content), /channels of 1 finished story were cleared/);
+  t.gameId = t.store.gameForGuildLobby('g1')!.id;
+  await t.cmd('u1', t.chan('lobby'), 'host', {}, 'end');
+  const second = await t.cmd('u1', 'general', 'host', {}, 'new');
+  assert.match(String(second.replies.at(-1)?.content), /channels of 1 finished story were cleared/, 'the first story was already cleared and is not counted again');
+  t.gameId = t.store.gameForGuildLobby('g1')!.id;
+  await t.cmd('u1', t.chan('lobby'), 'host', {}, 'end');
+  await t.cmd('u1', 'general', 'host', {}, 'new');
+  // nothing left over: a clean slate says nothing about clearing
+  t.gameId = t.store.gameForGuildLobby('g1')!.id;
+  await t.cmd('u1', t.chan('lobby'), 'host', {}, 'end');
+  for (const g of t.store.listGames()) if (g.id !== t.gameId) assert.equal(t.store.channels(g.id).length, 0, 'no channel is left behind by finished stories');
+});

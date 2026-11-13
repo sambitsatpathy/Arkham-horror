@@ -10,7 +10,7 @@ Requires Node >= 22.18 (type-stripping and `node:sqlite`).
 
 ```
 npm install
-npm test                      # 140 tests, no network, no Discord
+npm test                      # 141 tests, no network, no Discord
 npm run simulate              # headless games with a simple policy
 npm run coverage              # narration + card-script coverage report
 ```

@@ -100,6 +100,7 @@ export class Bot {
     let n = 0;
     for (const g of this.d.store.listGames()) {
       if (g.guildId !== guildId || (g.status !== 'ended' && g.status !== 'archived')) continue;
+      if (this.d.store.channels(g.id).length === 0 && !g.roleId) continue; // already cleared earlier: nothing to do, nothing to report
       await this.purge(g.id); n++;
     }
     return n;
