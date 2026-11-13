@@ -1,5 +1,7 @@
 // Card art is never bundled or copied. The bot puts ArkhamDB's own image URL in the embed and Discord fetches it.
 // Point it somewhere else (or switch it off) with CARD_IMAGE_BASE / CARD_IMAGES=off.
+// Checked against ArkhamDB's public API: every card (investigator, location, agenda, asset...) has imagesrc `/bundles/cards/<code>.png`;
+// double-sided cards also have `<code>b.png` for the other side, which the bot does not show yet.
 export interface ArtConfig { enabled: boolean; base: string; ext: string }
 
 let cfg: ArtConfig = { enabled: true, base: 'https://arkhamdb.com/bundles/cards/', ext: '.png' };

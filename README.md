@@ -10,7 +10,7 @@ Requires Node >= 22.18 (type-stripping and `node:sqlite`).
 
 ```
 npm install
-npm test                      # 141 tests, no network, no Discord
+npm test                      # 149 tests, no network, no Discord
 npm run simulate              # headless games with a simple policy
 npm run coverage              # narration + card-script coverage report
 ```
@@ -56,10 +56,26 @@ The bot needs: Manage Channels, Manage Roles, View Channels, Send Messages, Embe
 - Timers: optional prompts time out; required ones nudge, and a third nudge flags the host. Pause, hold and away seats work.
 - The whole Night of the Zealot first scenario (The Gathering) plays from start to ending, locks every channel, writes a first-person journal per player from templates, and purges after the retention period (7 days) while keeping the log. Opening a new story (`/host new`) clears the channels of finished stories in that server straight away, so the old game does not linger for the retention week.
 
+## Reading results
+
+Every test, hit and attack gets a plain line under the story line, built only from the game's own numbers (`src/adapter/narration/outcome.ts`):
+
+```
+✅ Passed — Fight (combat), by 2
+> Skill 3 + 1 lent + 1 from gear − 1 token = 4 against difficulty 2 (lent: Guts)
+> Drew: −1
+🗡️ Hit! Ghoul Minion takes 2 damage — defeated
+⚔️ Ghoul Minion hits Roland Banks for 1 damage and 1 horror — health 6/9 · sanity 4/5
+🔎 1 lead found — 2 left here
+🕯️ Dread +1 — now 3 of 10 before the hour turns
+```
+
+The Details button under a test lists the same sum one part per line. Health and sanity are written as what is left out of the most (`6/9`), the way the printed card counts them. Your private channel opens with your investigator's card face, health and sanity bars with numbers, and your skills; the Self button, the party line and the scene panel show the same figures. Players who set immersion to `story` get words only on their own panels; the shared result lines are the same for everyone.
+
 ## Card faces
 
 Real card images are shown by link only: the bot builds a URL to the image ArkhamDB serves and Discord fetches it; nothing is copied or stored. A place's face is posted in its channel when it opens, a foe's when it arrives, a treachery's where it strikes, the current agenda and act sit on the hour and trail panels, and your own hand and board have a "Look closely at a card" menu that shows the face to you alone. `/card` shows the face plus the text from your data clone. Nothing hidden is shown: unopened places and undrawn cards post nothing.
-The URL pattern is ArkhamDB's own (`https://arkhamdb.com/bundles/cards/{code}.png`), checked to return `image/png` with no referer or user-agent blocking. If ArkhamDB is unreachable or changes its paths, images may not render. Set `CARD_IMAGES=off` to hide them, or `CARD_IMAGE_BASE` / `CARD_IMAGE_EXT` to point elsewhere. Card art belongs to its publisher; this only links to it.
+The URL pattern is ArkhamDB's own (`https://arkhamdb.com/bundles/cards/{code}.png`, the `imagesrc` its public API reports for every card; double-sided cards also have `{code}b.png`). If ArkhamDB is unreachable or changes its paths, images may not render. Set `CARD_IMAGES=off` to hide them, or `CARD_IMAGE_BASE` / `CARD_IMAGE_EXT` to point elsewhere. Card art belongs to its publisher; this only links to it.
 
 ## What is approximated (cards)
 

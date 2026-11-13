@@ -22,6 +22,13 @@ export function holdingUp(wounds: number, maxW: number, nerves: number, maxN: nu
 export const woundsWord = (w: number, max: number) => w === 0 ? 'unhurt' : w * 2 < max ? 'bruised' : w < max - 1 ? 'hurt' : 'close to collapse';
 export const nervesWord = (h: number, max: number) => h === 0 ? 'calm' : h * 2 < max ? 'uneasy' : h < max - 1 ? 'shaken' : 'close to breaking';
 
+/** What is left, out of the most there can be: the same way the printed card counts health and sanity. */
+export const remaining = (taken: number, max: number) => Math.max(0, max - taken);
+export const vital = (taken: number, max: number) => `${remaining(taken, max)}/${max}`;
+export const vitalsLine = (p: { wounds: number; maxWounds: number; nerves: number; maxNerves: number }) => `health ${vital(p.wounds, p.maxWounds)} · sanity ${vital(p.nerves, p.maxNerves)}`;
+export const SKILL_LABEL: Record<string, string> = { willpower: 'Willpower', intellect: 'Intellect', combat: 'Combat', agility: 'Agility' };
+export const skillsLine = (sk: Record<string, number>) => ['willpower', 'intellect', 'combat', 'agility'].map(k => `${SKILL_LABEL[k]} ${sk[k] ?? 0}`).join(' · ');
+
 export function leadsLeftWord(n: number): string {
   return n <= 0 ? 'nothing more to find' : n === 1 ? 'a little left to find' : n <= 3 ? 'some left to find' : 'much left to find';
 }

@@ -242,7 +242,7 @@ export class K {
   hasKeyword(id: CardId, name: string): boolean { return !this.isBlanked(id) && this.def(id).keywords.some(x => x.name === name); }
 
   placeDoom(n: number): void {
-    this.s.agenda.doom += n; this.emit('doomPlaced', { count: n, total: this.s.agenda.doom });
+    this.s.agenda.doom += n; this.emit('doomPlaced', { count: n, total: this.totalDoom(), threshold: this.doomThreshold() });
     this.queue({ k: 'scenario', hook: 'checkAgenda', stage: 0, args: {} });
   }
 
@@ -264,7 +264,7 @@ export class K {
     if (n <= 0) return;
     const c = this.card(enemyId);
     c.tokens.damage += n;
-    this.emit('enemyDamaged', { cardId: enemyId, name: this.name(enemyId), amount: n, seat: bySeat ?? undefined, source });
+    this.emit('enemyDamaged', { cardId: enemyId, name: this.name(enemyId), amount: n, seat: bySeat ?? undefined, source, total: c.tokens.damage, health: this.enemyHealth(enemyId) });
     if (c.tokens.damage >= this.enemyHealth(enemyId)) this.defeatEnemy(enemyId, bySeat);
   }
 
@@ -345,17 +345,27 @@ export class K {
     return out;
   }
 
-  skillValue(t: TestState): number {
+  /** The skill figure split into what the investigator brings, what others lend, and flat bonuses. */
+  skillParts(t: TestState): { base: number; lent: number; bonus: number } {
     const inv = this.inv(t.seat);
     const used: Skill = t.swapSkill?.[t.skill] ?? t.skill;
     const mods = this.modsFor(t.seat, t);
-    let v = inv.skills[used] + mods[used];
-    if (inv.roundFlags.mindOverMatter && (used === 'combat' || used === 'agility')) v = Math.max(v, inv.skills.intellect + mods.intellect);
+    let base = inv.skills[used] + mods[used];
+    if (inv.roundFlags.mindOverMatter && (used === 'combat' || used === 'agility')) base = Math.max(base, inv.skills.intellect + mods.intellect);
+    let lent = 0;
     for (const [seat, ids] of Object.entries(t.committed)) {
       if (this.inv(seat).status !== 'active') continue;
-      for (const id of ids) { const ic = this.def(id).skillIcons; v += ic[t.skill] + ic.wild; }
+      for (const id of ids) { const ic = this.def(id).skillIcons; lent += ic[t.skill] + ic.wild; }
     }
-    return Math.max(0, v + t.bonus);
+    return { base, lent, bonus: t.bonus };
+  }
+  skillValue(t: TestState): number { const p = this.skillParts(t); return Math.max(0, p.base + p.lent + p.bonus); }
+
+  /** The doom the current agenda turns on, or 0 when there is none to show. */
+  doomThreshold(): number {
+    const code = String(this.s.scenarioFlags.agendaCode ?? ''); if (!code || !this.cat.has(code)) return 0;
+    const v = this.cat.get(code).actAgenda?.doomThreshold;
+    return typeof v === 'number' ? v : Number((v as { value?: number } | undefined)?.value ?? 0);
   }
 
   // ---- the three basic tests (used by the core actions and by weapon/tool abilities)

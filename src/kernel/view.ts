@@ -12,7 +12,7 @@ export interface PlaceView {
   here: SeatId[]; enemies: EnemyView[]; leadsLeft: number; attached: string[]; clean: boolean; shroud: number;
 }
 export interface PartyView {
-  seat: SeatId; name: string; loc: LocId; status: SeatStatus; wounds: number; maxWounds: number; nerves: number; maxNerves: number;
+  seat: SeatId; code: string; name: string; loc: LocId; status: SeatStatus; wounds: number; maxWounds: number; nerves: number; maxNerves: number;
   leads: number; means: number; handCount: number; inPlay: CardView[]; threat: string[]; moments: number; tome: number;
 }
 export interface SelfView extends PartyView { hand: CardView[]; deckCount: number; discardCount: number; skills: Record<string, number> }
@@ -46,7 +46,7 @@ function enemyView(k: K, id: CardId): EnemyView {
 function partyView(k: K, seat: SeatId): PartyView {
   const i = k.inv(seat);
   return {
-    seat, name: i.name, loc: i.loc, status: i.status, wounds: i.damage, maxWounds: i.maxHealth, nerves: i.horror, maxNerves: i.maxSanity,
+    seat, code: i.code, name: i.name, loc: i.loc, status: i.status, wounds: i.damage, maxWounds: i.maxHealth, nerves: i.horror, maxNerves: i.maxSanity,
     leads: i.clues, means: i.resources, handCount: i.hand.length, inPlay: i.inPlay.map(id => cardView(k, id)),
     threat: i.threat.map(id => k.name(id)), moments: i.actionsLeft, tome: i.restricted.tome ?? 0,
   };
