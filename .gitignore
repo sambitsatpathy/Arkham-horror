@@ -1,0 +1,19 @@
+# secrets and local configuration
+.env
+
+# dependencies
+node_modules/
+
+# local database (the game log lives here; never commit it)
+arkham.sqlite
+arkham.sqlite-shm
+arkham.sqlite-wal
+
+# vendored card-data clone (not ours to ship; see README)
+arkhamdb-json-data-master/
+
+# local snapshots / archives
+*.zip
+
+# macOS cruft
+.DS_Store
