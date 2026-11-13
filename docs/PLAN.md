@@ -32,12 +32,14 @@ Legend: **[x]** done and covered by tests, **[~]** done with a known simplificat
 - [x] Card faces by link (hour, trail, place, foe, treachery, "Look closely at a card" menu, `/card`); configurable or switchable off.
 - [x] Visible moment counter (`●●○`) on the scene panel and in replies.
 - [x] Hour panel shows "N of T before the hour turns" (the number printed on the agenda is the threshold T, not the current count).
+- [x] Plain result lines under the story: passed/failed with the margin, the sum (skill + lent cards + gear ± token = total against difficulty), tokens drawn, hit or miss, damage dealt and health left on foes, damage and horror taken with health/sanity left, leads found, dread against the hour. Details shows the same sum in words.
+- [x] Player channel opens with the investigator's card face, health and sanity as bars and numbers, and skills; the same figures on Self, the party line, the trail panel and the scene panel (not in `story` immersion).
 - [x] Journal written per player from templates at the ending.
 - [x] `.env` loading, default card-data path, `.gitignore`, `.env.example` (from the repo owner).
 - [x] `/host new` clears the channels of finished stories in that server first (from the repo owner), and this patch makes the reported count honest: stories whose channels were already cleared are no longer counted again.
 
 ### Tests and tooling
-- [x] 141 tests (kernel rules, every scripted card, adapter against an in-memory fake Discord, narration coverage, banned-word check); no network or Discord needed.
+- [x] 149 tests (kernel rules, every scripted card, adapter against an in-memory fake Discord, narration coverage, banned-word check); no network or Discord needed.
 - [x] `npm run simulate` (headless games, `MIX=all` mixes investigators): 600 games across 1-4 players all reach an ending; no card is ever in two zones.
 - [x] `npm run coverage` (narration and card-script coverage).
 
@@ -59,7 +61,8 @@ Needs a human, a real server, or an official rulebook. Listed roughly by risk.
 7. [?] **Reported "actions not counting for draw/resource".** Not reproducible in the engine (each costs one moment). If it recurs, capture the investigator, the panel and the exact buttons used.
 8. [?] **Approximated cards** (section 4) behave close to print but not exactly; check any ruling that surprises you against these first.
 9. [?] **Win paths.** The simple simulation policy nearly always loses, so winning endings are covered by unit tests, not by simulation. Play one full scenario by hand.
-10. [?] **CI.** There is none; card data is git-ignored, so any CI job must fetch it (or set `ARKHAM_DATA`) before `npm test`.
+10. [?] **Result lines and sheet on real Discord.** Check the emoji and `>` quote blocks look right on phone and desktop, the investigator card image loads (the path `bundles/cards/<code>.png` is assumed to work for investigators as it does for other cards), and a long fight does not post too many messages in a row.
+11. [?] **CI.** There is none; card data is git-ignored, so any CI job must fetch it (or set `ARKHAM_DATA`) before `npm test`.
 
 ## 4. Known simplifications (candidates to fix)
 
@@ -79,6 +82,8 @@ Needs a human, a real server, or an official rulebook. Listed roughly by risk.
 
 ### Near term
 - [ ] Fix the items in section 4, starting with Police Badge (needs fast abilities offered to a non-active player) and Grotesque Statue (ask the player).
+- [ ] Per-player choice of whether result lines show (they are shared messages, so today it is the same for everyone; a host-level switch would be simplest).
+- [ ] Show the sum inside the commit prompt as cards are picked, not only before.
 - [ ] Mulligan prompts currently go to personal channels, not the shared lobby channel; decide which is better and make it consistent.
 - [ ] `/host swap` takes a seat id plus a user; make it friendlier.
 - [ ] Make the retention period a setting (it is a constant, 7 days).
@@ -110,7 +115,7 @@ Needs a human, a real server, or an official rulebook. Listed roughly by risk.
 git clone https://github.com/Kamalisk/arkhamdb-json-data   # then put it at ./arkhamdb-json-data-master or set ARKHAM_DATA
 npm install
 npx tsc --noEmit
-npm test            # 141 tests
+npm test            # 149 tests
 npm run simulate -- 150 4   # MIX=all for mixed investigators
 npm run coverage
 ```

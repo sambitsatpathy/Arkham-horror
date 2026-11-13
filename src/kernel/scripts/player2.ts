@@ -44,7 +44,7 @@ const withFight = (o: Parameters<typeof attack>[0], extra: Partial<Script> = {})
 
 function placeDoomOn(k: K, cardId: CardId): void {
   k.card(cardId).tokens.doom += 1;
-  k.emit('doomPlaced', { count: 1, total: k.totalDoom() });
+  k.emit('doomPlaced', { count: 1, total: k.totalDoom(), threshold: k.doomThreshold() });
   k.queue({ k: 'scenario', hook: 'checkAgenda', stage: 0, args: {} });
 }
 

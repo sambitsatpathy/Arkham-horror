@@ -3,6 +3,7 @@
 import type { GameEvent, GameState } from '../../kernel/types.ts';
 import { narrationPick } from '../../kernel/rng.ts';
 import { cleanHow, escapeMd, tokenFeel, FEEL_LINE } from './vocab.ts';
+import { buildStrips } from './outcome.ts';
 
 export type Target =
   | { kind: 'loc'; loc: string } | { kind: 'hour' } | { kind: 'trail' } | { kind: 'none' };
@@ -81,8 +82,10 @@ export function narrate(events: GameEvent[], ctx: NarrateCtx): Narrated[] {
     expanded.push({ e, idx });
   });
   const seed = [...ctx.gameId].reduce((n, c) => (n * 31 + c.charCodeAt(0)) | 0, 7);
+  const strips = buildStrips(events, s);
   expanded.forEach(({ e, idx }, n) => {
-    if (SILENT.has(e.kind)) return;
+    const strip = strips.lines.get(idx);
+    if (SILENT.has(e.kind)) { if (strip) out.push({ target: targetFor(e, s), text: strip, eventIdx: idx, details: false }); return; }
     const who = e.seat ? s.investigators[e.seat as string] : undefined;
     const target = targetFor(e, s);
     const placeId = target.kind === 'loc' ? target.loc : undefined;
@@ -96,6 +99,7 @@ export function narrate(events: GameEvent[], ctx: NarrateCtx): Narrated[] {
     let text: string;
     if (t) { const v = t.variants.length === 1 ? 0 : narrationPick(seed, ctx.version, idx * 16 + n, t.variants.length); text = fill(t.variants[v]!, vars); }
     else text = '';                       // no authored or neutral line: stay quiet rather than print a raw tag; the coverage report lists it
+    if (strip) text = text ? `${text}\n${strip}` : strip;
     if (text === '') return;
     if (e.kind === 'action' && e.how) text = `*${vars.who}: “${cleanHow(e.how)}”*\n${text}`;
     out.push({ target, text, eventIdx: idx, details: e.kind === 'testResolved' });

@@ -3,8 +3,9 @@ import type { Decision, GameEvent, LegalOption } from '../kernel/types.ts';
 import type { PartyView, PlaceView, View } from '../kernel/view.ts';
 import type { ButtonSpec, EmbedSpec, MessageBody, Row, SelectOption } from './port.ts';
 import { cardArt } from './art.ts';
-import { bar, dreadWord, holdingUp, leadsLeftWord, moments, momentsWord, nervesWord, situation, woundsWord, type Immersion } from './narration/vocab.ts';
+import { bar, dreadWord, holdingUp, leadsLeftWord, moments, momentsWord, nervesWord, remaining, situation, skillsLine, vitalsLine, woundsWord, type Immersion } from './narration/vocab.ts';
 import { promptText, reactionText } from './narration/prompts.ts';
+import { testBreakdown } from './narration/outcome.ts';
 import { ACT_TEXT, AGENDA_TEXT, PLACE_TEXT } from './narration/gathering.ts';
 
 export interface ScenarioText { places: Record<string, string>; agenda: Record<number, string>; act: Record<number, string> }
@@ -29,7 +30,7 @@ const list = (xs: string[], none: string) => (xs.length ? xs.join('\n') : none);
 
 function who(p: PartyView, mode: Immersion, floor = false): string {
   const base = `**${p.name}** — ${holdingUp(p.wounds, p.maxWounds, p.nerves, p.maxNerves)}${floor ? ` · ${moments(p.moments)}${p.tome ? ' + one for the books' : ''}` : ''}`;
-  return mode === 'math' ? `${base} (wounds ${p.wounds}/${p.maxWounds}, nerves ${p.nerves}/${p.maxNerves})` : base;
+  return mode !== 'story' ? `${base} (${vitalsLine(p)})` : base;
 }
 
 // ───────────────────────────────────────────────────────────────────────── scene panel
@@ -39,10 +40,10 @@ export function scenePanel(i: PanelInputs): MessageBody {
   const { v, loc, mode } = i; const p: PlaceView | undefined = v.places[loc];
   if (!p) return { content: 'This place is out of reach now.' };
   const here = v.party.filter(x => p.here.includes(x.seat));
-  const foes = p.enemies.map(e => `**${e.name}** — ${e.engagedWith ? `on ${v.party.find(x => x.seat === e.engagedWith)?.name ?? 'someone'}` : 'loose'}, ${e.wounded}${e.exhausted ? ', spent' : ''}`);
+  const foes = p.enemies.map(e => `**${e.name}** — ${e.engagedWith ? `on ${v.party.find(x => x.seat === e.engagedWith)?.name ?? 'someone'}` : 'loose'}, ${e.wounded}${mode !== 'story' ? ` (health ${remaining(e.damage, e.health)}/${e.health})` : ''}${e.exhausted ? ', spent' : ''}`);
   const known = p.exits.filter(x => x.name).map(x => x.name!); const unopened = p.exits.filter(x => !x.name).length;
   const exits = [...known, ...(unopened ? [unopened === 1 ? 'a door you haven’t opened' : `${unopened} doors you haven’t opened`] : [])];
-  const left = leadsLeftWord(p.leadsLeft) + (mode === 'math' ? ` (${p.leadsLeft})` : '');
+  const left = leadsLeftWord(p.leadsLeft) + (mode !== 'story' ? ` (${p.leadsLeft})` : '');
   const embed: EmbedSpec = {
     title: p.name + (p.clean ? ' — searched' : ''),
     description: i.text.places[loc] ?? '',
@@ -70,7 +71,7 @@ export function hourPanel(v: View, text: ScenarioText): MessageBody {
     description: text.agenda[a.stage] ?? '',
     image: cardArt(a.code),
     fields: [
-      { name: 'Dread', value: `${bar(a.doom, a.threshold || 1)}  ${dreadWord(a.doom, a.threshold)}${cardArt(a.code) ? `  (${a.doom} of ${a.threshold} before the hour turns)` : ''}`, inline: false },
+      { name: 'Dread', value: `${bar(a.doom, a.threshold || 1)}  ${dreadWord(a.doom, a.threshold)}${a.threshold ? `  (${a.doom} of ${a.threshold} before the hour turns)` : ''}`, inline: false },
       { name: 'Round', value: String(v.round), inline: true },
       { name: 'Now', value: v.phase === 'mythos' ? 'The night deepens' : v.phase === 'enemy' ? 'The house moves' : v.phase === 'upkeep' ? 'A breath' : v.phase === 'ended' ? 'Over' : 'Your time', inline: true },
     ],
@@ -78,25 +79,39 @@ export function hourPanel(v: View, text: ScenarioText): MessageBody {
 }
 
 export function trailPanel(v: View, text: ScenarioText, journal: string[] = []): MessageBody {
+  const vit = (p: PartyView) => ` (${vitalsLine(p)})`;
   const place = (id: string) => v.places[id]?.name ?? 'out of sight';
   const fields = [
     { name: 'The trail', value: text.act[v.act.stage] ?? '', inline: false },
-    { name: 'Where everyone is', value: list(v.party.map(p => `**${p.name}** — ${p.status === 'active' ? `${place(p.loc)}, ${holdingUp(p.wounds, p.maxWounds, p.nerves, p.maxNerves)}` : p.status === 'resigned' ? 'got out' : 'lost to it'}`), 'No one.'), inline: false },
+    { name: 'Where everyone is', value: list(v.party.map(p => `**${p.name}** — ${p.status === 'active' ? `${place(p.loc)}, ${holdingUp(p.wounds, p.maxWounds, p.nerves, p.maxNerves)}${vit(p)}` : p.status === 'resigned' ? 'got out' : 'lost to it'}`), 'No one.'), inline: false },
   ];
   if (journal.length) fields.push({ name: 'Journal', value: trunc(journal.slice(-6).join('\n'), 1000), inline: false });
   return { embeds: [{ title: 'The trail', image: cardArt(v.act.code), fields }] };
 }
 
 // ───────────────────────────────────────────────────────────────────────── personal channel
+/** The investigator's own card face, with health and sanity as bars and as numbers (what is left out of the most). */
+export function investigatorSheet(me: PartyView & { skills: Record<string, number> }, numbers = true): EmbedSpec {
+  const health = remaining(me.wounds, me.maxWounds), sanity = remaining(me.nerves, me.maxNerves);
+  const fields = numbers ? [
+    { name: 'Health', value: `${bar(health, me.maxWounds, 9)}\n**${health}** of ${me.maxWounds}${me.wounds ? ` · ${me.wounds} damage taken` : ''}`, inline: true },
+    { name: 'Sanity', value: `${bar(sanity, me.maxNerves, 9)}\n**${sanity}** of ${me.maxNerves}${me.nerves ? ` · ${me.nerves} horror taken` : ''}`, inline: true },
+    { name: 'Skills', value: skillsLine(me.skills), inline: false },
+  ] : [];
+  const art = cardArt(me.code);
+  return { title: me.name, ...(art ? { image: art } : {}), ...(fields.length ? { fields } : {}) };
+}
 export function handMessage(game: string, v: View, playable: LegalOption[], mode: Immersion): MessageBody {
   const me = v.me; if (!me) return { content: 'Nothing here yet.' };
   const group = (type: string) => me.hand.filter(c => c.type === type).map(c => `${c.name}${c.cost !== null ? ` (${c.cost})` : ''}`);
+  const nums = mode !== 'story';
   const fields = [
     { name: 'Assets', value: list(group('asset'), '—'), inline: true },
     { name: 'Events', value: list(group('event'), '—'), inline: true },
     { name: 'Skills', value: list(group('skill'), '—'), inline: true },
-    { name: 'You', value: `${momentsWord(me.moments)} ${moments(me.moments)}${me.tome ? ' (and one more, only for the books)' : ''}\nMeans: ${me.means} · Leads: ${me.leads}\n${woundsWord(me.wounds, me.maxWounds)}, ${nervesWord(me.nerves, me.maxNerves)}${mode === 'math' ? ` (wounds ${me.wounds}/${me.maxWounds}, nerves ${me.nerves}/${me.maxNerves})` : ''}`, inline: false },
+    { name: 'You', value: `${momentsWord(me.moments)} ${moments(me.moments)}${me.tome ? ' (and one more, only for the books)' : ''}\nMeans: ${me.means} · Leads: ${me.leads}\n${woundsWord(me.wounds, me.maxWounds)}, ${nervesWord(me.nerves, me.maxNerves)}`, inline: false },
   ];
+  const sheet = investigatorSheet(me, nums);
   const opts: SelectOption[] = playable.filter(o => o.action.type === 'play').slice(0, 25).map(o => ({
     value: (o.action as { cardId: string }).cardId, label: trunc(o.label, 100), description: trunc(o.cost, 100),
   }));
@@ -105,7 +120,7 @@ export function handMessage(game: string, v: View, playable: LegalOption[], mode
   const seen = new Set<string>(); const look: SelectOption[] = [...me.hand, ...me.inPlay].filter(c => cardArt(c.code) && !seen.has(c.id) && seen.add(c.id)).slice(0, 25).map(c => ({ value: c.id, label: trunc(c.name, 100), description: c.cost !== null ? `costs ${c.cost}` : undefined }));
   if (look.length) rows.push({ select: { id: `p1:${game}:looksel`, placeholder: 'Look closely at a card…', options: look, min: 1, max: 1 } });
   rows.push({ buttons: [btn(`p1:${game}:self`, 'Self'), btn(`p1:${game}:journal`, 'Journal'), btn(`p1:${game}:settings`, 'Settings')] });
-  return { embeds: [{ title: `${me.name}’s things`, fields }], rows };
+  return { embeds: [sheet, { title: `${me.name}’s things`, fields }], rows };
 }
 
 export function boardMessage(game: string, v: View, abilities: LegalOption[]): MessageBody {
@@ -147,7 +162,9 @@ export function decisionMessage(d: Decision, c: DecisionCtx): MessageBody | null
       const abil = d.abilities.slice(0, 5).map(o => btn(decisionId(g, did, 'ab:' + o.id), trunc(`Use ${o.label}`, 80), 'secondary'));
       if (abil.length) rows.push({ buttons: abil });
       const sit = situation(d.test.label, d.test.kind, d.skillValue, d.test.difficulty, c.mode);
-      return { content: undefined, embeds: [{ title: 'Lend a hand?', description: `${d.test.sourceName ? `**${d.test.sourceName}.** ` : ''}${sit}`, footer: 'Cards you lend are spent on this either way.' }], rows };
+      const need = d.test.difficulty - d.skillValue;
+      const sum = c.mode === 'story' ? '' : `\n**Skill ${d.skillValue}** against **difficulty ${d.test.difficulty}**. ${need <= 0 ? `The token can take up to ${-need} off and you still pass.` : `You are ${need} short before the token and any help from your hand.`}`;
+      return { content: undefined, embeds: [{ title: 'Lend a hand?', description: `${d.test.sourceName ? `**${d.test.sourceName}.** ` : ''}${sit}${sum}`, footer: 'Cards you lend are spent on this either way.' }], rows };
     }
     case 'reveal':
       return { embeds: [{ description: `${c.v.party.find(p => p.seat === d.seat)?.name ?? 'Someone'} is ready. Everyone who wanted to help has.` }], rows: [{ buttons: [btn(decisionId(g, did, 'reveal'), 'Reach into the bag', 'primary')] }] };
@@ -185,19 +202,19 @@ export function resolvedPrompt(summary: string): MessageBody { return { content:
 
 // ───────────────────────────────────────────────────────────────────────── details and self
 export function detailsBody(events: GameEvent[]): MessageBody {
-  const ev = events.map(e => `• ${e.kind}: ${JSON.stringify(Object.fromEntries(Object.entries(e).filter(([k, val]) => k !== 'kind' && val !== undefined)))}`).join('\n');
-  return { content: '```\n' + trunc(ev, 1800).replace(/```/g, "'''") + '\n```', ephemeral: true };
+  const sum = testBreakdown(events);
+  return { content: sum ?? 'Nothing more to add to that.', ephemeral: true };
 }
 
 export function selfBody(v: View, mode: Immersion): MessageBody {
   const me = v.me; if (!me) return { content: 'You are not part of this story.', ephemeral: true };
-  return { ephemeral: true, embeds: [{ title: me.name, fields: [
+  return { ephemeral: true, embeds: [investigatorSheet(me, mode !== 'story'), { title: 'How you stand', fields: [
     { name: 'Holding up', value: `${woundsWord(me.wounds, me.maxWounds)}, ${nervesWord(me.nerves, me.maxNerves)}`, inline: true },
     { name: 'Means · Leads', value: `${me.means} · ${me.leads}`, inline: true },
     { name: 'Moments', value: `${moments(me.moments)} ${momentsWord(me.moments)}`, inline: true },
     { name: 'Out', value: list(me.inPlay.map(c => `${c.exhausted ? '◌' : '●'} ${c.name}`), 'Nothing.') },
     { name: 'Weighing on you', value: list(me.threat, 'Nothing.') },
-    ...(mode === 'math' ? [{ name: 'The numbers', value: `Skills: ${Object.entries(me.skills).map(([k, n]) => `${k} ${n}`).join(', ')}\nDeck ${me.deckCount} · discard ${me.discardCount}` }] : []),
+    ...(mode === 'math' ? [{ name: 'The numbers', value: `Deck ${me.deckCount} · discard ${me.discardCount}` }] : []),
   ] }] };
 }
 
@@ -207,7 +224,7 @@ export function caseBody(v: View, text: ScenarioText, mode: Immersion = 'balance
   ] }] };
 }
 export function partyBody(v: View): MessageBody {
-  return { ephemeral: true, embeds: [{ title: 'The party', description: list(v.party.map(p => `**${p.name}** — ${p.status === 'active' ? `${v.places[p.loc]?.name ?? 'somewhere'}, ${holdingUp(p.wounds, p.maxWounds, p.nerves, p.maxNerves)}` : p.status === 'resigned' ? 'got out' : 'lost to it'}`), 'No one.') }] };
+  return { ephemeral: true, embeds: [{ title: 'The party', description: list(v.party.map(p => `**${p.name}** — ${p.status === 'active' ? `${v.places[p.loc]?.name ?? 'somewhere'}, ${holdingUp(p.wounds, p.maxWounds, p.nerves, p.maxNerves)} (${vitalsLine(p)})` : p.status === 'resigned' ? 'got out' : 'lost to it'}`), 'No one.') }] };
 }
 export function mapBody(v: View): MessageBody {
   const lines = Object.values(v.places).filter(p => p.revealed).map(p => `${p.here.length ? '◉' : '○'} ${p.name} → ${p.exits.map(e => e.name ?? '?').join(', ') || '—'}`);

@@ -165,7 +165,7 @@ test('starting: personal channels are private, locations are public to read, and
   assert.ok(!t.fake.channelByName('attic') && !t.fake.channelByName('cellar'));
 });
 
-test('the scene panel is pinned, in the fiction, and shows no raw numbers or rules words', async () => {
+test('the scene panel is pinned, in the fiction, and uses no rules words', async () => {
   const t = await startedTable(1);
   const msgs = t.fake.live(t.locChan('study')).filter(m => m.pinned);
   assert.equal(msgs.length, 1);
@@ -213,7 +213,7 @@ test('acting: wrong place, wrong turn, stale and foreign buttons all answer in t
   assert.equal(t.host().state!.spotlight, 's1');
 });
 
-test('searching: a typed line of "how" is woven in, the result is narrated in the location, and Details shows the record', async () => {
+test('searching: a typed line of "how" is woven in, the result is narrated in the location, and Details shows the sum in words', async () => {
   const t = await startedTable(1, 3); await pastMulligans(t);
   const study = t.locChan('study');
   await t.cmd('u1', study, 'search', { how: 'I check behind the coat rack first' });
@@ -231,7 +231,8 @@ test('searching: a typed line of "how" is woven in, the result is narrated in th
   assert.match(text, /Roland Banks/);
   const details = t.find(study, c => c.label === 'Details'); assert.ok(details, 'a Details button follows the result');
   const d = await t.click('u1', study, details!.id);
-  assert.match(String(d.replies[0]?.content), /testResolved/);
+  assert.match(String(d.replies[0]?.content), /• Your intellect: \*\*\d+\*\*/); assert.match(String(d.replies[0]?.content), /• Total: \*\*\d+\*\*, needed \*\*\d+\*\*/);
+  assert.match(text, /(✅ \*\*Passed\*\*|❌ \*\*Failed\*\*) — Investigate \(intellect\)/, 'the result line says passed or failed in plain words');
   // the how line is quoted without markdown or mentions
   const evil = await t.cmd('u1', study, 'rummage', { how: '@everyone **now** <@123>' });
   void evil;
@@ -293,7 +294,7 @@ test('/host resync repairs a hand-edited overwrite and a deleted channel and a d
   assert.equal(t.fake.can(study, 'send', 'u1', r1), true);
   const p1b = t.personal('u1'); assert.notEqual(p1b, p1); assert.ok(t.fake.channels.has(p1b));
   assert.equal(t.fake.live(study).filter(m => m.pinned).length, 1, 'the panel was reposted and pinned');
-  assert.ok(t.fake.live(p1b).some(m => m.body.embeds?.[0]?.title?.includes('things')), 'the hand came back');
+  assert.ok(t.fake.live(p1b).some(m => m.body.embeds?.some(e => e.title?.includes('things'))), 'the hand came back');
 });
 
 test('a Discord outage during rendering does not lose the game, and the next sync catches up', async () => {
@@ -308,7 +309,7 @@ test('a Discord outage during rendering does not lose the game, and the next syn
   t.fake.failNext = null;
   const res = await t.cmd('u1', t.chan('talk'), 'host', {}, 'resync'); assert.match(String(res.replies.at(-1)?.content), /Repaired/);
   assert.ok(t.fake.live(study).some(m => m.pinned), 'the panel is there');
-  assert.ok(t.fake.live(t.personal('u1')).some(m => m.body.embeds?.[0]?.title?.includes('things')), 'and the hand');
+  assert.ok(t.fake.live(t.personal('u1')).some(m => m.body.embeds?.some(e => e.title?.includes('things'))), 'and the hand');
 });
 
 // ───────────────────────────────────────────────────────────────────────── timers, away seats
@@ -629,4 +630,26 @@ test('a later new story only counts stories that still had channels to clear', a
   t.gameId = t.store.gameForGuildLobby('g1')!.id;
   await t.cmd('u1', t.chan('lobby'), 'host', {}, 'end');
   for (const g of t.store.listGames()) if (g.id !== t.gameId) assert.equal(t.store.channels(g.id).length, 0, 'no channel is left behind by finished stories');
+});
+
+test('the player channel shows the investigator card face with health, sanity and skill numbers, and they follow the damage', async () => {
+  const t = await startedTable(1, 4); await pastMulligans(t);
+  const sheet = () => t.fake.live(t.personal('u1')).flatMap(m => m.body.embeds ?? []).find(e => e.fields?.some(f => f.name === 'Health'))!;
+  let e = sheet(); assert.ok(e, 'an investigator sheet is in the personal channel');
+  assert.match(String(e.image), /bundles\/cards\/01001\.png$/, 'Roland\u2019s card face');
+  const me = () => t.host().viewFor('s1').me!;
+  const val = (name: string) => e.fields!.find(f => f.name === name)!.value;
+  assert.match(val('Health'), new RegExp(`\\*\\*${me().maxWounds}\\*\\* of ${me().maxWounds}`));
+  assert.match(val('Sanity'), new RegExp(`\\*\\*${me().maxNerves}\\*\\* of ${me().maxNerves}`));
+  assert.match(val('Skills'), /Willpower \d · Intellect \d · Combat \d · Agility \d/);
+  // hurt him: the numbers move and say how much was taken
+  const st = t.host().state!; st.investigators.s1!.damage = 2; st.investigators.s1!.horror = 1;
+  await t.host().renderPanels();
+  e = sheet();
+  assert.match(val('Health'), new RegExp(`\\*\\*${me().maxWounds - 2}\\*\\* of ${me().maxWounds} · 2 damage taken`));
+  assert.match(val('Sanity'), new RegExp(`\\*\\*${me().maxNerves - 1}\\*\\* of ${me().maxNerves} · 1 horror taken`));
+  // the Self button and the party line carry the same figures
+  const self = await t.click('u1', t.personal('u1'), `p1:${t.gameId}:self`);
+  assert.ok(self.replies[0]?.embeds?.some(x => x.fields?.some(f => f.name === 'Health')));
+  assert.match(t.fake.text(t.locChan('study')), new RegExp(`health ${me().maxWounds - 2}/${me().maxWounds} · sanity ${me().maxNerves - 1}/${me().maxNerves}`));
 });

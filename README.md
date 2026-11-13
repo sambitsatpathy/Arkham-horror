@@ -10,7 +10,7 @@ Requires Node >= 22.18 (type-stripping and `node:sqlite`).
 
 ```
 npm install
-npm test                      # 141 tests, no network, no Discord
+npm test                      # 149 tests, no network, no Discord
 npm run simulate              # headless games with a simple policy
 npm run coverage              # narration + card-script coverage report
 ```
@@ -55,6 +55,22 @@ The bot needs: Manage Channels, Manage Roles, View Channels, Send Messages, Embe
 - Prompts go to the player's private channel with buttons; stale or forged buttons are refused; interactions are idempotent.
 - Timers: optional prompts time out; required ones nudge, and a third nudge flags the host. Pause, hold and away seats work.
 - The whole Night of the Zealot first scenario (The Gathering) plays from start to ending, locks every channel, writes a first-person journal per player from templates, and purges after the retention period (7 days) while keeping the log. Opening a new story (`/host new`) clears the channels of finished stories in that server straight away, so the old game does not linger for the retention week.
+
+## Reading results
+
+Every test, hit and attack gets a plain line under the story line, built only from the game's own numbers (`src/adapter/narration/outcome.ts`):
+
+```
+✅ Passed — Fight (combat), by 2
+> Skill 3 + 1 lent + 1 from gear − 1 token = 4 against difficulty 2 (lent: Guts)
+> Drew: −1
+🗡️ Hit! Ghoul Minion takes 2 damage — defeated
+⚔️ Ghoul Minion hits Roland Banks for 1 damage and 1 horror — health 6/9 · sanity 4/5
+🔎 1 lead found — 2 left here
+🕯️ Dread +1 — now 3 of 10 before the hour turns
+```
+
+The Details button under a test lists the same sum one part per line. Health and sanity are written as what is left out of the most (`6/9`), the way the printed card counts them. Your private channel opens with your investigator's card face, health and sanity bars with numbers, and your skills; the Self button, the party line and the scene panel show the same figures. Players who set immersion to `story` get words only on their own panels; the shared result lines are the same for everyone.
 
 ## Card faces
 

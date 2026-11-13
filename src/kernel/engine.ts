@@ -477,12 +477,12 @@ function applyTokens(E: Engine, s: GameState, t: TestState): void {
   const k = E.k(s); const inv = k.inv(t.seat);
   const pool = [...s.chaosBag]; const first = String(t.data.pre);
   pool.splice(pool.indexOf(first as never), 1);
-  const revealed: string[] = [];
+  const revealed: string[] = []; const perToken: { token: string; mod: number }[] = [];
   let mod = 0; let autofail = false;
   const ifFail: Handler[] = [];
   for (let guardN = 0; guardN < 4; guardN++) {
     const tok = guardN === 0 ? first : pool.splice(k.rand(pool.length), 1)[0]!;
-    revealed.push(tok);
+    revealed.push(tok); const modBefore = mod;
     let more = false;
     if (/^[+-]?\d+$/.test(tok)) mod += Number(tok);
     else if (tok === 'autofail') autofail = true;
@@ -496,12 +496,13 @@ function applyTokens(E: Engine, s: GameState, t: TestState): void {
       if (fx.immediate) k.queueEffect(fx.immediate);
       if (fx.ifFail) ifFail.push(fx.ifFail);
     }
+    perToken.push({ token: tok, mod: mod - modBefore });
     if (!more || !pool.length) break;
   }
   t.token = revealed[0] as never; t.extraTokens = revealed.slice(1) as never;
-  t.data.tokMod = mod; t.data.autofail = autofail; t.data.ifFail = ifFail as unknown as never;
+  t.data.tokMod = mod; t.data.perToken = perToken as unknown as never; t.data.autofail = autofail; t.data.ifFail = ifFail as unknown as never;
   t.stage = 'resolve';
-  k.emit('tokenRevealed', { seat: t.seat, tokens: revealed, modifier: mod, autofail, label: t.label });
+  k.emit('tokenRevealed', { seat: t.seat, tokens: revealed, modifier: mod, autofail, label: t.label, perToken });
   k.flush();
 }
 
@@ -523,6 +524,7 @@ function resolveTest(E: Engine, s: GameState, f: Extract<Frame, { k: 'test' }>):
     seat: t.seat, outcome: t.outcome, margin: t.margin, total: t.total, difficulty: t.difficulty, skillValue: t.skillValue,
     tokenMod: t.data.tokMod, tokens: [t.token, ...t.extraTokens].filter(Boolean), label: t.label, testKind: t.kind, skill: t.skill, locId: t.locId, enemyId: t.enemyId,
     sourceName: t.sourceName, autofail,
+    ...k.skillParts(t), perToken: t.data.perToken, enemyName: t.enemyId ? k.name(t.enemyId) : undefined, committedNames: Object.values(t.committed).flat().map(id => k.name(id)),
   });
   if (ok) for (const ids of Object.values(t.committed)) for (const id of ids) k.script(k.card(id).code)?.skillCard?.onSuccess?.(k, t, id);
   for (const ids of Object.values(t.committed)) for (const id of ids) {
@@ -629,7 +631,7 @@ function runHarm(E: Engine, s: GameState, f: Extract<Frame, { k: 'harm' }>): voi
     if (!soak.length) {
       const n = kind === 'damage' ? f.damage : f.horror;
       if (kind === 'damage') { inv.damage += n; f.tookDamage += n; f.damage = 0; } else { inv.horror += n; f.tookHorror += n; f.horror = 0; }
-      k.emit(kind === 'damage' ? 'damageTaken' : 'horrorTaken', { seat: f.seat, amount: n, source: f.source, direct: f.direct, target: 'self' });
+      k.emit(kind === 'damage' ? 'damageTaken' : 'horrorTaken', { seat: f.seat, amount: n, source: f.source, direct: f.direct, target: 'self', now: kind === 'damage' ? inv.damage : inv.horror, max: kind === 'damage' ? inv.maxHealth : inv.maxSanity });
       continue;
     }
     decide(s, {
@@ -653,12 +655,12 @@ function applyHarmChoice(E: Engine, s: GameState, f: Extract<Frame, { k: 'harm' 
   if (kind === 'damage') f.damage--; else f.horror--;
   if (choice === 'self') {
     if (kind === 'damage') { inv.damage++; f.tookDamage++; } else { inv.horror++; f.tookHorror++; }
-    k.emit(kind === 'damage' ? 'damageTaken' : 'horrorTaken', { seat: f.seat, amount: 1, source: f.source, target: 'self' });
+    k.emit(kind === 'damage' ? 'damageTaken' : 'horrorTaken', { seat: f.seat, amount: 1, source: f.source, target: 'self', now: kind === 'damage' ? inv.damage : inv.horror, max: kind === 'damage' ? inv.maxHealth : inv.maxSanity });
     return;
   }
   const c = k.card(choice); const d = k.def(choice);
   if (kind === 'damage') c.tokens.damage++; else c.tokens.horror++;
-  k.emit(kind === 'damage' ? 'damageTaken' : 'horrorTaken', { seat: f.seat, amount: 1, source: f.source, target: 'ally', name: d.title });
+  k.emit(kind === 'damage' ? 'damageTaken' : 'horrorTaken', { seat: f.seat, amount: 1, source: f.source, target: 'ally', name: d.title, now: kind === 'damage' ? c.tokens.damage : c.tokens.horror, max: Number(kind === 'damage' ? d.health : d.sanity) });
   if (kind === 'damage' && f.asEnemyAttack) k.queue({ k: 'window', trigger: 'assetDamagedByEnemy', data: { seat: f.seat, cardId: choice, enemyId: f.asEnemyAttack }, seats: [f.seat], used: [], stage: 0, finalize: null });
   const dead = kind === 'damage' ? c.tokens.damage >= (d.health as number) : c.tokens.horror >= (d.sanity as number);
   if (dead) { k.emit('allyDefeated', { seat: f.seat, name: d.title }); k.discardCard(choice); }
@@ -689,7 +691,7 @@ function runAttack(E: Engine, s: GameState, f: Extract<Frame, { k: 'attack' }>):
   if (f.stage === 0 && k.inv(f.seat).roundFlags.onTheLam && !k.isElite(f.enemyId)) { k.emit('attackCancelled', { seat: f.seat, name: k.name(f.enemyId) }); s.stack.pop(); return; }
   if (f.stage === 0) {
     f.stage = 1;
-    k.emit('enemyAttacks', { seat: f.seat, cardId: f.enemyId, name: k.name(f.enemyId), opportunity: f.opportunity });
+    k.emit('enemyAttacks', { seat: f.seat, cardId: f.enemyId, name: k.name(f.enemyId), opportunity: f.opportunity, damage: k.enemyStat(f.enemyId, 'damage'), horror: k.enemyStat(f.enemyId, 'horror') });
     const at = k.inv(f.seat).loc;
     k.queue({ k: 'window', trigger: 'enemyAttacks', data: { seat: f.seat, enemyId: f.enemyId }, seats: k.invAt(at).map(i => i.seat), used: [], stage: 0, finalize: null });
     k.flush(); return;
