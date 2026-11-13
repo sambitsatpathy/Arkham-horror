@@ -75,7 +75,7 @@ The Details button under a test lists the same sum one part per line. Health and
 ## Card faces
 
 Real card images are shown by link only: the bot builds a URL to the image ArkhamDB serves and Discord fetches it; nothing is copied or stored. A place's face is posted in its channel when it opens, a foe's when it arrives, a treachery's where it strikes, the current agenda and act sit on the hour and trail panels, and your own hand and board have a "Look closely at a card" menu that shows the face to you alone. `/card` shows the face plus the text from your data clone. Nothing hidden is shown: unopened places and undrawn cards post nothing.
-The URL pattern is ArkhamDB's own (`https://arkhamdb.com/bundles/cards/{code}.png`), checked to return `image/png` with no referer or user-agent blocking. If ArkhamDB is unreachable or changes its paths, images may not render. Set `CARD_IMAGES=off` to hide them, or `CARD_IMAGE_BASE` / `CARD_IMAGE_EXT` to point elsewhere. Card art belongs to its publisher; this only links to it.
+The URL pattern is ArkhamDB's own (`https://arkhamdb.com/bundles/cards/{code}.png`, the `imagesrc` its public API reports for every card; double-sided cards also have `{code}b.png`). If ArkhamDB is unreachable or changes its paths, images may not render. Set `CARD_IMAGES=off` to hide them, or `CARD_IMAGE_BASE` / `CARD_IMAGE_EXT` to point elsewhere. Card art belongs to its publisher; this only links to it.
 
 ## What is approximated (cards)
 

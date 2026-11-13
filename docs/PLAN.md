@@ -54,14 +54,14 @@ Needs a human, a real server, or an official rulebook. Listed roughly by risk.
    - Travel: the new location channel appears, the old one stays readable, a non-present player can read but not write.
    - Let a prompt time out; pause and resume; kill the bot mid-game and restart it (state should recover).
    - Finish or `/host end` a story, then `/host new` again: old channels cleared, count in the reply is right.
-3. [?] **Card images.** The README says the ArkhamDB path was checked; my own fetch of an image URL failed, so I could not confirm it. Check a few cards load in Discord embeds (Discord's proxy fetches them, which can differ from a plain request).
+3. [x] **Card image path** confirmed against ArkhamDB's public API (`/api/public/card/<code>` gives `imagesrc: /bundles/cards/<code>.png` for investigators, locations, agendas and the rest, plus `<code>b.png` for the back of double-sided cards). Every image in the bot is that URL placed in an embed, so Discord fetches it straight from ArkhamDB; nothing is stored. Still worth a look on a real server that they render.
 4. [?] **Scenario data written from memory:** chaos bag contents per difficulty, the resolutions, and the "ghouls loose" ending after agenda 3. Compare against your rulebook before trusting balance.
 5. [?] **ArkhamDB deck-import endpoint shape** (from memory). Pasting deck JSON is the dependable path.
 6. [?] **The four non-Roland starter decks** are my own assembly from the cards each investigator can use, not the publisher's recommended lists.
 7. [?] **Reported "actions not counting for draw/resource".** Not reproducible in the engine (each costs one moment). If it recurs, capture the investigator, the panel and the exact buttons used.
 8. [?] **Approximated cards** (section 4) behave close to print but not exactly; check any ruling that surprises you against these first.
 9. [?] **Win paths.** The simple simulation policy nearly always loses, so winning endings are covered by unit tests, not by simulation. Play one full scenario by hand.
-10. [?] **Result lines and sheet on real Discord.** Check the emoji and `>` quote blocks look right on phone and desktop, the investigator card image loads (the path `bundles/cards/<code>.png` is assumed to work for investigators as it does for other cards), and a long fight does not post too many messages in a row.
+10. [?] **Result lines and sheet on real Discord.** Check the emoji and `>` quote blocks look right on phone and desktop, the investigator card image loads, and a long fight does not post too many messages in a row.
 11. [?] **CI.** There is none; card data is git-ignored, so any CI job must fetch it (or set `ARKHAM_DATA`) before `npm test`.
 
 ## 4. Known simplifications (candidates to fix)
@@ -82,6 +82,7 @@ Needs a human, a real server, or an official rulebook. Listed roughly by risk.
 
 ### Near term
 - [ ] Fix the items in section 4, starting with Police Badge (needs fast abilities offered to a non-active player) and Grotesque Statue (ask the player).
+- [ ] Show the back (`<code>b.png`) of an agenda or act when it turns, so the players can read what the card says on its other side.
 - [ ] Per-player choice of whether result lines show (they are shared messages, so today it is the same for everyone; a host-level switch would be simplest).
 - [ ] Show the sum inside the commit prompt as cards are picked, not only before.
 - [ ] Mulligan prompts currently go to personal channels, not the shared lobby channel; decide which is better and make it consistent.
