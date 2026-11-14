@@ -10,7 +10,7 @@ Requires Node >= 22.18 (type-stripping and `node:sqlite`).
 
 ```
 npm install
-npm test                      # 149 tests, no network, no Discord
+npm test                      # 150 tests, no network, no Discord
 npm run simulate              # headless games with a simple policy
 npm run coverage              # narration + card-script coverage report
 ```
@@ -71,6 +71,8 @@ Every test, hit and attack gets a plain line under the story line, built only fr
 ```
 
 The Details button under a test lists the same sum one part per line. Health and sanity are written as what is left out of the most (`6/9`), the way the printed card counts them. Your private channel opens with your investigator's card face, health and sanity bars with numbers, and your skills; the Self button, the party line and the scene panel show the same figures. Players who set immersion to `story` get words only on their own panels; the shared result lines are the same for everyone.
+
+Cards you draw are named to you alone, in your own channel, with the card face as a small thumbnail: at the start of every round, when you rummage, and whenever a card or ability draws for you. Nobody else is told, and the opening hand and mulligans are left to the hand panel.
 
 ## Card faces
 

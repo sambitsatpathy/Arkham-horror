@@ -195,6 +195,21 @@ export function decisionMessage(d: Decision, c: DecisionCtx): MessageBody | null
   }
 }
 
+/** What you just drew, for your eyes only. `why` is the kernel's reason for the draw. */
+export interface DrawnCard { name: string; type: string; cost: number | null; code: string }
+const DRAW_LEAD: Record<string, string> = {
+  upkeep: 'A new round begins. You draw',
+  draw: 'You rummage through your things and come up with',
+  skill: 'Your effort pays off. You draw',
+  luck: 'Luck turns your way. You draw',
+};
+export function drawnMessage(why: string, cards: DrawnCard[]): MessageBody {
+  const one = (c: DrawnCard) => `**${c.name}** (${c.type}${c.cost !== null ? `, costs ${c.cost}` : ''})`;
+  const lead = DRAW_LEAD[why] ?? 'You draw';
+  const art = cards.length === 1 ? cardArt(cards[0]!.code) : undefined;
+  return { content: `📥 ${lead}: ${cards.map(one).join(', ')}.`, ...(art ? { embeds: [{ thumbnail: art }] } : {}) };
+}
+
 export function turnPing(name: string, left: number): string { return `**${name}** — your turn. ${momentsWord(left)} ${moments(left)}`; }
 
 /** An answered prompt becomes one quiet line and loses its controls, so stale buttons cannot be pressed. */

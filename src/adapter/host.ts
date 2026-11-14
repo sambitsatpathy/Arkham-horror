@@ -11,7 +11,7 @@ import { narrate, type NarrationPack, type Target } from './narration/engine.ts'
 import { generic } from './narration/generic.ts';
 import { gatheringPack } from './narration/gathering.ts';
 import { cardArt } from './art.ts';
-import { GATHERING_TEXT, boardMessage, decisionMessage, detailsId, handMessage, hourPanel, promptHome, resolvedPrompt, scenePanel, trailPanel, turnPing, type ScenarioText } from './render.ts';
+import { GATHERING_TEXT, boardMessage, decisionMessage, detailsId, drawnMessage, handMessage, hourPanel, promptHome, resolvedPrompt, scenePanel, trailPanel, turnPing, type ScenarioText } from './render.ts';
 import { draftJournal } from './journal.ts';
 import { ENDING_TEXT } from './narration/gathering.ts';
 
@@ -184,6 +184,25 @@ export class GameHost {
       await this.guard('narrate', () => this.d.port.send(ch, body));
     }
     await this.postCards(events);
+    await this.postDraws(events);
+  }
+
+  /** Whatever a player draws is told to that player alone, in their own channel: at the start of a round and whenever a card or action draws. */
+  private async postDraws(events: GameEvent[]): Promise<void> {
+    const st = this.state!; const k = this.d.E.k(st);
+    const bySeat = new Map<string, { why: string; cards: { name: string; type: string; cost: number | null; code: string }[] }[]>();
+    for (const e of events) {
+      if (e.kind !== 'drew') continue;
+      const p = e as Record<string, any>; const why = String(p.why ?? 'draw');
+      if (why === 'mulligan' || !st.cards[p.cardId]) continue;           // the hand panel already shows a mulligan
+      const d = k.def(p.cardId); const list = bySeat.get(p.seat) ?? []; bySeat.set(p.seat, list);
+      let g = list[list.length - 1]; if (!g || g.why !== why) { g = { why, cards: [] }; list.push(g); }
+      g.cards.push({ name: d.title, type: d.type, cost: typeof d.cost === 'number' ? d.cost : null, code: st.cards[p.cardId]!.code });
+    }
+    for (const [seat, groups] of bySeat) {
+      const ch = this.seats.find(x => x.seat === seat)?.personalChannel; if (!ch) continue;
+      for (const g of groups) await this.guard('draw-note', () => this.d.port.send(ch, drawnMessage(g.why, g.cards)));
+    }
   }
 
   /** The real card faces, linked from ArkhamDB, shown where the thing shows up: a place when it opens, a foe when it arrives, a
