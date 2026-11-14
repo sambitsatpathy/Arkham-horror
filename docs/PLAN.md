@@ -34,12 +34,13 @@ Legend: **[x]** done and covered by tests, **[~]** done with a known simplificat
 - [x] Hour panel shows "N of T before the hour turns" (the number printed on the agenda is the threshold T, not the current count).
 - [x] Plain result lines under the story: passed/failed with the margin, the sum (skill + lent cards + gear ± token = total against difficulty), tokens drawn, hit or miss, damage dealt and health left on foes, damage and horror taken with health/sanity left, leads found, dread against the hour. Details shows the same sum in words.
 - [x] Player channel opens with the investigator's card face, health and sanity as bars and numbers, and skills; the same figures on Self, the party line, the trail panel and the scene panel (not in `story` immersion).
+- [x] Draws are told privately: the card's name, kind and cost in the drawer's own channel (new round, rummage, and card or ability draws).
 - [x] Journal written per player from templates at the ending.
 - [x] `.env` loading, default card-data path, `.gitignore`, `.env.example` (from the repo owner).
 - [x] `/host new` clears the channels of finished stories in that server first (from the repo owner), and this patch makes the reported count honest: stories whose channels were already cleared are no longer counted again.
 
 ### Tests and tooling
-- [x] 149 tests (kernel rules, every scripted card, adapter against an in-memory fake Discord, narration coverage, banned-word check); no network or Discord needed.
+- [x] 150 tests (kernel rules, every scripted card, adapter against an in-memory fake Discord, narration coverage, banned-word check); no network or Discord needed.
 - [x] `npm run simulate` (headless games, `MIX=all` mixes investigators): 600 games across 1-4 players all reach an ending; no card is ever in two zones.
 - [x] `npm run coverage` (narration and card-script coverage).
 
@@ -116,7 +117,7 @@ Needs a human, a real server, or an official rulebook. Listed roughly by risk.
 git clone https://github.com/Kamalisk/arkhamdb-json-data   # then put it at ./arkhamdb-json-data-master or set ARKHAM_DATA
 npm install
 npx tsc --noEmit
-npm test            # 149 tests
+npm test            # 150 tests
 npm run simulate -- 150 4   # MIX=all for mixed investigators
 npm run coverage
 ```

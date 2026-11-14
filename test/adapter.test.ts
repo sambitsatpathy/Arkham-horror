@@ -653,3 +653,23 @@ test('the player channel shows the investigator card face with health, sanity an
   assert.ok(self.replies[0]?.embeds?.some(x => x.fields?.some(f => f.name === 'Health')));
   assert.match(t.fake.text(t.locChan('study')), new RegExp(`health ${me().maxWounds - 2}/${me().maxWounds} · sanity ${me().maxNerves - 1}/${me().maxNerves}`));
 });
+
+test('what you draw is told to you alone: the card named in your own channel when you rummage and at the start of a new round', async () => {
+  const t = await startedTable(2, 5); await pastMulligans(t);
+  const study = t.locChan('study'); const me = () => t.host().viewFor('s1').me!;
+  const mine = (re: RegExp) => t.fake.live(t.personal('u1')).filter(m => re.test(m.body.content ?? ''));
+  const handBefore = me().hand.map(c => c.id);
+  const sp = t.host().state!.pending!; assert.equal(sp.kind, 'spotlight'); await t.click('u1', t.chan('hour'), `d1:${t.gameId}:${sp.id}:step`);
+  assert.equal(t.host().state!.pending!.kind, 'turn');
+  const who = 'u1';
+  const rr = await t.cmd(who, study, 'rummage', {}); assert.match(String(rr.replies.at(-1)?.content), /Rummage/);
+  const drawn = me().hand.find(c => !handBefore.includes(c.id))!; assert.ok(drawn, 'a card was drawn');
+  const note = mine(/rummage/i); assert.equal(note.length, 1, 'one note in my own channel');
+  assert.match(String(note[0]!.body.content), new RegExp(`\\*\\*${drawn.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\*\\* \\(`), 'it names the card with its kind');
+  assert.equal(t.fake.live(t.personal('u2')).filter(m => /rummage|You draw/i.test(m.body.content ?? '')).length, 0, 'the other player is not told');
+  assert.ok(!/come up with/.test(t.fake.text(study)), 'nor is the place');
+  // the next round's draw is told too, to each player about their own card
+  let guard = 0; while (t.host().state!.round < 2 && guard++ < 12) await playThroughN(t, 30);
+  assert.ok(t.host().state!.round >= 2, 'a new round began');
+  for (const u of ['u1', 'u2']) assert.ok(t.fake.live(t.personal(u)).some(m => /A new round begins\. You draw: \*\*/.test(m.body.content ?? '')), `${u} was told what the new round gave`);
+});
